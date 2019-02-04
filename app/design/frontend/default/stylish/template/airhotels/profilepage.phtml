@@ -1,0 +1,87 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$customerData 	= Mage::getSingleton('customer/session')->getCustomer();
+$customerId 	= $customerData->getId();
+$customer 		= Mage::getModel('customer/customer')->load($customerId);
+$customerName 	= $customer->getFirstname();
+$customerMonth 	= date("F", strtotime($customer->getCreatedAt()));
+$customerYear 	= date('Y',strtotime($customer->getCreatedAt()));
+$profilePhoto 	= Mage::getModel('airhotels/product')->getCustomerPictureById($customerId);
+$airhote1sTitle  = Mage::getStoreConfig ( 'airhotels/custom_group/airhotels_title' );
+$aboutHost = '';
+if(isset($profilePhoto[0]["more_host"])){
+$aboutHost = $profilePhoto[0]["more_host"];
+} 
+if(( int ) Mage::helper ( 'airhotels/invitefriends' )->getInviteFriendsEnabledOrNot () == 0){
+    /**
+     * Get and display invitee credit amount in account dashboard.
+     */
+    if($customerId > 0){
+        $websiteId = Mage::app ()->getWebsite ()->getId ();
+        $currentStoreId = Mage::app ()->getStore ()->getId ();
+        $inviteFriendsCollection = Mage::getModel ( 'airhotels/invitefriends' )->getCollection ()->addFieldToFilter ( 'customer_id', $customerId )->addFieldToFilter ( 'website_id', $websiteId )->addFieldToFilter ( 'store_id', $currentStoreId )->addFieldToFilter ( 'invitee_id', '0' )->getFirstItem ();
+        $balanceCreditAmount = round($inviteFriendsCollection->getBalanceCreditAmount (),2);
+        if($balanceCreditAmount > 0){ ?>
+            <div class="refer_balance"> <i class="fa fa-money" aria-hidden="true"></i> Your referal balance <?php echo Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol().$balanceCreditAmount; ?></div>
+       <?php }
+    }
+}
+?>    
+<div class="page-title" style="margin:0;">
+	<h1 class="dashboard_leftside_heading"><?php echo $this->__('Welcome to '.$airhote1sTitle); ?> 
+		<span style="color:#479BFF;"><?php echo $customerName;?></span>
+	</h1> 
+    <span class="member_since"><?php echo $this->__('Member Since') ?> 
+    	<?php echo $customerMonth .' '.$customerYear;?>
+    </span>
+</div>           
+<div class="body_grid clearfix">
+	<?php if($aboutHost!=''){ ?>
+  		<p><?php echo $aboutHost;?></p>
+	<?php } else {?>
+    <p style="margin:10px 0;color:#479BFF;text-align:left;font-weight:700"><?php echo $this->__('No description available');?></p>
+    <?php } ?>
+	<div>
+		<p><?php echo $this->__("Check your messages, view upcoming trip information, and find travel inspiration all from your dashboard.
+										Before property your first stay, Make sure to:");?>
+		</p>
+		<a class="dashdoard_links" href="<?php echo $this->getBaseUrl()."airhotels/index/profile/id/$customerId/";?>"><?php echo $this->__("Complete Your Profile");?></a>
+		<p><?php echo $this->__("Upload a photo write a short bio to help hosts get to knoe you brfore inviting into their home.");?></p>
+	</div>  
+	<div>
+		<a class="dashdoard_links" href="<?php echo $this->getBaseUrl()."property/property/uploadphoto/";?>"><?php echo $this->__("Verify Your Information");?></a>
+	    <p><?php echo $this->__("Connect your social networks and verify your email, phone number and offline ID, Video, Document in the Airhotels community.");?></p>
+	</div>  
+	<div>
+		<a class="dashdoard_links" href="<?php echo $this->getBaseUrl()."help";?>"><?php echo $this->__("Learn How To Book a Place");?></a>
+	    <p><?php echo $this->__("Get ready to search for the perfect place, contact hosts, and prepare for a memorable trip.");?></p>
+	</div>  
+</div>
+      

@@ -1,0 +1,110 @@
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+ 
+#swfupload-control p{margin:10px 5px;font-size:0.9em;}
+#log{margin:0;padding:0;width:500px;margin:0 0 40px 0;}
+#log li{list-style-position:inside;margin:2px;border:1px solid #dce0e0;padding:10px;font-size:12px;color:#333;background:#fff;position:relative;}
+#log li .progressbar{height:5px;background:#fff;}
+#log li .progress{background:#119cd0;width:0%;height:5px;border:none}
+#log li p{margin:0;line-height:18px;}
+#log li.success{border:1px solid #339933;background:#ccf9b9;}
+body.airhotels-property-form #log li.success{border:1px solid #88c6f0;background:rgba(0,157,255,0.2);color:#fff!important;font-weight:100!important}
+body.airhotels-property-form #log li.success em{color:#414243!important;font-weight:100!important}
+body.airhotels-property-form #log li.success p.status{color:#ff0a1b;}
+body.airhotels-property-form #log li em{font-size:12px;letter-spacing:0.5px;}
+#log li span.cancel{position:absolute;top:5px;right:5px;width:20px;height:20px;background:url('js/swfupload/cancel.png') no-repeat;cursor:pointer;}
+#swfupload-control table tr td{font-size:1.091em;}
+.normal{background-color:#ACDBA8;}
+.weekDays td{height:20px;width:40px}
+#txtHint{color:red;margin:5px 0px 5px 0px}
+.subtotal{font-size:12px;color:#666;margin-bottom:-5px;}
+.bigTotal{font-size:30px;color:#CCC;font-weight:bold;padding-top:5px;}
+.normal{background-color:#ACDBA8;}
+.previous{cursor:no-drop!important;}
+.days{}
+#txtHint{color:red;margin:0 auto;width:100%;text-align:center;padding:4px 0px;}
+.calend{margin-top:0;width:100%;}
+.calend tr td{border-bottom:1px solid white!important;padding:2px !important;cursor:auto;text-align:center;border-left:1px solid white;color:#999;font-weight:normal;width:58px !important;height:35px !important;vertical-align:middle;word-wrap:break-word;}
+.calend tr td div{width:auto !important;text-align:center !important;}
+.subtotal{font-size:12px;color:#666;margin-bottom:-5px;}
+.bigTotal{font-size:30px;color:#CCC;font-weight:bold;padding-top:5px;}
+.weekDays{background:#fff;}
+.weekDays th{font-weight:bold;text-align:center;font-size:9px;padding:10px;border:1px solid #E2DFDF;border-right:none;}
+.weekDays th:last-child{border-right:1px solid #E2DFDF;}
+.center{text-align:center}
+.pac-container{font-family: 'Droid Sans', 'Belgrano', sans-serif!important;border:1px solid #dce0e0;background-color:#fff;overflow:hidden;z-index:99999;-moz-border-radius-bottomright:3px;-moz-border-radius-bottomleft:3px;-webkit-border-bottom-right-radius:3px;-webkit-border-bottom-left-radius:3px;padding:8px 0;border-image:initial;border-bottom-right-radius:3px;border-bottom-left-radius:3px;}
+.pac-item{font-family: 'Droid Sans', 'Belgrano', sans-serif;text-overflow:ellipsis;white-space:nowrap;text-align:left;margin:0;padding:8px;cursor:pointer;display:block;line-height:30px;overflow:hidden;color:#3D93D4;}
+.pac-item span{font-size:13px!important;letter-spacing:0.5px;}
+.pac-item:hover{background:#09f;color:#fff!important;}
+.pac-item:hover > .pac-matched{color:#fff!important;}
+#searchTextField::-webkit-input-placeholder{color:#393C3D;}
+#searchTextField{font-size:18px;color:#333 !important;margin-left:0;margin-right:0;background:white;}
+.searchmainpage_1 #searchTextField{padding:3px 8px;-webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.075),0 0 0 black;box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.075),0 0 0 black;-webkit-transition:border linear 0.2s,box-shadow linear 0.2s;-moz-transition:border linear 0.2s,box-shadow linear 0.2s;-ms-transition:border linear 0.2s,box-shadow linear 0.2s;-o-transition:border linear 0.2s,box-shadow linear 0.2s;transition:border linear 0.2s,box-shadow linear 0.2s;}
+#faceboxCloseImg{background:url('../images/spriteimage.png');width:34px;height:34px;display:inline-block;text-indent:100%;overflow:hidden;    background-position: -370px -402px;}
+.button-glossy{background:#05ab01;border:none;height:35px;width:86px;margin-left:-10px;cursor:pointer;}
+.catalog-product-view .button-glossy{background:#0099ff;border:2px solid #0099ff!important;font-weight:bold;font-size:16px;color:#fff;}
+.catalog-product-view .button-glossy:hover{background:#157EC3;border:2px solid #157EC3!important;color:#fff!important;box-shadow:none!important;}
+#light .search_date .lable_inner{font-size:12px;color:#2f2f2f;}
+#search_options .search_date, #search_options .search_guest {margin: 10px 5px 6px 0px;}
+.popupcheckindate{display:inline-block}
+.search_date #bookavail{padding:3px 5px;-moz-box-shadow:inset 0 1px 10px #dbdbdb;-webkit-box-shadow:inset 0 1px 10px #dbdbdb;box-shadow:inset 0 1px 10px #dbdbdb;border:1px solid #D2D2D2;border-radius:4px;-moz-border-radius:4px;-webkit-border-radius:4px;}
+.popupcheckindate input{width: 90px;border: 1px solid #d0d0d0;border-radius:2px;}
+/* .search_date input{border} */
+.search_guests{float:left;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;}
+.search_guests select{border-radius:none;display:block;height:45px;width:126px;padding:0 0 0 30px;border:none;   background-image: url('../images/spriteimage.png');background-position: -9px 146px;box-sizing:border-box;-webkit-appearance:menulist-button;color:#7f7c7c !important;}
+ ::i-block-chrome, 
+     .search_guests select{line-height:41px;-webkit-appearance: none;
+  -webkit-border-radius: 0px;}
+.search_guests #property_category_list{margin:0 15px 0 0;width:146px;}
+.checkin{margin-left:0;margin-right:0;padding:.3em .4em;background:white;border:1px solid #D2D2D2;color:#393C3D;border-radius:.3em;-moz-border-radius:.3em;-webkit-border-radius:.3em;box-shadow:inset -1px 1px 1px 0 rgba(0,0,0,0.1);-o-box-shadow:inset -1px 1px 1px 0 rgba(0,0,0,0.1);-moz-box-shadow:inset -1px 1px 1px 0 rgba(0,0,0,0.1);-webkit-box-shadow:inset -1px 1px 1px 0 rgba(0,0,0,0.1);font-size:1em;}
+.checkinDate{font-weight:bold;}
+.popup .search_guest .checkinDate, .popup .search_date .checkinDate{font-weight:100;margin:0 0px 5px;width: auto;display: block;}
+.sendmsg{text-align:right;}
+.popup_overlay{position:fixed;top:0;left:0;background:rgba(0, 0, 0, 0.6);z-index:-5;width:100%;height:100%;}
+.sel,.startsel,.endsel{background-color:rgb(0, 153, 255) !important;}
+.col{background-color:chartreuse;}
+.calend .normal{cursor:pointer;}
+#calendar_div .calend .normal{cursor:inherit}
+.normal{cursor:pointer;background-color:#ACDBA8;color:#292929 !important;}
+#cal_legend{clear:both;float:left;margin-bottom:10px;margin-top:10px;}
+#cal_legend h2{padding:3px 10px !important;float:left;font-size:15px;margin:0;color:#fff !important;font-size:12px !important;}
+#cal_legend h2.past_grid{background:#EEE;color:#999 !important;margin:0 10px 10px 0;}
+#cal_legend h2.available_grid{background-color:#ACDBA8;margin:0 10px 10px 0;}
+#cal_legend h2.specialprice_grid{background-color:#65AA5F;margin:0 10px 10px 0;}
+#cal_legend h2.booked_grid{background-color:#E07272;margin:0 10px 10px 0;}
+#cal_legend h2.unavailable_grid{background-color:#F18200;}
+#cal_legend h2.partially_available_grid{background-color:#FFFF00;margin:0 10px 10px 0;color:#888 !important;}
+#signUp_grid .buttons-set .back-link{display:none;}
+.search_guest #number_of_guests{width:50px;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;padding:3px;border:1px solid #d0d0d0; height: 30px;}
+table.calend{table-layout:fixed;}
+.hourly_booked_sp_byhost{background-color:#ACDBA8;color:#292929 !important;}
+.hourly_booked_blocked_byhost{background-color:#E07272;color:#292929 !important;}
+.hourly_booked_notavail_byhost{background-color:#F18200;color:#292929 !important;}
+.request_to{margin: 0!important;padding: 10px 0 6px 0;float: left;}
+.sendMessage h2{font-size:16px;}

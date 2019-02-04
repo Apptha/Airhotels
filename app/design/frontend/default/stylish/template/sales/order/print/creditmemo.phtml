@@ -1,0 +1,145 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+Getting Order Details
+ */
+
+$_order = $this->getOrder();
+
+   // For whether checking hourly based or not     
+   $hourlyFlag = Mage::helper('airhotels/airhotel')->hourlyFlag($_order);
+?>
+<?php 
+/**
+ * Getting Order ID
+ */
+
+?>
+<h1><?php echo $this->__('Booking #%s', $_order->getRealOrderId()) ?></h1>
+<p class="order-date"><?php echo $this->__('Booking Date: %s', $this->formatDate($_order->getCreatedAtStoreDate(), 'long')) ?></p>
+<?php $_creditmemo = $this->getCreditmemo() ?>
+<?php if($_creditmemo): ?>
+    <?php $_creditmemos = array($_creditmemo); ?>
+<?php else: ?>
+    <?php $_creditmemos = $_order->getCreditmemosCollection() ?>
+<?php endif; ?>
+<?php foreach ($_creditmemos as $_creditmemo): ?>
+    <h2 class="h2"><?php echo $this->__('Refund #%s', $_creditmemo->getIncrementId()) ?></h2>
+    <div class="col2-set">
+        <div class="col-1">
+        <?php if (!$_order->getIsVirtual()): ?>
+            <h3><?php echo $this->__('Shipping Address') ?></h3>
+            <?php $_shipping = $_creditmemo->getShippingAddress() ?>
+            <address><?php echo $_shipping->format('html') ?></address>
+        </div>
+        <div class="col-2">
+        <?php endif; ?>
+        <?php 
+        /**
+         * Showing Billing Address
+         */
+        
+        ?>
+            <h3><?php echo $this->__('Billing Address') ?></h3>
+            <?php $_billing = $_creditmemo->getbillingAddress() ?>
+            <address><?php echo $_order->getBillingAddress()->format('html') ?></address>
+        </div>
+    <?php if (!$_order->getIsVirtual()): ?>
+    </div>
+    <div class="col2-set">
+        <div class="col-1">
+            <h3><?php echo $this->__('Shipping Method') ?></h3>
+             <?php echo $_order->getShippingDescription() ?>
+        </div>
+        <?php endif; ?>
+        <?php 
+        /**
+         * Showing Payment Method
+         */
+        
+        ?>
+        <div class="col-2">
+            <h3>
+            <?php echo $this->__('Payment Method') ?>
+            </h3>
+            <?php echo $this->getPaymentInfoHtml() ?>
+        </div>
+    </div>
+    <h3>
+    <?php echo $this->__('Property Refunded') ?>
+    </h3>
+    <table id="my-refund-table-<?php echo $_creditmemo->getId(); ?>" class="data-table">
+      <col />
+      <col width="1" /><col width="1" /><col width="1" /><col width="1" /><col width="1" /><col width="1" />
+      <thead>
+          <tr>
+            <th><?php echo $this->__('Product Name') ?>
+            </th>
+            <th><?php echo $this->__('SKU') ?>
+            </th>
+            <th class="a-right"><?php echo $this->__('Price') ?>
+            </th>
+            <th class="a-center"><?php if($hourlyFlag == 0){ 
+            echo $this->__('No. of day(s)'); 
+            }else{ 
+                echo $this->__('No. of hour(s)'); 
+             } ?></th>
+            <th class="a-right"><?php echo $this->__('Subtotal') ?></th>
+            <th class="a-center wrap"><?php echo $this->__('Discount Amount') ?></th>
+            <th class="a-center wrap"><?php echo $this->__('Row Total') ?></th>
+          </tr>
+      </thead>
+      <tfoot>
+        <?php 
+        /**
+         * Showing Total
+         */
+   echo $this->getTotalsHtml($_creditmemo);?>
+      </tfoot>
+    <?php $_items = $_creditmemo->getAllItems(); ?>
+    <?php $_count = count($_items); ?>
+    <?php
+      /**
+        * Iterating loop
+        */
+     foreach ($_items as $_item): ?>
+    <?php if ($_item->getOrderItem()->getParentItem()){
+    continue; 
+    }?>
+    <tbody>
+        <?php echo $this->getItemHtml($_item) ?>
+    </tbody>
+    <?php endforeach; ?>
+</table>
+<script type="text/javascript">decorateTable('my-refund-table-<?php echo $_creditmemo->getId(); ?>', {'tbody' : ['odd', 'even'], 'tbody tr' : ['first', 'last']})</script>
+<?php endforeach; ?>
+<script type="text/javascript">window.print();</script>

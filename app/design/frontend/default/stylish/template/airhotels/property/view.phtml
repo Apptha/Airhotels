@@ -1,0 +1,1824 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$isSubscriptionEnabled = Mage::getStoreConfig('airhotels/subscription/activate_subscription_enable');
+if (! Mage::helper('customer')->isLoggedIn()) {
+    $current_url = $this->helper('core/url')->getCurrentUrl();
+    if( !((strpos($current_url, 'login') > -1) || (strpos($current_url, 'sign-in') > -1) || (strpos($current_url, 'checkout') > -1)) ) {
+        $current_session = Mage::getSingleton('customer/session');
+        if(isset($current_session)){
+        	$current_session->setData("before_auth_url", $current_url);
+        }
+    }
+}
+$from              = base64_decode($this->getRequest()->getParam('from'));
+$to                = base64_decode($this->getRequest()->getParam('to'));
+$serviceFrom       = base64_decode($this->getRequest()->getParam('sfrom'));
+$serviceTo         = base64_decode($this->getRequest()->getParam('sto'));
+$serviceFromPeriod = base64_decode($this->getRequest()->getParam('pfrom'));
+$serviceToPeriod   = base64_decode($this->getRequest()->getParam('pto'));
+$numberOfGuests    = base64_decode($this->getRequest()->getParam('number_of_guests'));
+$helper            = Mage::helper('airhotels');
+$productIds        = array();
+$productIds[]      =  $this->getProduct()->getId();
+
+?>
+<div id="content">
+	<div id="messages_product_view"><?php echo $this->getMessagesBlock()->getGroupedHtml() ?></div>
+	<?php
+	if (empty($productIds)) { ?>
+		<div class="contpad clearfix">
+			<div class="nodealtext clearfix ">
+		            <?php echo "<h1>" . $this->__('No Listing') . "</h1>" ?>
+		    </div>
+		</div>
+	<?php
+	} else {
+	    $count = 1;
+	    $customerLoginId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+	    foreach ($productIds as $item) {
+	       /**
+	         * Getting product model
+	         */
+	        $model           = Mage::getModel('catalog/product');
+	        $_product        = $model->load($item);
+	        $_sliderGallery  = $_product->getMediaGalleryImages();
+	        $propertyType	 = $_product->getPropertyType();
+	        $baseUrl 		 = $this->getBaseUrl();
+			$skinUrl 		 = $this->getSkinUrl();
+			$displayCategory 	= "";
+			$hostId 			= $_product->getUserid ();
+			$productId 		    = $_product->getId();
+			$city 				= $_product->getCity();
+			$country 			= $_product->getCountry();
+			$videoUrl 		 	= $_product->getVideoUrl();
+			$minimumPeople 	    = $_product->getPropertyMinimum();
+			$maximumPeople 	    = $_product->getPropertyMaximum();
+			$accommodateMinimum = $_product->getPeopleMin();
+			$accommodateMaximum = $_product->getPeopleMax();
+			$propertyTypeId 	= Mage::helper('airhotels/product')->getpropertytype();
+			$propertyType 		= $_product->getAttributeText('propertytype');
+			$roomType 			= $_product->getAttributeText('privacy');
+			$displayVideoType  = $_product->getAttributeText('video_type');
+			$currencySymbol    = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+			$price             = $_product->getPrice();
+			$amenity           = $_product->getAmenity();			
+			$cancelPolicy      = $_product->getAttributeText('cancelpolicy');			
+
+			/**
+			 * Reservation for experience
+			*/
+			/**
+			 * Initialize hourly property data
+			*/
+			$propertyServiceFromPeriodData  = $propertyServiceToPeriodData = '';
+			$propertyTime                   = $_product->getPropertyTime();
+			$propertyTimeData               = $propertyTimeId = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();
+			$propertyOvernightFeeData       = $_product->getPropertyOvernightFee();
+			$propertyServiceFromTimeData    = $_product->getPropertyServiceFromTime();
+			$propertyServiceToTimeData      = $_product->getPropertyServiceToTime();
+			$propertyServiceFromArray       = explode(":", $propertyServiceFromTimeData);
+			$propertyServiceFromData        =  $propertyServiceFromArray[0];
+			if(isset($propertyServiceFromArray[1])){
+				$propertyServiceFromPeriodData  = $this->__($propertyServiceFromArray[1]);
+			}
+			$propertyServiceToArray         = explode(":", $propertyServiceToTimeData);
+			$propertyServiceToData          =  $propertyServiceToArray[0];
+			if(isset($propertyServiceToArray[1])){
+				$propertyServiceToPeriodData    = $this->__($propertyServiceToArray[1]);
+			}
+			$propertyServiceFromTimeValue   = $propertyServiceFromData.' '.$propertyServiceFromPeriodData;
+			$propertyServiceToTimeValue     = $propertyServiceToData.' '.$propertyServiceToPeriodData;
+			if($propertyServiceFromPeriodData == 'PM'){
+				$validateFormServiceHours = Mage::helper('airhotels/calendar')->validateFormServiceHours($propertyServiceFromData);
+			}else{
+				$validateFormServiceHours = Mage::helper('airhotels/calendar')->calculateFormServiceHours($propertyServiceFromData);
+			}
+			if($propertyServiceToPeriodData == 'PM'){
+				$validateToServiceHours =  Mage::helper('airhotels/calendar')->validateToServiceHours($propertyServiceToData);
+			}else{
+				$validateToServiceHours =  Mage::helper('airhotels/calendar')->calculateToServiceHours($propertyServiceToData);
+			}
+			?>
+			<div class="host_details_wrapper"><?php
+			    /**
+			     * Host details
+			     */
+				$cityName 		= $_product->getCity();
+				$stateName 		= $_product->getState();
+				$countryName 	= $_product->getCountry();
+			    $customerData   = Mage::getModel ( 'airhotels/product' )->getCustomerPictureById ( $_product->getUserid () );
+			    $customer       = Mage::getModel ( 'customer/customer' )->load ( $_product->getUserid () );			    
+			    $hostName 		= $customer->getName();
+			    $verifiedTags   = Mage::getModel ( 'airhotels/verifyhost' )->getCollection ()
+   			                    ->addFieldToFilter('host_id',array('eq'=>$_product->getUserid()))
+   			                    ->addFieldToFilter('host_tags',array('eq'=>1));
+			    $verifyHostCount = count($verifiedTags);
+    			$popularProductdct    = $this->helper ( 'catalog/image' )->init ( $_product, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 315 );?>
+    			<div class="host_property_details">
+	    			<?php
+				    /**
+				    * Host image and Name display
+				    */
+				    ?>
+				    <div class="property-owner-image">
+				    <a href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$_product->getUserid ();?>" target="_blank">
+				   <?php  if (!empty($customerData[0]["imagename"])):                   
+				   ?>
+				        <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>" height="92" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($_product->getName()); ?>" alt="" class="customer_photo"><?php
+				    else: ?>
+				        <img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>" height="92" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($_product->getName()); ?>" alt="" class="customer_photo"><?php
+				    endif; ?></a>
+	    				<span class="host_name_detail"><?php echo ucwords($customer->getName()); ?></span>
+	    				<?php if($verifyHostCount >= 3){ ?>
+	    				<span class="verified-host-img airhotel-sprite"></span>
+	    				<?php } ?>
+	    				</div>
+	    			<div class="property-owner-description">
+	    			<h2><?php
+					    /**
+					     * Display experience name with host name
+					     */	    			    
+					    echo ucwords($_product->getName()). ' with '. ucwords($customer->getName());
+					    /**
+					     * Display city and country of experience
+					     */
+					    ?>
+	    			</h2>
+
+	    			<address class="city_name">
+	      				<span class="content_text"><?php if(isset($cityName)){echo ucwords($cityName);}if(isset($countryName)){echo ', '.ucwords($countryName); }?></span>
+	    			</address>
+
+	    			<?php
+				    /**
+				     * Display of Reviews and Ratings of experience
+				     */?>
+	    				<div id="action_buttons"><?php
+	    				$storeId = Mage::app()->getStore()->getId();
+				        $reviews = Mage::getModel('review/review')->getResourceCollection();
+				        $reviews ->addStoreFilter($storeId)
+				                 ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+				                 ->addEntityFilter('product', $_product->getId())
+				                 ->setDateOrder()
+				                 ->addRateVotes();
+				        $productReviewsCount = count($reviews);
+				        /**
+				         * rating form starts
+				         */
+				        $rating      = Mage::getModel('airhotels/product')->getCustomerRatings($_product->getId());
+				        $totalRating = count($rating);
+				        $detailAvgRating   = $sumRating = 0;
+				        foreach ($rating as $rate) {
+				            $sumRating += $rate["percent"];
+				        }
+				        if($totalRating != 0){
+				        $detailAvgRating          = $sumRating / $totalRating;
+				        }
+
+				        $PropertyReviewBlock = new Apptha_Airhotels_Block_Airhotels();
+				        if ($detailAvgRating > 1 && $detailAvgRating <= 20) {
+				            echo $PropertyReviewBlock->showratingCode(1);
+				        } else if ($detailAvgRating > 21 && $detailAvgRating <= 40) {
+				            echo $PropertyReviewBlock->showratingCode(2);
+				        } else if ($detailAvgRating > 41 && $detailAvgRating <= 60) {
+				            echo $PropertyReviewBlock->showratingCode(3);
+				        } else if ($detailAvgRating > 61 && $detailAvgRating <= 80) {
+				            echo $PropertyReviewBlock->showratingCode(4);
+				        } else if ($detailAvgRating > 81 && $detailAvgRating <= 100) {
+				            echo $PropertyReviewBlock->showratingCode(5);
+				        } else {
+				            echo $PropertyReviewBlock->showratingCode(0);
+				        }
+				        echo "<a href='#reviews_link_text' style='color: #fff; margin-left: 5px;text-transform: lowercase;    margin: 3px 0 0 5px;display: inline-block;'>" . count($reviews) . " " . strtoupper($this->__('Reviews')) . "</a>";
+				        ?>
+	    				</div>
+	    				</div>
+	    				<div class="porperty-review">
+	    					<span class="rating-num"><?php echo $productReviewsCount; ?></span>
+	    					<span class="rating-title">Reviews</span>
+	    				</div>
+	    				</div>
+	    				<!--sidebar-->
+<aside id="sidebar">
+	<div class="inside" >
+    <!-- Property Price  -->
+    	<div class="right_column">
+        	<div id="book_it" class="box">
+            	<div class="middle">
+                	<div id="book_it_default" class=" <?php if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { echo 'hourly-property'; } else { echo 'daily-property'; } ?> rounded monthly">
+                    	<div id="pricing" class="book_it_section demo">
+	                        <?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();  if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+	                        <div class="hourly_service">
+	                        	<p id="price_amount">
+		                        	<span id="changePrice" >
+										<?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2); ?>
+		                            </span>
+		                            <span id="pricePer"><?php echo $this->__('Per Hour') ?></span>
+	                            </p>
+							</div>
+	                        <?php }else{   ?>
+	                        <div class="price-calculate">
+	                            <h2 id="fromh2"><?php echo $this->__('From'); ?>
+	                            	<?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>
+	                             </h2>
+	                             <?php
+	                             $subscriptionType = Mage::getModel ( 'airhotels/property' ) -> getSubscriptionMethod($productId);
+                                 if(($isSubscriptionEnabled != 1 || ( $_product->getUserid() !=1 && $customer->getEmail() == 'john@sample.in')) ){
+                                     if(count($subscriptionType) > 0){
+	                             ?>
+                                           <select
+						id="subscription_type"
+						class="select select input-text required-entry input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+						name="subscription_type[]"
+						onchange="subscription(this.value)">
+							<option value="0"><?php echo Mage::helper('airhotels')->__('No subscription	'); ?></option>
+								<?php
+									foreach ( $subscriptionType as $key => $subscription ) {
+								?>
+								<option value="<?php echo $subscription->getId()?>"
+								><?php echo $subscription->getTitle();?></option>
+								<?php } ?>
+						</select>
+						<?php }?>
+	                       </div>
+	                       <p id="price_amount"><span id="changePrice" ></span></p>
+	                       <?php }
+						   } ?>
+
+	                       <input type="hidden" id="priceVal" value="<?php echo round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>" />
+	                       <div class="clear"></div>
+						   <?php Mage::getStoreConfig('design/header/logo_src'); ?>
+                       </div>
+                       <div id="changeVal"></div>
+                       <script type="text/javascript">
+                                        flag= false;
+                                        function subscription(val){
+                                              if( val != 0 ) {
+                                                  jQ('#changeVal').attr('id','ChangeValue');
+                                            	  jQ("#subscription_response").show();
+
+                                                document.getElementById("subscription_response").innerHTML='<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>';
+                                                var xmlhttp = getHttp();
+                                                xmlhttp.onreadystatechange=function()
+                                                {
+                                                    if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                                                    {
+                                                    flag = true;
+                                                     jQ("#fromh2").text();                                                     
+                                                        document.getElementById("subscription_response").innerHTML=xmlhttp.responseText;
+                                                     	jQ("#to").hide();
+                                                     	jQ("#labelto").hide();                                                     
+                                                        checkavail(jQ("#from").val(),jQ("#to").val());
+                                                    }
+                                                }
+                                                 var url = "<?php echo Mage::getBaseUrl() . 'airhotels/property/subscription/' ?>";
+                                                 url=url+"?subscriptionid="+val;
+                                                 url=url+"&productid="+<?php echo $productId; ?>;
+                                                 xmlhttp.open("GET",url,true);
+                                                 xmlhttp.send();
+                                              } else {
+                                            	  jQ('#subscription_cycle').remove();
+                                                  checkavail(jQ("#from").val(),jQ("#to").val());
+
+                                            	  jQ('#dayscount').remove();
+
+                                               	if(jQ('#ChangeValue').length) {
+                                                    jQ('#changeValue').attr('id','ChangeValueFor');
+                                                  	jQ('#txtHint').html('');
+                                                  	if(jQ('#ChangeValueFor').length) {
+                                                  		jQ('#txtHint').show();
+                                                      }
+                                                  }else{
+                                                	jQ('#txtHint').show();
+                                                      }
+                                               	jQ('#txtHint').show();
+												jQ("#fromh2").html('<?php echo $this->__('From '); ?><?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>' );
+                                              jQ("#subscription_response").hide();
+                                              flag= false;
+                                              jQ("#to").show();
+                                              jQ("#labelto").show();
+
+                                                   }
+                                        }
+                                        </script>
+                                        <form id="formhide">
+
+						<div id="subscription_response"></div>
+
+                                          <?php if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+                                        	 <span id="hourly_overnight_fee"><b><?php echo $this->__('Overnight Fee') ?></b><b class="bold"><?php 
+                                        	
+                                        	 if($propertyOvernightFeeData==""){
+echo $this->__("N/A");
+                                              
+}else{
+                                        	 
+                                         echo $currencySymbol.Mage::helper('directory')->currencyConvert($propertyOvernightFeeData, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()).' / '.$this->__('Per Night'); }
+                                        	 //} ?></b></span>
+	                            			 <span id="service_hours"><b><?php echo $this->__('Service Hours') ?></b><b class="bold">(<?php if(!empty($propertyServiceFromTimeValue)&&!empty($propertyServiceToTimeValue)){ echo $propertyServiceFromTimeValue.' - '.$propertyServiceToTimeValue; } ?>)</b></span>
+	                            		  <?php } ?>
+                                            <div class="demo book_it_section ">
+
+                        <?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+                        if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+                        <div class="select_grid_timings first">
+                        <label for="from"><?php echo $this->__('Check In') ?></label>
+                        <input type="text" id="from" name="from" autocomplete="off" placeholder="<?php echo $this->__('mm/dd/yyyy');?>" value="<?php echo $from; ?>" readonly />
+
+                        <div class="sort_grid"><select id="property_service_from" name="property_service_from" onchange="propertyTimeChange()">
+                        <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                            <option value="<?php echo $inc; ?>" <?php if(!empty($serviceFrom)){if($serviceFrom == $inc){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromData)){if($propertyServiceFromData==$inc){echo 'selected="selected"';}}} ?>><?php echo $inc; ?></option>
+                        <?php } ?>
+                        </select></div>
+                        <div class="sort_grid"><select id="property_service_from_period" name="property_service_from_period" onchange="propertyTimeChange()">
+                            <option value="AM" <?php if(!empty($serviceFromPeriod)){if($serviceFromPeriod=='AM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromPeriodData)){if($propertyServiceFromPeriodData=='AM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('AM'); ?></option>
+                            <option value="PM" <?php if(!empty($serviceFromPeriod)){if($serviceFromPeriod=='PM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromPeriodData)){if($propertyServiceFromPeriodData=='PM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('PM'); ?></option>
+                        </select></div>
+                         </div>
+                        <?php } else {?>
+                        <div class="select_grid">
+                        <label for="checkin"><?php echo $this->__('Check In') ?> </label>
+                        <input type="text" id="from" name="from" autocomplete="off" placeholder="<?php echo $this->__('mm/dd/yyyy');?>" value="<?php echo $from; ?>" readonly />
+                        </div>
+                        <?php } ?>
+
+
+                        <?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+                         if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+                        <div class="select_grid_timings second">
+                          <label for="to"><?php echo $this->__('Check Out') ?></label>
+                          <input type="text" id="to" name="to" autocomplete="off" placeholder="<?php echo $this->__('mm/dd/yyyy');?>"  value="<?php echo $to; ?>" readonly />
+                        <div class="sort_grid"><select id="property_service_to" name="property_service_to" onchange="propertyTimeChange()">
+                        <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                                <option value="<?php echo $inc; ?>" <?php if(!empty($serviceTo)){if($serviceTo==$inc){echo 'selected="selected"';}}else{if(!empty($propertyServiceToData)){if($propertyServiceToData==$inc){echo 'selected="selected"';}}} ?>><?php echo $inc; ?></option>
+                            <?php } ?>
+                        </select></div>
+                        <div class="sort_grid"><select id="property_service_to_period" name="property_service_to_period" onchange="propertyTimeChange()">
+                            <option value="AM" <?php if(!empty($serviceToPeriod)){if($serviceToPeriod=='AM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceToPeriodData)){if($propertyServiceToPeriodData=='AM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('AM'); ?></option>
+                            <option value="PM" <?php if(!empty($serviceToPeriod)){if($serviceToPeriod=='PM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceToPeriodData)){if($propertyServiceToPeriodData=='PM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('PM'); ?></option>
+                        </select></div>
+                          </div>
+                        <?php } else { ?>
+                        <div class="select_grid">
+                                                    <label id = "labelto" for="to"><?php echo $this->__('Check Out') ?></label>
+                        <input type="text" id="to" readonly name="to" autocomplete="off" placeholder="<?php echo $this->__('mm/dd/yyyy');?>"  value="<?php echo $to; ?>" />
+                          </div>
+                        <?php } ?>                                               
+                                                <div class="select_grid1" <?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+                                                if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { echo 'class="selct_grid_items"'; } ?>>
+                                                    <label for="number_of_guests"><?php echo $this->__('Guests') ?> </label>
+                                                    <div class="sort_grid"><select id="number_of_guests" name="number_of_guests">
+                                                    <?php for ($i = $accommodateMinimum; $i <= $accommodateMaximum; $i++) { ?>
+                                                    <option value="<?php echo $i; ?>" <?php if(!empty($numberOfGuests)){if($numberOfGuests ==  $i){ echo 'selected="selected"';}} ?>><?php echo $i; ?></option>
+                                                    <?php } ?>
+                                                    </select></div>
+                                                </div>                                                
+                                                <div class="clear"></div>
+                                            </div>
+                                            <div id="txtHint"></div>
+                                            <div id="avail">
+                                                <input type="button" class=" pink_grid"
+                                                       value="<?php echo $this->__('Book it') ?>!" onClick="checkavail(from.value,to.value);return checkCalendar(from.value,to.value);"/>
+                                            </div>
+
+                                            <div id="cart" style="display: none">
+                                                <a id="bookit_sumbit_button" onclick="return bookItNow('<?php echo $this->helper('checkout/cart')->getAddUrl($_product); ?>')" href='javascript:void(0);' id="scriptbuynow-<?php echo $count; ?>" class="button-glossy  booknow_btn"><?php echo $this->__('Book Now') ?></a>
+                                            </div>
+                                            <div id="contact_host">
+											<?php
+						                     $displayContactMe = Mage::getStoreConfig('airhotels/layout_settings/display_contactme');
+						                     if(empty($displayContactMe)) {
+						                        if (!Mage::getSingleton('customer/session')->isLoggedIn()) { ?>
+						                        	<a href="<?php echo Mage::helper('customer')->getLoginUrl(); ?>" class="description_contact" id="contact_link"><?php echo $this->__('Contact Host');?></a><?php
+						                        } elseif($customerLoginId != $hostId){ ?>
+						                        	<a rel="facebox" href="<?php echo Mage::getBaseUrl() . "airhotels/hourly/contact"; ?>" class="description_contact"  id="contact_link"><?php echo $this->__('Contact Host'); ?></a>
+						                        <?php
+						                        }
+						                     } ?>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="clear"></div>
+                                </div>
+                            </div>
+                            <?php
+                            /**
+                             * Save the customer,wishlist values to session
+                             */
+                            $customer = Mage::getSingleton('customer/session')->getCustomer();
+                            $wishList = Mage::getSingleton('wishlist/wishlist')->loadByCustomer($customer);
+                            $wishListItemCollection = $wishList->getItemCollection();
+                            /**
+                             * Create an array for $arrProductIds
+                             */
+                            $arrProductIds = array();
+                            /**
+                             * Count the wishlist Item COllection
+                             */
+                            if (count($wishListItemCollection)) {
+                             foreach ($wishListItemCollection as $item) {
+                              $product = $item->getProduct();
+                              $arrProductIds[] = $product->getId();
+                             }
+                            }
+                            ?>
+                            <div id="whislist_message"></div>
+                            <div class="wishlist-addthis">
+                             <a href="<?php echo $this->helper('wishlist')->getAddUrl($_product) ?>" class="wish_list_button link-cart" title="Save this experience to review later"  >
+
+                                <span class="wishlist-icons_<?php echo $_product->getId(); ?> <?php if(in_array($_product->getId(),$arrProductIds)){
+ 										echo 'pink-icon sprimg';
+ 								}else{
+ 									echo 'icon sprimg';
+ 								} ?>"></span>
+ 								<span><?php echo $this->__('Add to Wishlist'); ?></span>
+ 						    </a>
+                            <div class="addthis_sharing_toolbox"><h3 class="title"><?php echo $this->__('Share') ?></h3></div></div>
+                        </div>
+
+                                     <?php
+                                    $latitude = trim ( $_product->getLatitude () );
+                                    $longitude = trim ( $_product->getLongitude () );
+                                    ?>
+                                    <input type="hidden" id="lat_for_space" value="<?php if(!empty($latitude)){ echo $latitude; } ?>" />
+                                    <input type="hidden" id="lng_for_space" value="<?php if(!empty($longitude)){ echo $longitude; } ?>" />
+                       <div class="clear">
+                   </div>
+
+    		</div>
+    </aside>
+    <!--end sidebar-->
+
+			</div>
+			<div class="content_outer_wrapper only_view_page">
+    			<div class="content_wrapper">
+        			<div class="host_description">
+		             <div class="description_content">
+		                <div class="view_description_container">
+
+		            <input type="hidden" id="validate_form_service_hours" value="<?php echo $validateFormServiceHours; ?>">
+		            <input type="hidden" id="validate_to_service_hours" value="<?php echo $validateToServiceHours; ?>">
+
+		            <div class="left_view_column">
+		                <div id="aboutListing" style="float:left;">
+		                   <div class="host_view_content">
+		                   		<div class="about-listings">
+		                   			<h4><?php echo $this->__('About this listing'); ?></h4>
+		                   			<p class="listingInfo listingInfo_less"><?php echo $_product->getDescription(); ?></p>
+		                   			<?php 
+		                   			if($_product->getDescription()): ?>
+                        				<a href="#host_info_outer" title="<?php echo "More Descripion"; ?>" class="more_description" style="display: none;">+ More</a>
+                        				<a href="#host_info_outer" title="<?php echo "Less Descripion"; ?>" class="less_description" style="display: none;">- Less</a>
+                        				<?php
+                        			endif; ?>
+		                   		</div>
+		                   		<div class="lising-details property-space">
+		                   			<h4><?php echo $this->__('Property Space'); ?></h4>
+		                   			<ul>
+		                   				<li><span class="property"><?php echo $this->__('Property Type : '); ?></span><span class="value_description"><?php echo $this->__($propertyType); ?></span></li>
+		                   				<li><span class="property"><?php echo $this->__('Room Type : '); ?></span><span class="value_description"><?php echo $this->__($roomType); ?></span></li>		                   						                   				
+		                   				<li><span class="property"><?php echo $this->__('City : '); ?></span><span class="value_description"><?php echo $this->__($city); ?></span></li>
+		                   				<li><span class="property"><?php echo $this->__('Country : '); ?></span><span class="value_description"><?php echo $this->__($country); ?></span></li>
+		                   				<?php 
+                    	    			$manage_attribute_enable = Mage::getStoreConfig('airhotels/custom_group/custom_attribute');
+                    	    			if($manage_attribute_enable == 0){ ?>
+                    	    			<?php $attributeSetId = $_product->getAttributeSetId();
+                                        $attributeGroupCollection = Mage::getResourceModel('eav/entity_attribute_group_collection')->setSortOrder()->load();
+                                        $count = 0;
+                                        $i =0;
+                                        foreach ($attributeGroupCollection as $group) {
+                                           $groupName  = $group->getAttributeGroupName();
+                                           if($groupName == "Property Information"){
+                                               $groupId  = $group->getAttributeGroupId();
+                                               $attributes = Mage::getResourceModel('catalog/product_attribute_collection') ->setAttributeGroupFilter($group->getId())->addVisibleFilter()->checkConfigurableProducts()->load();
+                                               if ($attributes->getSize() > 0) {
+                                                   foreach ($attributes->getItems() as $attribute) {
+                                                        if($attribute->getIsUserDefined()){
+                                                       /**
+                                                        *  @var $child Mage_Eav_Model_Entity_Attribute
+                                                        */
+                                                       $attributeCode = $attribute->getAttributeCode();
+                                                       $attributeName = $attribute->getFrontendLabel();
+                                                       $attributeType = $attribute->getFrontendInput();
+                                                       $attribute_value = $_product->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($_product);
+                                                       if(!empty($attribute_value)){                                                       
+                                                       ?>
+                                                       <li>
+                                                       <span class="property"><?php echo $this->__($attributeName); ?>:</span>
+                                                       <span class="value_description"><?php echo $this->__($attribute_value); ?></span>
+                                                       </li>
+                                                      <?php } 
+                                                      $count++;
+                                                      }
+                                                    }
+                                            }
+                                        }
+                                    } 
+                    				}?>
+		                   			</ul>
+		                   		</div>
+                    	        <!-- Amenities existing To Property Start-->
+                         		<div class="amenities">
+                         			<h4><?php echo $this->__('Amenities') ?></h4>
+									<?php
+                                        $getamenity = explode(',', $amenity);
+                                        $amenityId = Mage::helper('airhotels/product')->getamenity();
+                                        $amenityAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $amenityId);
+										$amenityCollection = $amenityAttribute->getSource()->getAllOptions();
+                                        $totalAmenity = count($amenityCollection);
+                                        $x = 1;
+                                        foreach ($amenityCollection as $amenity) {
+                                        	$value = $amenity['value'];
+                                            if ($value != '') {
+                                            	if ($x == 1)
+                                                	echo "<ul>";
+                                                if (in_array($amenity['value'], $getamenity)) {
+                                                	?><li>
+                                                    <img src="<?php echo $this->getSkinUrl('images/Tick_32.png') ?>" alt="Allowed" style="vertical-align: middle" width="16" height="16">
+                                                    <?php echo $amenity['label']; ?> </li><?php
+                                                } else {
+                                                	?><li>
+                                                    <img src="<?php echo $this->getSkinUrl('images/Cross-32.png'); ?>" alt="Not allowed" style="vertical-align: middle" width="16" height="16">
+                                                    <?php echo $amenity['label']; ?>
+                                                    </li><?php
+                                            	}
+                                            	if ($x % 6 == 0)
+                                                	echo "</ul><ul>";
+                                            		$x++;
+                                            	if ($x == $totalAmenity)
+                                                	echo "</ul>";
+                                        	}
+                                    	} ?>
+                                    <div class="clear"></div>
+                              	</div>                     		
+	                     		<div class="price-details">
+	                     			<h4><?php echo $this->__('Price'); ?></h4>
+	                     			<ul>
+	                     			<li><span class="property"><?php echo $this->__('Per Night') ?> : </span><span class="value_description"><?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2); ?></span></li>
+            						<li><span class="property"><?php echo $this->__('Weekly Price') ?> :</span><span class="value_description"><?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2) *  7; ?></span></li>
+            						<li><span class="property"><?php echo $this->__('Monthly Price') ?> :</span><span class="value_description"><?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2) *  30; ?></span></li>
+            						<?php
+            						$getSecurityEnabledOrNot = Mage::helper('airhotels/product')->getSecurityEnabledOrNot();
+							        if($getSecurityEnabledOrNot == 0){
+										$allOptions = $_product->getOptions();
+										if($allOptions){
+											foreach ($allOptions as  $option){
+												foreach ($option->getValues() as  $value) { ?>
+													<li><span class="property"><?php echo $this->__($value->getDefaultTitle().' Fee') ?> : </span><span class="value_description"><?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($value->getPrice(), Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2);  ?></span></li>
+													<?php
+												}
+											}
+										}
+							        }
+							        ?>
+							        <li class="cancellation"><span class="property"><?php echo $this->__('Cancellation') ?> : </span><span id="cancellation_val" class="value_description"><?php echo $this->__($cancelPolicy); ?></span></li>
+							        </ul>
+
+	                     		</div>
+	                     		<div class="availability">
+	                     			<?php
+	                     			$propertyTime 		= Mage::getModel ( 'catalog/product' )->load ( $productId )->getPropertyTime ();
+	                     			$propertyTimeData 	= Mage::helper ( 'airhotels/airhotel' )->getPropertyTimeLabelByOptionId ();
+	                     			$hourlyEnabledOrNot = Mage::helper ( 'airhotels/product' )->getHourlyEnabledOrNot ();
+	                     			$propertyMaximum 	= Mage::helper ( 'airhotels/airhotel' )->getPropertyMaximumByProductId ( $productId );
+	                     			$propertyMinimum 	= Mage::helper ( 'airhotels/airhotel' )->getPropertyMinimumByProductId ( $productId );
+	                     			?>
+	                     			<h4><?php echo $this->__('Availability') ?></h4>
+	                     			<ul>
+	                     			<?php if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+	                     				<li><span class="property"><?php echo $this->__('Minimum stay : '); ?></span><span class="value_description"><?php echo $this->__($propertyMinimum.' Hour(s)'); ?></span></li>
+	                     				<li><span class="property"><?php echo $this->__('Maximum stay : '); ?></span><span class="value_description"><?php echo $this->__($propertyMaximum.' Hour(s)'); ?></span></li>
+	                     				<li class="calendar-show"><span class="view-calendar"><?php echo $this->__('View Calendar'); ?></span></li>
+	                     			<?php }else{?>
+	                     				<li><span class="property"><?php echo $this->__('Minimum stay : '); ?></span><span class="value_description"><?php echo $this->__($propertyMinimum.' Day(s)'); ?></span></li>
+	                     				<li><span class="property"><?php echo $this->__('Maximum stay : '); ?></span><span class="value_description"><?php echo $this->__($propertyMaximum.' Day(s)'); ?></span></li>
+	                     				<li class="calendar-show"><span class="view-calendar"><?php echo $this->__('View Calendar'); ?></span></li>
+	                     			<?php } ?>
+	                     			</ul>
+
+	                     			 <!-- Property Calendar Start-->
+	                     			<div id="calendar_div" class="main_content" style="display: none;padding-bottom: 10px;">
+                                        <?php
+                                        if (!Mage::app()->getRequest()->getParam('date')) {
+                                            if (!Mage::app()->getRequest()->getParam('x')) {
+                                                $x = date("n");
+                                            } else {
+                                                $x = Mage::app()->getRequest()->getParam('x');
+                                            }
+                                            if ($x == "")
+                                                $x = date("n");
+
+                                            $year = date("Y");
+                                            $calendar = $x . '__' . $year;
+                                            $date 	= strtotime("$year/$x/1");
+                                            $day 	= date("D", $date);
+                                            $m 		= date("F", $date);
+                                        }
+                                        else {
+                                            $dateSplit = explode("__", Mage::app()->getRequest()->getParam('date'));
+                                            $x = $dateSplit[0];
+                                            if ($x == "")
+                                                $x 	= date("n");
+                                            $year 	= $dateSplit[1];
+                                            $date 	= strtotime("$year/$x/1");
+                                            $day 	= date("D", $date);
+                                            $m 		= date("F", $date);
+                                        }
+                                        ?>
+                                        <script type="text/javascript">
+                                        jQ(function() {
+                                        	jQ("#selectMonth").val('<?php echo $calendar; ?>');                                        	
+                                        });
+                                        </script>
+                                        <div class="calenderfloatleft">
+                                            <select name="selectMonth" id="selectMonth" style="float:left"
+                                                onchange="ajaxLoadCalendar('<?php echo $this->getUrl('airhotels/property/calender/') . "?date=" ?>'+this.value)">
+                                                    <?php
+                                                    $month = date("n");
+                                                    for ($j = $year; $j <= ($year + 3); $j++) {
+                                                        for ($k = $month; $k <= 12; $k++) {
+                                                            $loopYear = strtotime("$j/$k/1");
+                                                            $loopmonth = date("M", $loopYear);
+                                                            ?>
+                                                    		<option value="<?php echo $k . "__" . $j; ?>"
+                                                            <?php
+                                                            if ($x == $k && $j == $year)
+                                                                echo " selected='selected' "
+                                                                ?>>
+		                                                    <?php echo $loopmonth . "," . $j; ?>
+		                                                    </option>
+		                                                    <?php
+		                                                    if ($k == 12) {
+		                                                        $month = 1;
+		                                                    }
+                                                		}
+                                            		}
+                                            	?>
+                                        	</select>
+	                                        <div id="calendarWrapper"></div>
+	                                        <div id="cal_legend">
+	                                        	<h2 class="past_grid"><?php echo $this->__('Past') ?></h2>
+	                                            <h2 class="available_grid"><?php echo $this->__('Available') ?></h2>
+	                                            <h2 class="specialprice_grid"><?php echo $this->__('Special Price') ?></h2>
+	                                            <h2 class="booked_grid"><?php echo $this->__('Booked') ?></h2>
+	                                            <?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();  if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+	                                            <h2 class="partially_available_grid"><?php echo $this->__('Partially Available') ?></h2>
+	                                            <?php } ?>
+	                                            <h2 class="unavailable_grid"><?php echo $this->__('Not Available') ?></h2>
+	                                        </div>
+                                        </div>
+                                        <div class="calender_left"><p> <?php echo Mage::getStoreConfig('airhotels/layout_settings/calender_text'); ?></p></div>
+                                        <!-- Property Calendar End-->
+                                    </div>
+	                     		</div>
+	                 		</div>
+ 						</div>
+            			<input type="hidden" name="appthaAjaxLoading" id="appthaAjaxLoading" value="<?php echo $this->getSkinUrl('images/ajax-loader.gif') ?>" />
+	                    <input type="hidden" name="productId" id="productId" value="<?php echo $productId; ?>" />
+	                    <input type="hidden" name="customerId" id="customerId" value="<?php echo $hostId; ?>" />
+	                    <div id="photo_gallery" style="float:left;width:100%;">
+	                    	<?php if(Mage::getStoreConfig ( 'airhotels/custom_email/enable_videolink' )) {?>
+            				<div id="experience_video" class="clearfix">
+	                     		<?php
+	                     		if(!empty($videoUrl)) {
+									if($displayVideoType=="Youtube") {
+	                     				$getYoutubeID = explode("v=",$videoUrl);
+	                     				if(count($getYoutubeID)>1) {
+	                     					$getYoutubeID = explode("&",$getYoutubeID[1]);
+	                     				} else {
+											$getYoutubeID = explode("/",$videoUrl);
+											$count = count($getYoutubeID);
+											$getYoutubeID = array($getYoutubeID[$count-1]);
+										}
+	                     				?>
+	                     				<iframe class="video_iframe" src="https://www.youtube.com/embed/<?php echo $getYoutubeID[0];?>"></iframe><?php
+									}
+	                     			if($displayVideoType=="Youku") {
+	                     				$getYoukuID = explode("id_",$videoUrl);
+				                     	if(count($getYoukuID)>1) {
+				                     		$getYoukuID = explode(".html",$getYoukuID[1]);
+				                     	} else {
+											$getYoukuID = explode("/",$videoUrl);
+											$count = count($getYoukuID);
+											$getYoukuID = array($getYoukuID[$count-2]);
+										} ?>
+	                     				<iframe class="video_iframe" src="http://player.youku.com/embed/<?php echo $getYoukuID[0];?>" frameborder="0"></iframe><?php
+									}
+	                     			if($displayVideoType=="Vimeo") {
+	                     				$getVimeoID = explode("/",$videoUrl);
+	                     				$count = count($getVimeoID); ?>
+	                     				<iframe class="video_iframe" src="https://player.vimeo.com/video/<?php echo $getVimeoID[$count-1];?>" frameborder="0"></iframe><?php
+									}
+	                     			if($displayVideoType=="Tencent") {
+	                     				$getTencentID = explode("?",$videoUrl); ?>
+	                     				<iframe class="video_iframe" src="http://v.qq.com/iframe/player.html?<?php echo $getTencentID[1];?>" frameborder="0"></iframe><?php
+									}
+									if($displayVideoType=="Videourl"){ ?>
+										<video class="video_iframe" controls>
+										  <source src="<?php echo $videoUrl; ?>">
+										   Your browser does not support the video tag.
+										  </video>
+								<?php 	}
+	                     	 	}  ?>
+                   			</div>
+                   			<?php } ?>
+							<?php $imageCount = count($_sliderGallery);
+                     		$increment = 0;
+                     		if ( $imageCount != 0) { ?>
+                    			<div class="photo-grid">
+                  					<?php foreach ($_sliderGallery as $_image) {
+                     		 			$baseImage = $this->helper('catalog/image')->init($_product, 'baseimage', $_image->getFile())
+					                                 ->constrainOnly(TRUE)
+					                                 ->keepAspectRatio(TRUE)
+					                                 ->keepFrame(FALSE)
+					                     			 ->resize(250, null);
+                     		 			$baseImageSlider = $this->helper('catalog/image')->init($_product, 'baseimage', $_image->getFile())
+						                     		 ->constrainOnly(TRUE)
+						                     		 ->keepAspectRatio(TRUE)
+						                     		 ->keepFrame(FALSE);
+		                     		 /**
+		                     		  *  check the first two photos and displayed on top
+		                     		  */
+                     		 		if($increment < 2) { ?>
+                     	  				<div class="first_row_gallery">
+				                          <a class="fancybox-thumbs_gallery" data-fancybox-group="thumbs" title="<?php if(isset($cityName)){echo ucwords($cityName);}if(isset($stateName)){echo ', '.ucwords($stateName);}if(isset($countryName)){echo ', '.ucwords($countryName); }?>" href="<?php echo $baseImageSlider; ?>">
+				                              <img src="<?php echo $baseImage; ?>" width="300"/>
+				                          </a>
+			                          	</div>
+			                          <?php
+			                          /**
+			                          * check the above two photos and displayed on below
+			                          */
+									} else if(($increment < 5) && ($increment >= 2)) {  ?>
+			                          <div class="second_row_gallery">
+				                          <a class="fancybox-thumbs_gallery" data-fancybox-group="thumbs" title="<?php if(isset($cityName)){echo ucwords($cityName);}if(isset($stateName)){echo ', '.ucwords($stateName);}if(isset($countryName)){echo ', '.ucwords($countryName); }?>" href="<?php echo $baseImageSlider; ?>">
+				                              <img src="<?php echo $baseImage; ?>" width="200"/>
+					                          <?php
+					                          /**
+					                           * check and print the content for remaining photos
+					                           */
+					                          	if(($imageCount > 5) && ($increment ==4 )) {
+													/**
+													 * Get the remaining photos count.
+													 */
+						                          	$remaining = $imageCount-5;
+						                          	$content = "See other $remaining photos";
+						                          	if($remaining == 1) {
+														$content = "See other $remaining photo";
+													}
+						                          	?>
+					                          		<div class="seeothers_container"><span><?php echo $this->__($content);?></span></div>
+				                          		<?php }?>
+				                          </a>
+			                          </div>
+                  		  			<?php } else { ?>
+									  <a class="fancybox-thumbs_gallery" data-fancybox-group="thumbs" title="<?php if(isset($cityName)){echo ucwords($cityName);}if(isset($stateName)){echo ', '.ucwords($stateName);}if(isset($countryName)){echo ', '.ucwords($countryName); }?>" href="<?php echo $baseImageSlider; ?>" style="display:none;">
+			                              <img src="<?php echo $baseImage; ?>" width="200"/>
+			                          </a>
+                  		  			<?php } $increment++; } ?>
+                    			</div>
+                     	 	<?php } ?>
+                     	</div>
+                	</div>
+        		</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php
+$latitude = trim ( $_product->getLatitude () );
+$longitude = trim ( $_product->getLongitude () ); ?>
+<script type="text/javascript">
+var map_marker_icon = '<?php echo Mage::getBaseUrl('skin').'frontend/default/stylish/images/orange-dot.png';?>';
+function initialize() {
+	var myLatlng = new google.maps.LatLng(<?php echo $latitude;?>,<?php echo $longitude;?>);
+  	var mapOptions = {	 
+  		Zoom: 8,   
+	    minZoom: 2, 
+	    maxZoom: 12,
+	    center: myLatlng,
+	    scrollwheel: false
+  	}
+  	var map = new google.maps.Map(document.getElementById('customer_view_map_for_space'), mapOptions);
+  	var marker = new google.maps.Marker({
+      position: myLatlng,
+      map: map,
+      title: '<?php echo $_product->getName();?>',
+      icon:map_marker_icon
+  	});
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+<?php
+/**
+ * Display expeience review
+ */?>
+ <div id="mainreviews">
+	<div class="reviews_content_wrapper" style="display: block !important;">
+		<div class="rating_container">
+			<div id="main_reviews" class="clearfix">
+             <?php
+              //rating form starts
+              if ($totalRating) {
+               	$sumRating = 0;
+               	foreach ($rating as $rate) {
+                	$sumRating += $rate["percent"];
+                }
+                $avg_rating = $sumRating / $totalRating; ?>
+	            <div class="reviews_background_image">
+
+					<h3 id="satisfaction_title"><?php echo $this->__('Overall Guest Satisfaction') ?></h3>
+					<div class="satisfaction_title_review">
+		            	<?php
+		                 if ($avg_rating > 1 && $avg_rating <= 20) {
+		                 	echo $PropertyReviewBlock->showratingCode(1);
+		                 }
+		                 if ($avg_rating > 21 && $avg_rating <= 40) {
+		                	 echo $PropertyReviewBlock->showratingCode(2);
+		                 }
+		                  if ($avg_rating > 41 && $avg_rating <= 60) {
+		                 	echo $PropertyReviewBlock->showratingCode(3);
+		                 }
+		                 if ($avg_rating > 61 && $avg_rating <= 80) {
+		                	 echo $PropertyReviewBlock->showratingCode(4);
+		                 }  if ($avg_rating > 81 && $avg_rating <= 100) {
+		                	 echo $PropertyReviewBlock->showratingCode(5);
+		                 }
+		                ?>
+	                </div>
+				 </div>
+               <?php
+               }
+               $i = 1;
+               foreach ($rating as $rate) {
+               		if ($i == 1){ ?>
+                  		<div class='experience_page_rating'><h3 id='satisfaction_title'><?php echo $this->__('Summary') ?></h3><ul class='rating_for_host_item'>
+                  	<?php }
+                  	echo "<li><span>" . strtoupper($rate["rating_code"]) . "</span><div class='rating_star'>";
+                    if ($rate["percent"] > 1 && $rate["percent"] <= 20) {
+                    	echo $PropertyReviewBlock->showratingCode(1);
+                    } else if ($rate["percent"] > 21 && $rate["percent"] <= 40) {
+                    	echo $PropertyReviewBlock->showratingCode(2);
+                    } else if ($rate["percent"] > 41 && $rate["percent"] <= 60) {
+                    	echo $PropertyReviewBlock->showratingCode(3);
+                    } else if ($rate["percent"] > 61 && $rate["percent"] <= 80) {
+                    	echo $PropertyReviewBlock->showratingCode(4);
+                    } else if ($rate["percent"] > 81 && $rate["percent"] <= 100) {
+                    	echo $PropertyReviewBlock->showratingCode(5);
+					}
+                      	echo "</div></li>";
+                    if ($i % 3 == 0){
+                    	echo "</ul><ul>";
+                    }
+                    if ($i == count($rating)){
+                    	echo "</ul></div>";
+                    }
+                        $i++;
+				}
+					/**
+					 * Rating form ends
+					 */
+                ?>
+            </div>
+         </div>
+		<div id="reviews_link_text">
+	        <?php
+	        $reviews = Mage::getModel('review/review')->getResourceCollection();
+	        $reviews->addStoreFilter($storeId)
+	        	    ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+	           		->addEntityFilter('product', $_product->getId())
+	           		->setDateOrder()
+	           		->addRateVotes()
+	           		->setPageSize(3)->setCurPage(1)
+	           		->load();
+	        $reviews = $reviews->getData(); ?>
+			<div class="clear"></div>
+          	<?php
+          	/**
+           	* Getting total count
+           	*/
+          	$reviewsTotal = Mage::getModel('review/review')->getResourceCollection();
+          	$reviewsTotal->addStoreFilter($storeId)
+          				 ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+          				 ->addEntityFilter('product', $_product->getId())
+          				 ->setDateOrder()
+          				 ->addRateVotes()
+          				 ->load();
+          	$totalRecords 	= count($reviewsTotal);
+          	$customer 		= Mage::getSingleton('customer/session')->getCustomer();
+          	$reviewCustomerId = $customer->getId();
+          	if(isset($reviewCustomerId)){
+	          	$propcustomerData = Mage::getModel('customer/customer')->load($customer->getId())->getData();
+	          	$collection= Mage::getResourceModel('sales/order_item_collection');
+	          	$collection->addFieldToFilter('main_table.product_id',$_product->getId());
+	          	$select = $collection->getSelect();
+	          	$select->joinLeft(array('order' => Mage::getModel('core/resource')->getTableName('sales/order')), 'order.entity_id=main_table.order_id', array('customer_id' => 'customer_id'));
+	          	$collection->addFieldToFilter('customer_id',$propcustomerData['entity_id']);
+	          	$productIdCust = array();
+	          	foreach ($collection as $order){
+	          		$productIdCust[] = $order->getProductId();
+	          	}
+          	}?>
+			<div id="reviewrapper"><?php
+        		if (count($reviews)) {
+        			if(count($reviews) >= 1){ ?>
+        				<h3><span><?php echo $totalRecords.strtoupper($this->__(' Reviews')); ?></span></h3>
+        			<?php } ?>
+        			<div id="moreReviewWrapper"><?php
+        				for ($i = 0; $i < count($reviews); $i++) {
+        					$reviewCustomerData = Mage::getModel('airhotels/product')->getCustomerPictureById($reviews[$i]["customer_id"]);
+        					?>
+        					<div class="review-product">
+								<ul>
+									<li>
+										<a target="_blank" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$reviews[$i]["customer_id"];?>"	class="customer_img">
+							            <?php if (!empty($reviewCustomerData[0]["imagename"])): ?>
+							           	 	<img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $reviewCustomerData[0]["imagename"] ?>" alt="">
+							        	<?php else: ?>
+							            	<img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" alt="">
+							        	<?php endif; ?>
+							        	<p class="nick_name"><?php echo ucwords($reviews[$i]["nickname"]); ?></p>
+							                </a>
+
+										<div class=review_content_wrapper>
+											<p class="reviews_title"><?php echo ucwords(nl2br($reviews[$i]["title"])); ?></p>
+											<p class="reviews_detail"><?php echo '' . ucfirst(nl2br($reviews[$i]["detail"])) . ''; ?></p>
+											<p class="review_date"><?php echo date("jS, F Y", strtotime($reviews[$i]["created_at"])); ?></p>
+										</div>
+									</li>
+								</ul>
+							</div>
+				        <?php
+				        }
+				        ?>
+        			</div>
+					<div id="reviewsLoading"></div>
+					<div class="clear"></div>
+					<div class="reviews_btn_wrappers">
+						<?php
+						if(isset($reviewCustomerId)){
+				            if (in_array($_product->getId(),$productIdCust)){ ?>
+								<a id="openReviewForm" href="" class="leave_review service import_button"> <?php echo $this->__('Leave a Review');?></a>
+							<?php }
+						}?>
+				        <?php
+				        /**
+				         * Add more reviews button
+				         * If we click more reviews button it will show all the reviews.
+				         *
+				        */
+				        if ($totalRecords > 3) { ?>
+				        	<a id='morereviews' class='import_button' href='javascript:void(0);' onclick='getMoreReviews("<?php echo $_product->getId()?>")'> <?php echo $this->__('More Reviews');?></a>
+							<a id='lessreviews' class='import_button' href='javascript:void(0);' style="display: none;"
+								onclick='getLessReviews("<?php echo $_product->getId()?>")'> <?php echo $this->__('Less Reviews');?></a>
+				        <?php } ?>
+				   </div>
+				   <?php
+			    } else { ?>
+					<h3 class="about_host no_reviewbook"> <?php echo $this->__("There are no reviews yet for this booking.") . "..." ; ?></h3>
+				    <?php
+						if(isset($reviewCustomerId)){
+					    	if (in_array($_product->getId(),$productIdCust)){ ?>
+								<div class="reviews_btn_wrappers">
+									<a id="openReviewForm" href="" class="leave_review service import_button"> <?php echo $this->__('Leave a Review');?></a>
+								</div>
+				           <?php }
+				         }
+				 } ?>
+          	</div>
+		</div>
+		<div id="review_form" style="display: none;">
+	 		<div class="review_form_content"><?php echo $this->getLayout()->createBlock('review/form')->setBlockId('')->toHtml(); ?></div>
+    	</div>
+    </div>
+</div>
+<div class="host_info_outer_wrapper" id="host_info_outer">
+	<div class="host_info_wrapper clearfix">
+	<?php $hostInfo = Mage::getModel('airhotels/customerphoto')->load($_product->getUserid ());
+			/**
+			* Display host info
+			*/
+	if($hostInfo->getMoreHost()){
+    ?>
+		<h3 class="about_host"><?php
+		/**
+		 * About host
+		 */		
+		$customerMonth = date("F", strtotime($customerData[0]["created_date"]));
+		$customerYear = date('Y',strtotime($customerData[0]["created_date"]));		
+		echo $this->__('About your companion, ').ucwords($customer->getName());?></h3><?php
+		if (!empty($customerData[0]["imagename"])): ?>
+			<a href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$_product->getUserid ();?>" target="_blank" class="host-img">
+			<img
+				src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>"
+				alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($_product->getName()); ?>"></a>
+        <?php else: ?>
+            <a href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$_product->getUserid ();?>" target="_blank" class="host-img">
+         	<img
+				src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>"
+				alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($_product->getName()); ?>"></a>
+        <?php endif; ?>
+		<div class="description_wrapper_class">			
+			<p class="hostInfo hostInfo_less"><?php echo $hostInfo->getMoreHost(); ?></p>
+			<?php
+			/**
+			 * Display host info with +more and -less option
+			 */
+			if($hostInfo->getMoreHost()): ?>
+				<a href="#host_info_outer" title="<?php echo "More"; ?>" class="more_btn" style="display: none;">+ More</a>
+				<a href="#host_info_outer" title="<?php echo "Less"; ?>" class="less_btn" style="display: none;">- Less</a>
+				<?php
+			endif;
+			?>
+			<div class="about_experience_block"><?php
+				$hostCountryName="";
+				if($hostInfo->getCountry()):
+					$countryModel = Mage::getModel('directory/country')->loadByCode($hostInfo->getCountry());
+					$hostCountryName=$countryModel->getName();
+				endif; ?>
+                <span><?php if($hostInfo->getCity())echo ucwords($hostInfo->getCity().', '.$hostCountryName); ?></span>
+				<span><?php echo $this->__('Member Since '). $customerMonth .' '.$customerYear; ?></span>
+				<span><?php if($hostInfo->getResponseTime())echo $this->__('Response Time: ') .$hostInfo->getResponseTime(); ?></span>
+			</div>
+			<div class="clear"></div>
+			<?php			
+			/**
+			* Call 'Add Tags' Child block
+			*/
+			echo $this->getChildHtml('product_tag_list');
+            /**
+            * Similar Listing of experience
+            */
+			$city = $_product->getCity();?>
+
+		</div>			
+		<?php } ?>
+		<div class="trust-section"><?php
+			if($verifyHostCount >= 1){?>
+              <span class="trust-title"><?php echo $this->__('Trust'); ?></span>
+            <?php }
+            if($verifyHostCount >= 3){ ?>
+                        <span class="verified-host-img airhotel-sprite"></span>
+             <?php }
+			foreach ($verifiedTags as $verifiedTag){
+                ?>
+		        <span class="airhotel-sprite host_tags_<?php echo $verifiedTag->getTagId(); ?>"></span>
+		    <?php } ?>
+		</div>
+	</div>
+</div>
+<!-- Display google map -->
+<div id="location">
+	<div id="customer_view_map_for_space" style="width: 100%; height: 450px;"></div>
+</div>
+<script type="text/javascript">
+var jQ = jQuery.noConflict();
+jQ( "#openReviewForm" ).click(function() {
+	jQ( "#review_form" ).slideToggle( "slow", function() {
+	//Animation complete.
+    });
+});
+jQ('.service').click(function(e) {
+	e.preventDefault();
+});
+var bookit_sumbit_button_status = 0;
+function bookItNow(url){
+	jQ('#bookit_sumbit_button').attr('disabled','disabled');
+	if(bookit_sumbit_button_status == 1){
+		return false;
+	}else{
+		bookit_sumbit_button_status = 1;
+	}
+	var fromdate = document.getElementById('from').value;
+	var todate = document.getElementById('to').value;
+    if(flag==true) {
+        var todate = document.getElementById('hiddento').value;
+    }
+	fromdate = fromdate.replace(/(\/)/gi,"@");
+	todate = todate.replace(/(\/)/gi,"@");
+	var accomodate = document.getElementById('number_of_guests').value;
+	var days = document.getElementById('subtotal_days').value;
+	var subtotal_amt = document.getElementById('subtotal_amt').value;
+	<?php $getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+    if ($getSecurityEnabledOrNot == 0) { ?>
+    	var securityFee = 0;
+    <?php }else{ ?>
+    	var securityFee = 1;
+    <?php } ?>
+	var hourly_product_id = document.getElementById('productId').value;
+	<!-- Hourly property functionality -->
+	<?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+	if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+		var property_service_from = document.getElementById('property_service_from').value;
+	    var property_service_from_period = document.getElementById('property_service_from_period').value;
+	    var property_service_to = document.getElementById('property_service_to').value;
+	    var property_service_to_period = document.getElementById('property_service_to_period').value;
+	    var overall_total_hours = document.getElementById('overall_total_hours').value;
+	    var hourly_night_fee = document.getElementById('hourly_night_fee').value;
+	<?php }?>
+	var newurl = url+"fromdate/"+fromdate+"/todate/"+todate+"/accomodate/"+accomodate+"/qty/"+days+"/subtotal_amt/"+subtotal_amt+"/serviceFee/"+document.getElementById('serviceFee').value+"/hourly_product_id/"+hourly_product_id+"/securityFee/"+securityFee;
+	<?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+	if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+		var newurl = newurl +"/property_service_from/"+property_service_from+"/property_service_from_period/"+property_service_from_period+"/property_service_to/"+property_service_to+"/property_service_to_period/"+property_service_to_period+"/overall_total_hours/"+overall_total_hours+"/hourly_night_fee/"+hourly_night_fee+"/securityFee/"+securityFee;
+	<?php }  elseif($isSubscriptionEnabled==0) { ?>
+	if(document.getElementById('subscription_type')){
+     var subscriptionId = document.getElementById('subscription_type').value;
+	}
+	 var newurl = newurl+"/subid/"+subscriptionId;
+   <?php }?>
+	window.location.href = newurl;
+}
+jQ(function() {
+
+	<?php if ($from != "" && $to != ""): ?>
+		checkavail(jQ("#from").val(),jQ("#to").val());
+	<?php endif; ?>
+	var dates = jQ( "#from, #to" ).datepicker({
+		changeMonth: false,
+	    minDate: '0',numberOfMonths: 1,
+	    monthNames:["January","February","March","April","May","June","July","August","September","October","November","December"],
+	    onSelect: function( selectedDate ) {var option = this.id == "from" ? "minDate" : "maxDate",
+		    instance = jQ( this ).data( "datepicker" ), date = jQ.datepicker.parseDate(
+		    instance.settings.dateFormat || jQ.datepicker._defaults.dateFormat,
+		    selectedDate, instance.settings );
+		    dates.not( this ).datepicker( "option", option, date ); jQ("#from" ).datepicker("option","maxDate","");
+	    	if(this.id == "from"){ instance = jQ( this ).data( "datepicker" )
+		    	var depart = jQ.datepicker.parseDate(jQ.datepicker._defaults.dateFormat, selectedDate);
+				<?php if(Mage::helper('airhotels/product')->getHourlyEnabledOrNot() != 0){ ?>
+		    		depart.setDate(depart.getDate() + 1);
+		    	<?php }else{ ?>
+		    		depart.setDate(depart.getDate());
+		    	<?php } ?>	jQ("#to" ).datepicker(  "option", "minDate", depart );
+			}
+	    	<?php $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+	    	if ($propertyTime != $propertyTimeData || $hourlyEnabledOrNot != 0) { ?>
+            	if(jQ("#from").val()!='' && jQ("#to").val()!='' || flag == true) {
+		    		checkavail(jQ("#from").val(),jQ("#to").val()); }
+			<?php }else{ ?>
+	    		propertyTimeChange();
+			<?php } ?>
+		}
+	});
+});
+<?php
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+    function propertyTimeChange(){
+     	document.getElementById("txtHint").innerHTML = '';
+     	if(jQ("#from").val()!='' && jQ("#to").val()!='' && jQ("#property_service_from").val()!='' && jQ("#property_service_from_period").val()!=''  && jQ("#property_service_to").val()!='' && jQ("#property_service_to_period").val()!=''){
+     		 var from_data = jQ("#from").val();
+		     var to_data = jQ("#to").val();
+		     var property_service_from_data = jQ("#property_service_from").val();
+		     var property_service_from_period_data = jQ("#property_service_from_period").val();
+		     var property_service_to_data = jQ("#property_service_to").val();
+		     var property_service_to_period_data = jQ("#property_service_to_period").val();
+		     var validate_form_service_hours_data = jQ("#validate_form_service_hours").val();
+		     var validate_to_service_hours_data = jQ("#validate_to_service_hours").val();
+    		 if(property_service_from_period_data == 'PM'){
+    		 	if(parseInt(property_service_from_data) != 12){
+    				property_service_from_data = parseInt(property_service_from_data)+12;
+    			}
+    		}else{
+			    if(parseInt(property_service_from_data) == 12){
+			    	property_service_from_data = 0;
+			    }
+    		}
+	    	if(property_service_to_period_data == 'PM'){
+			    if(parseInt(property_service_to_data) != 12){
+			    	property_service_to_data = parseInt(property_service_to_data)+12;
+			    }
+	    	}else{
+			    if(parseInt(property_service_to_data) == 12){
+			    	property_service_to_data = 0;
+			    }
+	    	}
+	     	if(parseInt(validate_form_service_hours_data) > parseInt(property_service_from_data)){
+	     		document.getElementById("txtHint").innerHTML = "<?php echo $this->__("Please check your from time, service starts at ");
+	     		$propertyServiceFromTimeValue = Mage::helper('airhotels/calendar')->propertyServiceFromTimeValue($propertyServiceFromTimeValue);
+			    ?>";
+			    document.getElementById("txtHint").style.color = "red";
+			    return;
+		     }
+	     	if(parseInt(validate_to_service_hours_data) < parseInt(property_service_to_data)){
+	     		document.getElementById("txtHint").innerHTML = "<?php echo $this->__("Please check your from time, service ends at ");
+	     		if(isset($propertyServiceToTimeValue)){
+	      	  		echo $propertyServiceToTimeValue;
+	       		} ?>";
+	     		document.getElementById("txtHint").style.color = "red";
+	     		return;
+	    	}
+	     	<!--  Validate property time -->
+		     if(parseInt(property_service_to_data) <= parseInt(property_service_from_data) && from_data == to_data){
+			     document.getElementById("txtHint").innerHTML = "<?php echo $this->__('Please check your from and to time');  ?>";
+			     document.getElementById("txtHint").style.color = "red";
+			     return;
+		     }
+	     	checkavail(jQ("#from").val(),jQ("#to").val());
+     	}
+    }<?php
+} ?>
+</script>
+<script type="text/javascript">
+function checkCalendar(from,to){
+	if (jQ.trim(from)=="" || jQ.trim(from)=="mm/dd/yyyy" ) {
+		jQ( "#from").datepicker("show");
+		document.getElementById("txtHint").innerHTML="";
+		return false;
+	}
+	if (jQ.trim(to)!="" || jQ.trim(to)!="mm/dd/yyyy" ) {
+		jQ( "#to").datepicker("show");
+		document.getElementById("txtHint").innerHTML="";
+		return false;
+	}
+}
+function getHttp(){
+    var xmlhttp;
+    if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest();
+    } else{// code for IE6, IE5
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return xmlhttp;
+}
+/***
+ *  More Reviews button action
+ *  Getting all reviews from the response
+ */
+function getMoreReviews(productId){
+    document.getElementById("reviewsLoading").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+    var xmlhttp = getHttp();
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState==4 && xmlhttp.status==200){
+            document.getElementById("reviewsLoading").innerHTML = "";
+            document.getElementById("moreReviewWrapper").innerHTML=xmlhttp.responseText;
+        }
+    }
+    var url = "<?php echo Mage::getBaseUrl() . 'property/dashboard/reviewpageload/product/'?>"+productId;
+    xmlhttp.open("GET",url,true);
+    xmlhttp.send();
+}
+/***
+ *  Less Reviews button action
+ *  Getting last 3 reviews from the response
+ */
+function getLessReviews(productId){
+    document.getElementById("reviewsLoading").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+    var xmlhttp = getHttp();
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState==4 && xmlhttp.status==200){
+            document.getElementById("reviewsLoading").innerHTML = "";
+            document.getElementById("moreReviewWrapper").innerHTML=xmlhttp.responseText;
+        }
+    }
+    var url = "<?php echo Mage::getBaseUrl() . 'property/dashboard/lessReviewPage/product/'?>"+productId;
+    xmlhttp.open("GET",url,true);
+    xmlhttp.send();
+}
+jQ(function() {
+	jQ("#subscription_type").val('0');
+	jQ("#number_of_guests").val('1');
+});
+function checkavail(from,to) {
+	var no_of_days = jQ("#dayscount").val();
+	var url = "";
+    var  subscription_price = jQ("#subscription_price").val();
+    var  subscription_cycle = jQ("#subscription_cycle").val();
+    var select= jQ('#subscription_type :selected').val();     
+    if(select == 0){
+    	jQ("#fromh2").html('<?php echo $this->__('From'); ?> <?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>' );
+    }else if(select == 'Per Night'){
+    	jQ("#fromh2").html('<?php echo $this->__('From'); ?> <?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>' );
+    }else if(select == null){       
+    	jQ("#fromh2").html('<?php echo $this->__('From'); ?> <?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($price, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>' );
+    }else{     	
+        jQ("#fromh2").html('<?php echo $this->__('From'); ?> <?php echo $currencySymbol; ?>'+jQ.trim(subscription_price));
+    }
+	bookit_sumbit_button_status = 0;
+    if (jQ.trim(from)=="" || jQ.trim(from)=="mm/dd/yyyy" ) {
+		jQ( "#from").datepicker("show");
+		document.getElementById("txtHint").innerHTML="";
+            return false;
+        }
+	else if(jQ.trim(to) !="" && jQ.trim(to)!="mm/dd/yyyy"  || flag==true) {
+		document.getElementById("txtHint").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+        var xmlhttp = getHttp();
+        xmlhttp.onreadystatechange=function() {
+		if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+			console.log(xmlhttp.responseText);
+			document.getElementById("txtHint").innerHTML=xmlhttp.responseText;
+            if(xmlhttp.responseText != "Dates are not available"){
+            	document.getElementById("avail").style.display = "none";
+                document.getElementById("cart").style.display = "block";
+			}
+            if(xmlhttp.responseText == "Dates are not available"){
+	            document.getElementById("avail").style.display = "block";
+	            document.getElementById("cart").style.display = "none";
+	            document.getElementById("txtHint").style.color = "red";
+            }
+		}
+	}
+	<?php
+	$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+    if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+		var from_date = jQ("#from").val();
+	    var to_date = jQ("#to").val();
+	    var property_service_from = jQ("#property_service_from").val();
+	    var property_service_from_period = jQ("#property_service_from_period").val();
+	    var property_service_to = jQ("#property_service_to").val();
+	    var property_service_to_period = jQ("#property_service_to_period").val();
+		<!--  Validate property time  -->
+	    if(property_service_from == property_service_to && property_service_from_period == property_service_to_period && from_date == to_date){
+		    if(property_service_to == '11' && property_service_to_period == 'AM'){
+		    property_service_to = parseInt(property_service_to) + 1;
+		    property_service_to_period = 'PM';
+		    jQ("#property_service_to_period").val(property_service_to_period);
+		    }else{
+		    property_service_to = parseInt(property_service_to) + 1;
+		    }
+		    jQ("#property_service_to").val(property_service_to);
+		}
+     <?php } ?>
+
+
+	 url = "<?php echo Mage::getBaseUrl() . 'airhotels/property/checkavail/' ?>";
+     url=url+"?from="+from;
+     url=url+"&to="+to;
+     url=url+"&productid="+<?php echo $productId; ?>;
+     url=url+"&price="+<?php echo $price; ?>;
+     if(select == '0'){
+         url=url+"&subcycle=undefined";
+         url=url+"&days=undefined";
+         url=url+"&subsprice=undefined";
+     }else{
+         url=url+"&subcycle="+subscription_cycle;
+         url=url+"&days="+no_of_days;
+         url=url+"&subsprice="+subscription_price;
+     }
+	 <?php
+	 $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+     if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+     	url = url +"&property_service_from="+property_service_from;
+        url = url +"&property_service_from_period="+property_service_from_period;
+        url = url +"&property_service_to="+property_service_to;
+        url = url +"&property_service_to_period="+property_service_to_period;
+        <?php } ?>
+        xmlhttp.open("GET",url,true);
+        xmlhttp.send();
+	 }
+}
+</script>
+<?php
+$_productCollection = Mage::helper('airhotels/calendar')->getSimilarLocation($city, $productId);
+if (count($_productCollection)):?>
+	<!--  similar listing -->
+	<div id="similar_listings_outer_wrapper">
+		<div id="similar_listings_wrapper" class="box">
+			<h1 class="similar_listings_title"><?php echo $this->__('Similar listings'); ?></h1>
+			<ul class="similar_listing_scroll">	 <?php
+				$similarCount = count($_productCollection);
+				foreach ($_productCollection as $_similarproduct):	?>
+					<li	class="similar_listing">
+						<a class="search-result-pimage" href="<?php echo $_similarproduct->getProductUrl(); ?>" style="background: url(<?php	if ($_similarproduct->getImage() != 'no_selection') {
+							echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$_similarproduct->getImage();
+							} else {
+							echo $_similarproduct->getImageUrl();
+							}
+							?>)
+							">
+							 <span class="price">
+							 	<span class="price-tag-price">
+							 	<?php
+							 		$experience = Mage::getModel('catalog/product')->load($_similarproduct->getId());
+	                                echo $currencySymbol .' '.round(Mage::helper('directory')->currencyConvert($experience->getPrice(), Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0);
+	                                ?>
+	                           </span>
+							</span>
+						</a>
+                   		<!-- Code to display host profile image with redirect url to my experience listing page -->
+                     	<div class="search-result-info-wrapper">
+							<div class="slider_showface">
+	                            <?php $customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($_similarproduct->getUserid()); ?>
+	                            <?php if (!empty($customerData[0]["imagename"])): ?>
+	                            <a style="text-decoration: none;" target="_blank" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$_similarproduct->getUserid();?>">
+	                            <!--  Displaying the host profile image -->
+	                            	<img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"]; ?>"	class="face_img" height="86" alt="<?php echo $_similarproduct->getName(); ?>">
+								</a>
+	                            <?php else: ?>
+	                            <a style="text-decoration: none;" target="_blank" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$_similarproduct->getUserid();?>">
+									<img
+									src="<?php echo $this->getSkinUrl('images/home_no_user.jpg'); ?>"
+									class="face_img"
+									alt="<?php echo $_similarproduct->getName(); ?>">
+								</a>
+	                            <?php endif; ?>
+	                        </div>
+							<div class="search-result-title-left">
+								<a class="name_title" href="<?php echo $_similarproduct->getProductUrl(); ?>">
+	                              <?php echo Mage::helper('airhotels/property')->getPropertyName($_similarproduct->getName());
+	                               ?></a>
+	                            <span class="customer_country"><?php
+	                            $str = ucwords($_similarproduct->getCity()).', '.ucwords($_similarproduct->getCountry());
+	                            if (strlen($str) > 21)
+	                            	$str = substr($str, 0, 21) . '...';
+	                            echo $str;?></span>
+	                            <em class="dot airhotel-sprite"></em>
+								<div class="search-result-reviews reviews-wrapper">
+		                            <?php
+		                            $rating = Mage::getModel('airhotels/airhotels')->getCustomerRatings($_similarproduct->getId());
+		                            $propertyAvgRating = $sum = 0;
+		                            for ($i = 0; $i < count($rating); $i++) {
+		                                $sum +=$rating[$i]["percent"];
+		                            }
+		                           	if(count($rating) != 0){
+		                          	 	$propertyAvgRating = $sum / count($rating);
+		                           	}
+		                           	$propertyReviewBlockMethod = new Apptha_Airhotels_Block_Airhotels();
+		                            if ($propertyAvgRating > 1 && $propertyAvgRating <= 20) {
+		                                echo $propertyReviewBlockMethod->showratingCode(1);
+		                            } else if ($propertyAvgRating > 21 && $propertyAvgRating <= 40) {
+		                                echo $propertyReviewBlockMethod->showratingCode(2);
+		                            } else if ($propertyAvgRating > 41 && $propertyAvgRating <= 60) {
+		                                echo $propertyReviewBlockMethod->showratingCode(3);
+		                            } else if ($propertyAvgRating > 61 && $propertyAvgRating <= 80) {
+		                                echo $propertyReviewBlockMethod->showratingCode(4);
+		                            } else if ($propertyAvgRating > 81 && $propertyAvgRating <= 100) {
+		                                echo $propertyReviewBlockMethod->showratingCode(5);
+		                            } else {
+		                                echo $propertyReviewBlockMethod->showratingCode(0);
+		                            }
+		                            ?>
+	                        	</div>
+	                        	<em class="dot airhotel-sprite"></em>
+	                        	<div class="reviews-count">
+		                        <?php
+                                    $summaryData = Mage::getModel('review/review_summary')
+                                					->setStoreId($storeId)
+                                					->load($_similarproduct->getId());
+                                    ?>
+									<div class="respond-review">
+										<span class="reviews_count_no"><?php if(count($summaryData->getReviewsCount()) != ''){
+											echo $summaryData->getReviewsCount();
+										}else{
+											echo "0";
+										}
+										echo strtoupper($this->__(' Reviews'));?></span>
+									</div>
+                                </div>
+							</div>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+	</div>
+<?php endif;
+}
+}
+?>
+<div class="nav-containerr">
+    <div class="navv" id="menu-center">
+		<nav>
+      		<ul>
+         		<li>
+		          <a  href="#aboutListing" id="aboutListing" class="aboutListing active">
+		            <?php echo $this->__('About this listing'); ?></a>
+        		</li>
+		        <li>
+		          <a href="#photo_gallery" id="photo_gallery"  class="photo_gallery active"><?php echo $this->__('Photos'); ?>
+		          </a>
+		        </li>
+		        <li>
+		          <a href="#mainreviews"
+		          id="mainreviews"  class="mainreviews active">
+		           <?php echo $this->__('Reviews'); ?>
+		          </a>
+		        </li>
+		        <li>
+		          <a href="#location" id="location"   class="location"><?php echo $this->__('Location'); ?></a>
+		        </li>
+      		</ul>
+      	</nav>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+var userAgent = window.navigator.userAgent;
+  jQ(window).scroll(function () {
+  	jQ("#sidebar").css("display","none");
+
+	  var winTop = jQ(this).scrollTop();
+	  var imgs = jQ('#location');
+
+	  if(jQ(imgs).position().top <= winTop)
+		  jQ("#sidebar").hide();
+
+
+	  if (jQ(this).scrollTop()>0) {
+		  if (userAgent.match(/iPad/i) || userAgent.match(/iPhone/i)) {
+		  } else{
+			  jQ('#ui-datepicker-div').fadeOut();
+		  }
+	     }
+	  if (jQ(this).scrollTop() > 490) {
+	    jQ('.nav-containerr').show();
+	    jQ('.nav-containerr').addClass("fix-nav");
+	    jQ('body').addClass("fix-body");
+	    jQ("#price_amount,#fromh2").css("line-height", "40px");
+	       } else {
+	    jQ('.nav-containerr').hide();
+	    jQ('.nav-containerr').removeClass("fix-nav");
+	    jQ("#price_amount,#fromh2").css("line-height", "35px");
+	    jQ('body').removeClass("fix-body");
+	    }
+	    var height =  jQ("#content").height();
+	    if(jQ(window).scrollTop() > height) {
+	    	jQ("#sidebar").hide();
+	    }else{
+	    	jQ("#sidebar").show();
+	    }
+
+	 	var winTop = jQ(this).scrollTop();
+	 	var imgs = jQ('#location');
+	 	if(jQ(imgs).position().top <= winTop){
+	 		jQ("#formhide").hide();
+	 		jQ(".wishlist-addthis").hide();
+	 	}else{
+	 		jQ("#formhide").show();
+	 		jQ(".wishlist-addthis").show();
+	    }
+  });
+
+</script>
+<?php $useragent = $_SERVER['HTTP_USER_AGENT'];
+  if(preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4))) { ?>
+  <script type="text/javascript">
+  jQ = jQuery.noConflict();
+    var control = false;
+    var controlCount = '<?php echo $similarCount; ?>';
+    if(controlCount > 1){
+    	control = true;
+    }
+    jQ(document).ready(function(){
+    var test = jQ("select[name='subscription_type']").val("0");
+    console.log(typeof test);
+    jQ('.similar_listing_scroll').bxSlider({
+  	infiniteLoop: false,
+  	controls: control,
+  	hideControlOnEnd: true,
+      slideWidth: 133,
+      minSlides: 1,
+      maxSlides: 1,
+      moveSlides: 1,
+      slideMargin: 10
+    });
+  });
+  </script>
+  <?php } else { ?>
+  <script type="text/javascript">
+    var control = false;
+    var controlCount = '<?php echo $similarCount; ?>';
+    if(controlCount > 3){
+    	control = true;
+    }
+    jQ(document).ready(function(){
+    jQ('.similar_listing_scroll').bxSlider({
+  	infiniteLoop: false,
+  	controls: control,
+  	hideControlOnEnd: true,
+      slideWidth: 133,
+      minSlides: 2,
+      maxSlides: 3,
+      moveSlides: 1,
+      slideMargin: 10
+    });
+  });
+  </script>
+  <?php } ?>
+  <script type="text/javascript">
+  jQ(function() {
+      jQ('a[rel*=facebox]').facebox();
+
+  });
+
+</script>
+<script>
+jQ(document).ready(function() {
+	jQ("input:text, textarea, select, input:password").focus(function(){
+		jQ(this).css('border', '1px solid #5aaee5');
+		jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    });
+	jQ("input:text, textarea, select, input:password").blur(function(){
+		jQ(this).css('border', '1px solid #dbdbdb');
+		jQ(this).css('box-shadow', 'none');
+    });
+});
+jQ("#from,#to").click(function(event){
+ jQ("#ui-datepicker-div").css("display", "block");
+	
+})
+
+/**
+ * Adding CSS to sticky nav bar Active Menu
+ */
+jQ("a").click(function(event){
+    var val = this.href;
+
+   
+    var myString = val.substr(val.indexOf("#") + 1);
+     if(myString == 'photo_gallery'){
+       
+    	jQ(".navv #photo_gallery").addClass("active");
+    	jQ(".navv #aboutListing").removeClass("active");
+    	jQ(".navv #main_reviews").removeClass("active");
+    	jQ(".navv #location").removeClass("active");
+    }else if(myString == 'aboutListing'){
+    	jQ(".navv #aboutListing").addClass("active");
+    	jQ(".navv #photo_gallery").removeClass("active");
+    	jQ(".navv #main_reviews").removeClass("active");
+    	jQ(".navv #location").removeClass("active");
+    }else if( myString == 'main_reviews'){
+    	jQ(".navv #main_reviews").addClass("active");jQ(".navv #photo_gallery").removeClass("active");
+    	jQ(".navv #aboutListing").removeClass("active");
+    	jQ(".navv #location").removeClass("active");
+    }else if(myString == 'location'){
+    	jQ(".navv #location").addClass("active");jQ(".navv #photo_gallery").removeClass("active");
+    	jQ(".navv #aboutListing").removeClass("active");jQ(".navv #main_reviews").removeClass("active");
+    }
+
+});
+/**
+ * Sticky nav bar
+ */
+ jQ(document).ready(function () {
+	 jQ(document).on("scroll", onScroll);
+	 jQ("#ui-datepicker-div").show();
+	jQ('a[href^="#"]').on('click', function (e) {
+		e.preventDefault();
+		jQ(document).off("scroll");
+
+		jQ('a').each(function () {
+			jQ(this).removeClass('active');
+		})
+		jQ(this).addClass('active');
+
+		var target = this.hash;
+		 jQtarget = jQ(target);
+		jQ('html, body').stop().animate({
+		}, 500, 'swing', function () {
+			window.location.hash = target;
+			jQ(document).on("scroll", onScroll);
+		});
+	});
+});
+function onScroll(event){
+		var scrollPosition = jQ(document).scrollTop();
+		jQ('nav a').each(function () {
+			var currentLink = jQ(this);
+			var refElement = jQ(currentLink.attr("href"));
+			if (refElement.position().top <= scrollPosition && refElement.position().top + refElement.height() > scrollPosition) {
+				jQ('nav ul li a').removeClass("active");
+				currentLink.addClass("active");
+			}
+			else{
+				currentLink.removeClass("active");
+			}
+		});
+	}
+function ajaxLoadCalendar(pUrl){
+
+    //document.getElementById("calendarWrapper").innerHTML = "<img src='ajax-loader.gif' />";
+    document.getElementById("calendarWrapper").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+    var xmlhttp = getHttp();
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            document.getElementById("calendarWrapper").innerHTML=xmlhttp.responseText;
+        }
+    }
+    xmlhttp.open("GET",pUrl+"&ajax"+"&productid="+<?php echo $productId; ?>,true);
+    xmlhttp.send();
+}
+ajaxLoadCalendar('<?php echo $this->getUrl('airhotels/property/calender/') . "?date=" ?>'+'<?php echo $calendar; ?>');
+
+/**
+ * for Calender script Ends
+ */
+
+ var currectHourlyBlock = '';
+ var hourlyOverlayFlag = 0;
+
+ function showHourlyCalendar(value){
+ if(jQ(value).is(":visible")){
+ if(hourlyOverlayFlag == 0){
+ currectHourlyBlock = value;
+ }else{
+	 jQ(currectHourlyBlock).hide();
+	 jQ('.airhotels_hourly_overlay').hide();
+ hourlyOverlayFlag = 0;
+ }
+ }else{
+	 jQ('.airhotels_hourly_overlay').show();
+	 jQ(value).show();
+ currectHourlyBlock = value;
+ }
+ }
+
+ jQ(".airhotels_hourly_overlay").click(function() {
+ jQ(currectHourlyBlock).hide();
+ jQ('.airhotels_hourly_overlay').hide();
+ });
+
+ function airhotels_hourly_overlay_close(){
+ hourlyOverlayFlag = 1;
+ }
+
+
+ jQ('.view-calendar').click(function(e) {
+    if (jQ("#calendar_div").is(":visible"))
+    {
+    	jQ("#calendar_div").hide();
+    	jQ(".view-calendar").text('View Calendar');
+    }
+    else
+    {
+    	jQ("#calendar_div").show();
+    	jQ(".view-calendar").text('Hide Calendar');
+    }
+    return false;
+});
+
+     jQ(".more_btn").click(function (e) {
+    		jQ(".less_btn").show();
+    		jQ(".more_btn").hide();
+    		jQ(".hostInfo").addClass("hostinfo_btn");
+    		jQ(".hostInfo").removeClass("hostInfo_less");
+    	});
+    	jQ(".less_btn").click(function (e) {
+    		jQ(".less_btn").hide();
+    		jQ(".more_btn").show();
+    		jQ(".hostInfo").addClass("hostInfo_less");
+    		jQ(".hostInfo").removeClass("hostinfo_btn");
+    	});
+    	jQ(".more_description").click(function (e) {
+    		jQ(".less_description").show();
+    		jQ(".more_description").hide();
+    		jQ(".listingInfo").addClass("listingInfo_btn");
+    		jQ(".listingInfo").removeClass("listingInfo_less");
+    	});
+    	jQ(".less_description").click(function (e) {
+    		jQ(".less_description").hide();
+    		jQ(".more_description").show();
+    		jQ(".listingInfo").addClass("listingInfo_less");
+    		jQ(".listingInfo").removeClass("listingInfo_btn");
+    	});
+    
+	// show hide option script for more and less reviews.
+	jQ("#morereviews").click(function (e) {
+		jQ(this).hide();
+		jQ("#lessreviews").show();
+	});
+	jQ("#lessreviews").click(function (e) {
+		jQ(this).hide();
+		jQ("#morereviews").show();
+	});
+	jQ(document).ready(function(){		
+		 var str = "<?php echo $hostInfo->getMoreHost(); ?>";	
+		 var strDesc = "<?php echo $hostInfo->getMoreHost(); ?>";		 
+		 var n = str.length;	
+		 var len = strDesc.length;		 
+		 if(n > 200){ 		
+			jQ(".more_btn").show();
+		 }
+		 if(len > 200){ 		
+			jQ(".more_description").show();
+		 }
+	});
+</script>

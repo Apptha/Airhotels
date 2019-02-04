@@ -1,0 +1,226 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+?>
+<?php 
+function getAttributevalue(){
+ $attribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'id_type');
+ $options = '';
+ if ($attribute->usesSource()){
+  $options = $attribute->getSource()->getAllOptions(false);
+ }
+ return $options;
+}
+$verificationTag = Mage::getModel('airhotels/tagsverification')->getCollection();
+?>
+<div class="content">
+	<div class="bank_details">
+		<h3><?php echo $this->__('Account verification required') ?></h3>
+		<p><?php echo $this->__('Verification is a process that build a trust . We belive endors trust , so we verify your IDs to ensure a safety of our growing community.') ?></p>
+	</div>
+	<div class="bank_details">
+		<h3><?php echo $this->__('Goverment Id') ?></h3>
+		<p><?php echo $this->__('Upload the picture of your official ID such as Passport or Identy card.') ?></p>
+	</div>
+</div>
+<div id="main_content" class="box">
+	<ul id="main_content_sub_nav"
+		class="review_list clearfix verification_tab">
+		<li id="id_upload"
+			onclick="select_tab(&#39;main&#39;, &#39;id_verify&#39;, jQuery(this));"
+			class="main_link selected"><?php echo $this->__('Id verification'); ?></li>
+		<li id="video_upload"
+			onclick="select_tab(&#39;main&#39;, &#39;video_verify&#39;, jQuery(this));"
+			class="main_link"><?php echo $this->__('Video Verfication') ?></li>
+		<li id="document_upload"
+			onclick="select_tab(&#39;main&#39;, &#39;document_verify&#39;, jQuery(this));"
+			class="main_link"><?php echo $this->__('Document Verfication') ?></li>
+		<li id="content_flag"></li>
+	</ul>
+	<div id="id_verify" class="main_content" style="display: block;">
+		<div style="margin: 30px 0 0 0;">
+			<form
+				action="<?php echo Mage::getBaseUrl()."airhotels/product/idsave" ?>"
+				method="post" name="form" onsubmit="return validateIdFile()" id="form-validate" enctype="multipart/form-data">
+				<h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__('Documents');?></h1>
+				<div class="profile_document_section clearfix"
+					style="padding: 10px;">
+	    	<?php $countryList = Mage::getModel('directory/country')->getResourceCollection()                        
+	                            ->toOptionArray(false);
+	    	?>                            
+	    	<div class="country">
+						<label class="country_label"><?php echo $this->__('Country') ?></label>
+						<select name="country" id="country">							
+	    	        <?php
+	                    foreach($countryList as $_countryList) { ?>
+	                        <option
+								value="<?php echo $_countryList['value'] ?>"><?php echo $_countryList['label'] ?></option>
+	                <?php }?>
+	            </select>
+					</div>
+					<div class="form-space" style="padding: 10px 0">
+						<label class="label_align"><?php echo $this->__(' Id File') ?></label>
+						 <?php 
+                           $types = getAttributevalue();
+       	                   foreach($types as $type) { ?>
+                               <div class="verify_id_type"><input onclick="hideIdErrMsg()" type="radio" name="id_type"  value="<?php echo $type['value']?>"/><?php echo $type['label']?></div>
+                           <?php } ?>
+                           <label class="label_align"></label>
+                           <p id="verify_id_type_err_msg" style="display: none;"><?php echo $this->__('Kindly choose one of the above verify id type'); ?></p>
+						<input type="file" id="id" name="id"
+							value="<?php if(isset($customerData[0]['document_url'])){ echo $customerData[0]['document_url']; } ?>" />					
+			
+					</div>
+					<input type="hidden" name="documents" value="documents" /> <input
+						type="hidden" name="tag_id" value="id" /> <input type="submit"
+						style="float: right;" name="upload"
+						title="<?php echo $this->__('Upload ID') ?>"
+						value="<?php echo $this->__('Upload ID') ?>"
+						class="import_button" />	
+				       	<label class="label_align"></label>
+				<?php echo $this->__('Allowed Extensions : jpg, jpeg & png'); ?>
+				</div>
+				
+			</form>
+		</div>
+	</div>
+	<div id="video_verify" class="main_content" style="display: none;">
+		<div class="form-space">
+			<form
+				action="<?php echo Mage::getBaseUrl()."airhotels/product/videosave" ?>"
+				method="post" name="videoForm" onsubmit="return validateVideo()"  id="form-validate"  enctype="multipart/form-data">
+				<h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__('Documents');?></h1>
+				<div class="profile_document_section clearfix"
+					style="padding: 10px;">
+					<label class="label_align"><?php echo $this->__(' Video File') ?></label>
+					<input type="file" id="video" name="video"
+						value="<?php if(isset($customerData[0]['document_url'])){ echo $customerData[0]['document_url']; } ?>" />
+					<input type="hidden" name="documents" value="documents" /> <input
+						type="hidden" name="tag_video" value="video" /> <input
+						type="submit" name="upload"
+						title="<?php echo $this->__('Upload Video') ?>"
+						value="<?php echo $this->__('Upload Video') ?>"
+						class="import_button" />
+						<span class="video-verfication-size">
+						<label class="label_align"></label>
+						<?php echo $this->__('Allowed Extensions : mp4, avi, 3gp, mov, webm, flv, mpeg4, mpegps & wmv'); ?>	</span>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="document_verify" class="main_content" style="display: none;">
+		<div class="form-space">
+			<form
+				action="<?php echo Mage::getBaseUrl()."airhotels/product/documentsave" ?>"
+				method="post" name="documentSave" onsubmit="return validateDocumentFile()" id="form-validate" enctype="multipart/form-data">
+				<h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__('Documents');?></h1>
+				<div class="profile_document_section clearfix"
+					style="padding: 10px;">
+					<label class="label_align"><?php echo $this->__('Document File') ?></label>
+					<input type="file" id="document" name="document"
+						value="<?php if(isset($customerData[0]['document_url'])){ echo $customerData[0]['document_url']; } ?>" />
+					<input type="hidden" name="documents" value="documents" /> <input
+						type="hidden" name="tag_document" value="document" /> <input
+						type="submit" onclick="checkSize" name="upload"
+						title="<?php echo $this->__('Upload Document') ?>"
+						value="<?php echo $this->__('Upload Document') ?>"
+						class="import_button" />
+						<span class="video-verfication-size">
+						<label class="label_align"></label>
+						<?php echo $this->__('Allowed Extensions : pdf & txt'); ?></span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	function checkSize(){  
+	     var iSize = ($("#document")[0].files[0].size / 1024);
+	     if (iSize / 1024 > 1){
+		     
+	        if (((iSize / 1024) / 1024) > 1){
+	            iSize = (Math.round(((iSize / 1024) / 1024) * 100) / 100);
+	            alert('Maximum file size exceeds');
+	            return false;
+	        }
+	        else{
+	            iSize = (Math.round((iSize / 1024) * 100) / 100);
+	            alert('Maximum file size exceeds');
+	            return false;
+	        }
+	     }
+	     else{
+	        iSize = (Math.round(iSize * 100) / 100);
+	     }   
+	     
+  }
+
+
+
+	
+	var jQ = jQuery.noConflict();
+	function validateIdFile(){
+    if (jQ("input:radio[name=id_type]").is(":checked")) {		 
+    	 var empt = document.forms["form"]["id"].value;
+    	    if (empt == ""){
+    	    alert("Please select a Document file.");
+    	    return false;
+    	    } 
+   		 return true;
+    }else{
+    	jQ('#verify_id_type_err_msg').show();	    
+    	return false;    
+	}   
+	}
+
+	function validateVideo(){	 
+	    var empt = document.forms["videoForm"]["video"].value;	   
+	    if (empt == ""){
+	    	alert("Please select a Video file.");
+	    	return false;
+	    } 
+	   	return true; 
+	}
+
+	function validateDocumentFile(){
+		var empt = document.forms["documentSave"]["document"].value;
+	    if (empt == ""){
+	    	alert("Please select a Document file.");
+	    	return false;
+	    } 
+	   	return true;
+	}
+	
+	
+	function hideIdErrMsg(){
+	jQ('#verify_id_type_err_msg').hide();		
+	}
+	
+</script>	

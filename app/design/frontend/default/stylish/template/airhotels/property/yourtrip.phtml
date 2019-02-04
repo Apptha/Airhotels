@@ -1,0 +1,97 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
+?>
+<div class="my-account" style="padding:0">
+	<h1 class="dashboard_leftside_heading"><?php echo $this->__('Upcoming Trip');?></h1>
+	<div id="upcoming_div" class="main_content">
+	    <?php  $upcoming_value = $this->upcomingTrip();        
+	    $cancelRequestconfig = Mage::getStoreConfig ( 'airhotels/custom_group/order_cancel_request' );
+	    ?>
+	    <div style="clear:both;"></div>
+	    <div class="property_history_responsivetable">
+		    <table cellspacing="2" cellpadding="2" id="property_trip_table"><!-- property_property -->
+		    	<thead>
+		    		<tr>
+                    	<th width="10%"><?php echo $this->__('S.No'); ?></th>
+                        <th width="15%"><?php echo $this->__('Image'); ?></th>
+                        <th width="25%"><?php echo $this->__('Experience Name'); ?></th>
+                        <th width="15%"><?php echo $this->__('Start On'); ?></th>
+                        <th width="15%"><?php echo $this->__('End On'); ?></th>
+                        <?php if($cancelRequestconfig == 1){?>
+                        <th width="24%"><?php echo $this->__('Action'); ?></th>
+                        <?php } ?>
+                    </tr>
+                </thead>
+				<?php
+				$serialNumber = 1;
+				$tempValue = 0;
+				for ($j = 0; $j < count($upcoming_value[0]); $j++) {
+					$propertyCollection = Mage::getModel('airhotels/property')->getpropertycollection()
+							            ->addFieldToFilter(array(
+							                array('attribute' => 'entity_id', 'eq' => $upcoming_value[0][$j])));							
+					foreach ($propertyCollection as $property) {
+						$startOn 	= $upcoming_value[1][$j];
+						$endOn 	= $upcoming_value[2][$j];
+						$tempValue = 1;
+						$thumbGallery = $this->helper('catalog/image')->init($property, 'thumbnail', $property->getImage())
+	                    			  ->constrainOnly(TRUE)
+	                                  ->keepAspectRatio(TRUE)
+	                                  ->keepFrame(FALSE)
+	                                  ->resize(80, null); ?>
+	                   	<p> <?php
+                        echo '<tr>';
+                        echo '<td width="10%"><span>' . $serialNumber . '</span></td>'; ?><!-- class="sno" -->
+                        <td width="15%" style="line-height:0"> <img src="<?php echo  $thumbGallery ?>" style="width: 50px !important; height: 50px !important;border:2px solid #D4D4D5" /> </td>
+                        <?php echo '<td width="25%">' . $property->getName() . '</td>';
+                        echo '<td width="15%">' . date('M d, Y h:i A',strtotime($startOn)). '</td>';
+                        echo '<td width="15%">' . date('M d, Y h:i:A',strtotime($endOn)). '</td>'; ?>
+                        <?php if($cancelRequestconfig == 1){?>
+                        <td width="24%">
+	                        <?php if($upcoming_value[7][$j] == 0){ ?>
+	                        <a href="javascript:void(0);" onClick="location.href='<?php echo Mage::getBaseUrl().'airhotels/order/cancelrequest/order_id/'.$upcoming_value[6][$j];?>'"><?php echo $this->__('Cancel Property'); ?> </a>
+	                        <?php }else{ ?>
+	                        <span style="color:#F54747;opacity:0.7;cursor: no-drop;"><?php echo $this->__('Cancel request sent'); ?> </span>
+	                        <?php }?>    
+						</td>
+						<?php } ?>
+                        <?php echo '</tr>';
+                        $serialNumber++;
+                        ?>
+                        </p>
+                        <?php
+                   }
+            	} ?>       
+		     </table>		    
+			<?php if(empty($tempValue)) { ?><p  class="nocontent_available outline_style" style="padding:20px 0;"><?php echo $this->__('You have no trips'); ?></p><?php } ?>
+		</div>
+	</div>
+</div>
+                    

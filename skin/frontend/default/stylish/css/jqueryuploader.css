@@ -1,0 +1,148 @@
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+
+ .ajax-file-upload-statusbar {
+border: 1px solid #dbdbdb;
+margin-top: 10px;
+width: 420px;
+margin-right: 10px;
+margin: 5px;
+-moz-border-radius: 4px;
+-webkit-border-radius: 4px;
+border-radius: 4px;
+padding: 5px 5px 5px 5px
+}
+.ajax-file-upload-filename {
+width: 100%;
+height: auto;
+margin: 0 5px 5px 10px;
+color: #807579
+}
+.ajax-file-upload-progress {
+margin: 0 10px 5px 10px;
+position: relative;
+width: 250px;
+border: 1px solid #ddd;
+padding: 1px;
+border-radius: 3px;
+display: inline-block
+}
+.ajax-file-upload-bar {
+background-color: #0ba1b5;
+width: 0;
+height: 20px;
+border-radius: 3px;
+color:#FFFFFF;
+}
+.ajax-file-upload-percent {
+position: absolute;
+display: inline-block;
+top: 3px;
+left: 48%
+}
+.ajax-file-upload-red {
+-moz-box-shadow: inset 0 39px 0 -24px #e67a73;
+-webkit-box-shadow: inset 0 39px 0 -24px #e67a73;
+box-shadow: inset 0 39px 0 -24px #e67a73;
+background-color: #e4685d;
+-moz-border-radius: 4px;
+-webkit-border-radius: 4px;
+border-radius: 4px;
+display: inline-block;
+color: #fff;
+font-family: arial;
+font-size: 13px;
+font-weight: normal;
+padding: 4px 15px;
+text-decoration: none;
+text-shadow: 0 1px 0 #b23e35;
+cursor: pointer;
+vertical-align: top;
+margin-right:5px;
+}
+.ajax-file-upload-green {
+background-color: #77b55a;
+-moz-border-radius: 4px;
+-webkit-border-radius: 4px;
+border-radius: 4px;
+margin: 0;
+padding: 0;
+display: inline-block;
+color: #fff;
+font-family: arial;
+font-size: 13px;
+font-weight: normal;
+padding: 4px 15px;
+text-decoration: none;
+cursor: pointer;
+text-shadow: 0 1px 0 #5b8a3c;
+vertical-align: top;
+margin-right:5px;
+}
+.ajax-file-upload {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	cursor:pointer;	
+	line-height:20px;
+	margin:0;
+  display: inline-block;
+  color: #888;
+  text-decoration: none;
+  padding: 5px 30px 4px 30px;
+  cursor:pointer; 
+  color: #fff;
+  background: #2f8ab9;
+  vertical-align:middle; 
+  background:url('../images/jquery_upload.png') no-repeat 0 0 ;
+  width:32px;
+  height:32px;
+  text-indent:-999em;
+  }
+  
+.ajax-file-upload input
+{
+	cursor: pointer;
+}
+.ajax-upload-dragdrop
+{
+
+	border:2px dotted #dbdbdb;
+	width:420px;
+	color: #DADCE3;
+	text-align:left;
+	vertical-align:middle;
+	padding:10px 10px 0px 10px;
+}
+@media only screen and (min-width: 320px) and (max-width: 479px) 
+{
+	.ajax-file-upload-statusbar {box-sizing:border-box;width: 100%!important;}
+	 .ajax-file-upload-progress {box-sizing:border-box;width: 80%!important;}
+
+	
+	}

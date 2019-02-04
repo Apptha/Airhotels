@@ -1,0 +1,160 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+
+$_order = $this->getOrder();
+$items = $_order->getItemsCollection();
+foreach($items as $item){
+	$orderId =  $item['order_id'];
+	$details = unserialize($item['product_options']);
+     foreach($details as $det){
+	   /**
+ 		* Get the Value of ServiceFee
+ 		*/
+		$securityFee	= $det['securityFee'];
+		$productId		= $det['product'];
+		$serviceFee		= $det['serviceFee'];
+        if(isset($det['property_service_from'])&&isset($det['property_service_from_period'])&&isset($det['property_service_to'])&&isset($det['property_service_to_period'])&&isset($det['overall_total_hours'])&&isset($det['hourly_night_fee'])){
+        $overallTotalHours =  $det['overall_total_hours'];
+        $hourlyNightFee =  $det['hourly_night_fee'];
+        }
+     }
+}
+$getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+$product = Mage::getModel ( 'catalog/product' )->load ( $productId );
+?>
+<div class="items_ordered_container" style="padding:10px;">
+<table class="data-table" style="width:100%!important;background: #F5F5F5;border: 1px solid #d0cbc1;" id="my-orders-table" summary="<?php echo $this->__('Items Ordered') ?>">
+    <col />
+    <col width="1" />
+    <col width="1" />
+    <col width="1" />
+    <col width="1" />
+    <thead>
+        <tr>
+            <th style="width:70%;"><?php echo $this->helper('airhotels')->__('Property Details') ?></th>
+            <th style="text-align: center"><?php echo $this->__('SKU') ?></th>
+            <th style="text-align: center"><?php echo $this->__('Price') ?></th>
+
+            <?php if(isset($overallTotalHours)){ ?>
+            <th class="a-center"><?php echo $this->helper('airhotels')->__('No. of hour(s)') ?></th>
+            <?php }else{ ?>
+            <th class="a-center"><?php echo $this->helper('airhotels')->__('no.of days') ?></th>
+            <?php } ?>
+
+             <?php if(isset($hourlyNightFee) && $hourlyProductId  ){ ?>
+            <th class="a-center"><?php echo $this->helper('airhotels')->__('Overnight Fee (per night)') ?></th>
+            <?php }
+	            $propertyOrderStatus = Mage::helper('airhotels/vieworder')->getPropertyOrderStatus($orderId);
+	            
+	            $currentDate = strtotime(date ( 'Y-m-d H:i:s'));
+	            $bookedTime =  strtotime($propertyOrderStatus['checkin_time']);
+	            $orderCancelStatusFlag = Mage::getStoreConfig ( 'airhotels/custom_group/order_cancel_request' );
+	            
+	            foreach ($_order->getCreditmemosCollection() as $createdMemo) {
+	            	$crediMemoState = $createdMemo->getState();
+	            }
+            ?>
+
+            <th class="order-subtotal" colspan="2" style="text-align: center;<?php if(($currentDate < $bookedTime || $propertyOrderStatus['cancel_request_status'] == 0) && ($orderCancelStatusFlag == 1) && $crediMemoState != 2){ ?>width:67%;<?php }else{?>width:156%<?php }?>"><?php echo $this->__('Subtotal') ?></th>
+            <?php 
+            if(($currentDate < $bookedTime || $propertyOrderStatus['cancel_request_status'] == 0) && ($orderCancelStatusFlag == 1) && $crediMemoState != 2){
+            ?>
+            <th class="order-action"  style="text-align: left"><?php echo $this->__('Action') ?></th>
+            <?php }?>
+        </tr>
+    </thead>
+    <tfoot style="line-height:28px;">
+        <?php echo $this->getChildHtml('order_totals') ?>
+    </tfoot>
+        <?php $_items = $_order->getItemsCollection(); ?>
+        <?php $_index = 0; ?>
+            <?php $_count = $_items->count(); ?>
+        <?php foreach ($_items as $_item): ?>
+        <?php if ($_item->getParentItem()) continue; ?>
+        <tbody style="line-height:26px;">
+            <?php echo $this->getItemHtml($_item) ?>
+            <?php if($this->helper('giftmessage/message')->getIsMessagesAvailable('order_item', $_item) && $_item->getGiftMessageId()): ?>
+            <tr class="border<?php echo ($_index++ > $_count ?' last':'') ?>" id="order-item-gift-message-<?php echo $_item->getId() ?>" style="display:none;">
+                <?php $_giftMessage=$this->helper('giftmessage/message')->getGiftMessageForEntity($_item); ?>
+                <td class="gift-message-row" colspan="7">
+                    <a href="#" title="<?php echo $this->__('Close') ?>" onclick="return giftMessageToogle('<?php echo $_item->getId() ?>');" class="btn-close"><?php echo $this->__('Close') ?></a>
+                    <dl class="gift-message">
+                        <dt><strong><?php echo $this->__('From:') ?></strong> <?php echo $this->htmlEscape($_giftMessage->getRecipient()) ?></dt>
+                        <dt><strong><?php echo $this->__('To:') ?></strong> <?php echo $this->htmlEscape($_giftMessage->getSender()) ?></dt>
+                        <dd><?php echo $this->helper('giftmessage/message')->getEscapedGiftMessage($_item) ?></dd>
+                    </dl>
+                </td>
+            </tr>
+            <?php endif ?>
+        <tr>
+            <?php
+            $order = Mage::getResourceModel('sales/order_collection') ->addFieldToFilter('entity_id', $orderId);
+         	foreach($order as $orderVal){
+				 $orderCurrencyCode = 	$orderVal['order_currency_code'];
+			}
+             $orderCurrencySymbol = Mage::app()->getLocale()->currency($orderCurrencyCode)->getSymbol();
+            ?>
+        </tr>
+        </tbody>
+        <?php endforeach; ?>
+</table></div>
+<?php
+$subscriptionOrder = Mage::getResourceModel('paypaladaptive/preapprovaldetails_collection') ->addFieldToFilter('order_id', $orderId)->getData();
+?>
+<script type="text/javascript">
+var $jq = jQuery.noConflict();
+
+function securityFee(){
+<?php
+
+if (($getSecurityEnabledOrNot == 0 || $securityFee == 0) && !$subscriptionOrder) {
+	$allOptions = $product->getOptions ();
+	if ($allOptions) {
+		foreach ( $allOptions as $option ) {
+			foreach ( $option->getValues () as $key => $value ) { ?>
+
+		$jq('.subtotal').after('<tr class="invoice_<?php echo strtolower($value->getDefaultTitle ()); ?>_fee"><td colspan="5" align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><strong><?php echo $this->__($value->getDefaultTitle ().' Fee'); ?></strong></td><td align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$value->getPrice (), 2, '.', '');?></span></td></tr>');
+		<?php
+			}
+		}
+	}
+  }
+
+?>
+	$jq('.subtotal').after('<tr class="invoice_processing_fee"><td colspan="5" class="a-right"><strong>Processing Fee</strong></td><td class="last a-right"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$serviceFee, 2, '.', '');?></span></td></tr>');
+}
+
+$jq( document ).ready(function() {
+	securityFee();
+});
+</script>
+<script type="text/javascript">decorateTable('my-orders-table', {'tbody' : ['odd', 'even'], 'tbody tr' : ['first', 'last']})</script>

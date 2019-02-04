@@ -1,0 +1,145 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php  
+$_order = $this->getOrder(); 
+
+/**		   
+ Getting Order Collection
+ */
+$items = $_order->getItemsCollection();
+/**
+ * Iteration Loop
+ */
+foreach($items as $item){
+	$orderId =  $item['order_id'];
+	/**
+	 Getting Product Options
+	 */
+	$details = unserialize($item['product_options']);
+	/**
+	 * Iteration Loop
+	*/
+	foreach($details as $det){
+		 /**
+ 		  * Get the Value of ServiceFee
+		  */
+		$securityFee	= $det['securityFee'];
+		$productId		= $det['product'];
+		/**
+		 * Get the Value of ServiceFee
+		 */
+		$serviceFee		= $det['serviceFee'];
+	}
+}
+   /**
+    * For whether checking hourly based or not
+    */      
+   $hourlyFlag = Mage::helper('airhotels/airhotel')->hourlyFlag($_order);
+   $getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+   $product = Mage::getModel ( 'catalog/product' )->load ( $productId );
+   ?>
+<p class="order-links"><a href="<?php echo $this->getPrintAllInvoicesUrl($_order) ?>" 
+onclick="this.target='_blank'" class="link-print"><?php echo $this->__('Print All Invoices') ?></a></p>
+<?php foreach ($_order->getInvoiceCollection() as $_invoice): ?>
+<h2 class="sub-title"><?php echo $this->__('Invoice #') ?>
+<?php echo $_invoice->getIncrementId(); ?> <span class="separator">|</span> 
+<a href="<?php echo $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print">
+<?php echo $this->__('Print Invoice') ?></a></h2>
+<h3 class="table-caption"><?php echo $this->__('Property Invoiced') ?></h3>
+<table class="data-table" id="my-invoice-table-<?php echo $_invoice->getId(); ?>">
+    <col />
+    <col width="1" />
+    <col width="1" />
+    <col width="1" />
+    <col width="1" />
+    <thead>
+        <tr>
+            <th width="35%"><?php echo $this->__('Property Name') ?></th>
+            <th style="text-align:center;"><?php echo $this->__('SKU') ?></th>
+            <th style="text-align:center;" class=""><?php echo $this->__('Price') ?></th>
+            <th class="a-center"><span class="nobr"><?php if($hourlyFlag != 0){ 
+            echo $this->__('No. of day(s) Invoiced'); 
+            }else{ 
+             echo $this->__('No. of hour(s) Invoiced'); 
+} ?></span>
+</th>
+            <th class="order-subtotal">
+            <?php echo $this->__('Subtotal') ?>
+            </th></tr></thead>
+    <tfoot><?php echo $this->getInvoiceTotalsHtml($_invoice)?></tfoot>
+    <?php $_items = $_invoice->getAllItems(); ?>
+    <?php $_count = count($_items) ?>
+    <?php foreach ($_items as $_item): ?>
+    <?php if ($_item->getOrderItem()->getParentItem()){
+    continue; 
+    }?>
+    <tbody><?php echo $this->getItemHtml($_item) ?></tbody>
+    <?php endforeach; 
+    		$order = Mage::getResourceModel('sales/order_collection') ->addFieldToFilter('entity_id', $orderId);		
+         	foreach($order as $orderVal){		
+				 $orderCurrencyCode = 	$orderVal['order_currency_code'];		
+			}		
+             $orderCurrencySymbol = Mage::app()->getLocale()->currency($orderCurrencyCode)->getSymbol();		
+     ?>
+
+    </table>
+<script type="text/javascript">decorateTable('my-invoice-table-<?php echo $_invoice->getId(); ?>', {'tbody' : ['odd', 'even'], 'tbody tr' : ['first', 'last']})</script>
+<?php echo $this->getInvoiceCommentsHtml($_invoice)?>
+<?php endforeach; ?>
+
+<script type="text/javascript">		
+var $jq = jQuery.noConflict(); 		
+
+function securityFee(){	
+<?php 
+
+if ($getSecurityEnabledOrNot == 0 || $securityFee == 0) {
+	$allOptions = $product->getOptions ();
+	if ($allOptions) {
+		foreach ( $allOptions as $option ) {
+			foreach ( $option->getValues () as $key => $value ) { ?>
+			
+		$jq('.subtotal').after('<tr class="invoice_<?php echo strtolower($value->getDefaultTitle ()); ?>_fee"><td colspan="4" class="a-right"><?php echo $this->__($value->getDefaultTitle ().' Fee'); ?></td><td class="last a-right" colspan="2"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$value->getPrice (), 2, '.', '');?></span></td></tr>');
+		<?php		
+			}
+		}
+	}
+  }
+
+?>	
+	$jq('.subtotal').after('<tr class="invoice_processing_fee"><td colspan="4" class="a-right">Processing Fee</td><td class="last a-right" colspan="2"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$serviceFee, 2, '.', '');?></span></td></tr>');		
+}
+
+$jq( document ).ready(function() {
+	securityFee();
+});				
+</script>
+<script type="text/javascript">decorateTable('my-orders-table', {'tbody' : ['odd', 'even'], 'tbody tr' : ['first', 'last']})</script>

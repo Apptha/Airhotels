@@ -1,0 +1,62 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * For hourly wise property
+ */  
+$productId = Mage::getSingleton('core/session')->getHourlyProductId();                
+$propertyTime = Mage::getModel('catalog/product')->load($productId)->getPropertyTime();
+$propertyTimeData = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();
+$securityEnable = Mage::getSingleton('core/session')->getSecurityFee();
+?>
+<tr>
+    <th colspan="<?php echo $this->getColspan(); ?>" 
+    style="<?php echo $this->getTotal()->getStyle() ?>" class="a-right">
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?><strong><?php endif; ?>
+            <?php echo $this->getTotal()->getTitle() ?>
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?></strong><?php endif; ?>
+    </th>
+    <td style="<?php echo $this->getTotal()->getStyle() ?>" class="a-right">
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?><strong><?php endif; ?>
+          <?php if($propertyTime == $propertyTimeData){
+                $hourlyNightFee = Mage::getSingleton('core/session')->getHourlyNightFee(); 
+                if( !(empty($hourlyNightFee)) && ($hourlyNightFee >= 1) ) {
+         ?>
+         <div id="hourly_overnight_fee_space"></div>   
+         <?php              
+                }                 
+                }
+          ?>            
+            
+        <?php  echo $this->helper('checkout')->formatPrice($this->getTotal()->getValue()) ?>
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?></strong><?php endif; ?>
+    </td>
+</tr>

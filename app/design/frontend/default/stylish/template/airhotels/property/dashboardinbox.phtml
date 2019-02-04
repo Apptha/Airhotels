@@ -1,0 +1,176 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<div style="position:relative;" class="dashboard_inbox">
+<div class="page-title" style="margin:0;">
+    <h1 class="dashboard_leftside_heading"><?php echo $this->__('Inbox');?></h1>
+    <i class="airhotel-sprite envelope dashnotify" title="inbox"></i>
+</div>
+<?php
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+$inboxDetails = Mage::getModel('airhotels/product')->getInboxDetails();
+if(count($inboxDetails)){
+    ?>
+    <form name="mailform" action="" method="post" id="mailin">
+	    <div id="inboxSpace">
+	       <div class="property_history_responsivetable">
+	        <table class="inboxTable dashboard_inbox_only" id="outboxList">
+	        <thead>
+	        	<tr>
+	        	<th width="2%"></th>
+	        	<th width="30%">From</th>
+	        	<th width="50%">Message</th>
+	        	<th width="18%">Date</th>
+	        	</tr>
+	        </thead>
+	            <?php for($i=0;$i<count($inboxDetails);$i++ ){ ?>
+	            <?php
+                    $customer_id = Mage::getSingleton('customer/session')->getCustomer()->getId();
+                    $receiver_id = $inboxDetails[$i]["receiver_id"];
+                    if ($customer_id == $receiver_id) {
+			            if ($inboxDetails[$i]["receiver_read"] == '1') {
+			                $read_class = "class='read'";
+			            } else {
+			                $read_class = "class='unread' ";
+			            }
+			        } else {
+			            if ($inboxDetails[$i]["sender_read"] == '1') {
+			                $read_class = "class='read'";
+			            } else {
+			                $read_class = "class='unread' ";
+			            }
+			        }
+                    ?>
+                    <tr style="cursor: pointer" <?php echo $read_class; ?>  onclick="this.className ='read' ">
+                    <td width="2%" class="select_message_box"></td>
+	                <td width="30%" onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>')">
+	                    <?php echo $this->__('From'); ?> : <?php  $customer = Mage::getModel('customer/customer')->load($inboxDetails[$i]["sender_id"]); echo ucfirst($customer->getName());
+							$replycount = Mage::getModel('airhotels/airhotels')->getReplyCount($inboxDetails[$i]["message_id"]);
+                            if(isset($replycount["count"])){
+                                echo " ".$this->__("Re").":"."(".$replycount["count"].")";
+                            } ?>
+	                </td>
+	                <td width="50%" onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>')">
+	                    <?php echo (strlen($inboxDetails[$i]["message"])>30)? substr($inboxDetails[$i]["message"],0,30) : $inboxDetails[$i]["message"]."..";   ?>
+	                </td>
+	                <td width="18%" onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>')">
+	                    <?php echo date("d/m/Y",strtotime ($inboxDetails[$i]["created_date"]) );  ?>
+	                </td>
+	            </tr>
+	            <?php  } ?>
+	        </table>
+	        </div>
+	    </div>
+    </form>
+    <div id="mailSpace" style="display: none"></div>
+ <?php
+}
+else{  ?>
+    <p class="no_mails nocontent_available" style="text-align: left">
+    <?php echo $this->__('No mail received'); ?>
+    </p>
+    <?php
+}
+?>
+<div class="clear"></div>
+</div>
+<script type="text/javascript">
+        function openMessage(flag,messageId){
+            if(flag==1){ document.getElementById("inboxSpace").style.display = "none";
+                document.getElementById("mailSpace").style.display = "block"; getMessageDetails(messageId);
+            }
+            else{document.getElementById("inboxSpace").style.display = "block";
+            document.getElementById("ReplyMail").style.display = "none";document.getElementById("mailSpace").style.display = "none";
+            }
+        }
+
+        function getMessageDetails(messageId){ var xmlhttp = getHttp();
+            document.getElementById("mailSpace").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+            xmlhttp.onreadystatechange=function(){
+                if (xmlhttp.readyState==4 && xmlhttp.status==200){
+                    document.getElementById("mailSpace").innerHTML=xmlhttp.responseText;
+                }
+            }
+            var url = "<?php echo Mage::getBaseUrl() . 'property/property/showmessage/' ?>";
+            url=url+"id/"+messageId+"/show/in/name/dashboard"; xmlhttp.open("GET",url,true); xmlhttp.send();
+            new Ajax.Request("<?php echo Mage::getBaseUrl(); ?>airhotels/payout/updataMailIcon/", {
+                method: "get",
+                onSuccess: successFunc
+            });
+        }
+        function successFunc(response) {
+            var content = response.responseText;
+            document.getElementById("mailcount").innerHTML = content;
+        }
+        function getHttp(){
+            var xmlhttp;
+            if (window.XMLHttpRequest)
+            {// code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp=new XMLHttpRequest();
+            }
+            else
+            {// code for IE6, IE5
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            return xmlhttp;
+        }
+
+      function validateReply(){
+        var mailSubject = document.getElementById("replyMessage").value;
+        if(mailSubject != ''){
+        var re_http = /(ftp|http|https):\/\//i;
+        var re_www = /www\.\w+/i;
+        var re_domain_ext = /\w+\.(com|net|org|biz|ws|name)/i;
+        var re_phone_number = /([0-9]{3,9}[\- ]?){3,9}/;
+        var re_phone_word = /((zero|one|two|three|four|five|six|seven|eight|nine)\W+){6,100}/i;
+        var re_email = /\w+(\.\w+){0,1}(@)[\w|\-]+(\.|\W{1,3}dot\W{1,3})\w+/;
+        var re_email_domain = /( aol|gmail|hotmail|msn|yahoo)(\.com){0,1}/i;
+
+        var is_website = (re_http.test(mailSubject) || re_www.test(mailSubject) || re_domain_ext.test(mailSubject));
+        var is_phone = (re_phone_number.test(mailSubject) || re_phone_word.test(mailSubject));
+        var is_email = (re_email.test(mailSubject) || re_email_domain.test(mailSubject));
+
+        if (is_website || is_phone || is_email) {
+            alert("<?php echo $this->__('Warning: It looks like you may be trying to send contact information.'); ?>");
+            return false;
+        }
+        }
+            if(jQuery.trim(document.getElementById("replyMessage").value).length==0){
+                alert("<?php echo $this->__('Please fill message'); ?>");
+                return false;
+            }else{
+            document.getElementById("replyMessageSubmitButton").disabled=true;
+            return true;
+            }
+        }
+</script>

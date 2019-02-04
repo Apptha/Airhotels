@@ -1,0 +1,60 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php if( $this->getCollection() && $this->count()): ?>
+<div class="box-account box-reviews" style="display: none;">
+    <div class="box-head">
+        <h2><?php echo $this->__('My Recent Reviews') ?></h2>
+        <a href="<?php echo $this->getAllReviewsUrl() ?>">
+        <?php echo $this->__('View All Reviews') ?></a>
+    </div>
+    <ol id="my_recent_reviews">
+    <?php $iterator = 0 ?>
+    <?php foreach ($this->getCollection() as $_review): ?>
+        <li class="item">
+            <span class="number"><?php echo 1+$iterator; ?></span>
+            <div class="details">
+                <h3 class="product-name"><a href="<?php echo $this->getReviewUrl($_review->getReviewId()) ?>">
+                <?php echo $this->htmlEscape($_review->getName()) ?></a></h3>
+                <?php if($_review->getSum()): ?>
+                    <div class="ratings">
+                        <strong><?php echo $this->__('Rating:') ?></strong>
+                        <div class="rating-box">
+                            <div class="rating" style="width:<?php echo  $_review->getSum() / $_review->getCount(); ?>%;"></div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ol>
+    <script type="text/javascript">decorateList('my_recent_reviews');</script>
+</div>
+<?php endif; ?>

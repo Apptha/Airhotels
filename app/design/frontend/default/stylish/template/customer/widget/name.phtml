@@ -1,0 +1,114 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/**
+USAGE:
+
+Simple:
+
+<?php echo $this->getLayout()->createBlock('customer/widget_name')
+   ->setObject($this->getAddress())
+   ->toHtml() ?>
+
+For checkout/onepage/shipping.phtml:
+
+<?php echo $this->getLayout()->createBlock('customer/widget_name')
+   ->setObject($this->getAddress())
+   ->setFieldIdFormat('shipping:%s')
+   ->setFieldNameFormat('shipping[%s]')
+   ->setFieldParams('onchange="shipping.setSameAsBilling(false);"')
+   ->toHtml() ?>
+*/
+/* @var $this Mage_Customer_Block_Widget_Name */
+$controllerAction = Mage::app()->getRequest()->getControllerName();
+?>
+<div class="<?php echo $this->getContainerClassName()?>" style="background:#fff">
+<?php if ($this->showPrefix()): ?>
+    <div class="name-prefix profile_container">
+       <div class="profile_common_label"> <label for="<?php echo $this->getFieldId('prefix')?>"<?php if ($this->isPrefixRequired()) echo ' class="required profile_label"' ?>><?php if ($this->isPrefixRequired()) echo '<i class="airhotel-sprite lock profile_madatory"></i>' ?><?php echo $this->getStoreLabel('prefix') ?></label></div>
+        <div class="profile_input_section">
+            <?php if ($this->getPrefixOptions() === false): ?>
+                <input type="text" id="<?php echo $this->getFieldId('prefix')?>" name="<?php echo $this->getFieldName('prefix')?>" value="<?php echo $this->escapeHtml($this->getObject()->getPrefix()) ?>" title="<?php echo $this->getStoreLabel('prefix') ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('prefix') ?>" <?php echo $this->getFieldParams() ?> />
+            <?php else: ?>
+                <select id="<?php echo $this->getFieldId('prefix')?>" name="<?php echo $this->getFieldName('prefix')?>" title="<?php echo $this->getStoreLabel('prefix') ?>" class="<?php echo $this->helper('customer/address')->getAttributeValidationClass('prefix') ?>" <?php echo $this->getFieldParams() ?>>
+                <?php foreach ($this->getPrefixOptions() as $_option): ?>
+                    <option value="<?php echo $_option?>"<?php if ($this->getObject()->getPrefix()==$_option):?> selected="selected"<?php endif; ?>><?php echo $this->__($_option)?></option>
+                <?php endforeach; ?>
+                </select>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+    <div class="name-firstname frst_nme form-space clearfix" style="padding:0 0 28px">
+    <?php if($controllerAction == "address") { ?>
+       	<div class="address_book_information">
+       		<div class="profile_common_label"> <label for="<?php echo $this->getFieldId('firstname')?>" class="required profile_label"><?php echo $this->getStoreLabel('firstname') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+        	<div class="profile_input_section"><input type="text" id="<?php echo $this->getFieldId('firstname')?>" name="<?php echo $this->getFieldName('firstname')?>" value="<?php echo $this->escapeHtml($this->getObject()->getFirstname()) ?>" title="<?php echo $this->getStoreLabel('firstname') ?>" maxlength="255" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('firstname') ?>" <?php echo $this->getFieldParams() ?> /></div>
+   		</div>
+    <?php } else { ?>
+    	<div class="profile_common_label"> <label for="<?php echo $this->getFieldId('firstname')?>" class="required onestep_label"><?php echo $this->getStoreLabel('firstname') ?><i class="airhotel-sprite lock mandatory_star"></i></label></div>
+    	<div class="profile_input_section"><input type="text" id="<?php echo $this->getFieldId('firstname')?>" name="<?php echo $this->getFieldName('firstname')?>" value="<?php echo $this->escapeHtml($this->getObject()->getFirstname()) ?>" title="<?php echo $this->getStoreLabel('firstname') ?>" maxlength="255" class="onestep_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('firstname') ?>" <?php echo $this->getFieldParams() ?> /></div>
+    <?php } ?>
+    </div>
+    <div class="clearfix onestepclearfix"></div>
+<?php if ($this->showMiddlename()): ?>
+<?php $isMiddlenameRequired = $this->isMiddlenameRequired(); ?>
+    <div class="name-middlename mld_nme form-space" style="padding::0 0 10px">
+        <div class="profile_common_label"><label for="<?php echo $this->getFieldId('middlename')?>"<?php echo $isMiddlenameRequired ? ' class="required profile_label"' : '' ?>><?php echo $isMiddlenameRequired ? '<i class="airhotel-sprite lock profile_madatory"></i>' : '' ?><?php echo $this->getStoreLabel('middlename') ?></label></div>
+        <div class="profile_input_section"><input type="text" id="<?php echo $this->getFieldId('middlename')?>" name="<?php echo $this->getFieldName('middlename')?>" value="<?php echo $this->escapeHtml($this->getObject()->getMiddlename()) ?>" title="<?php echo $this->getStoreLabel('middlename') ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('middlename') ?>" <?php echo $this->getFieldParams() ?> /></div>
+    </div>
+<?php endif; ?>
+    <div class="name-lastname lst_nme form-space">
+    <?php if($controllerAction == "address") { ?>
+       	 <div class="address_book_information">
+    		<div class="profile_common_label"><label for="<?php echo $this->getFieldId('lastname')?>" class="required profile_label"><?php echo $this->__('Sur Name') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+        	<div class="profile_input_section"><input type="text" id="<?php echo $this->getFieldId('lastname')?>" name="<?php echo $this->getFieldName('lastname')?>" value="<?php echo $this->escapeHtml($this->getObject()->getLastname()) ?>" title="<?php echo $this->getStoreLabel('lastname') ?>" maxlength="255" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('lastname') ?>" <?php echo $this->getFieldParams() ?> /></div>
+    	</div>
+    <?php } else { ?>
+    	<div class="profile_common_label"><label for="<?php echo $this->getFieldId('lastname')?>" class="required onestep_label"><?php echo $this->__('Sur Name') ?><i class="airhotel-sprite lock mandatory_star"></i></label></div>
+        <div class="profile_input_section"><input type="text" id="<?php echo $this->getFieldId('lastname')?>" name="<?php echo $this->getFieldName('lastname')?>" value="<?php echo $this->escapeHtml($this->getObject()->getLastname()) ?>" title="<?php echo $this->getStoreLabel('lastname') ?>" maxlength="255" class="onestep_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('lastname') ?>" <?php echo $this->getFieldParams() ?> /></div>
+    <?php } ?>
+    </div>
+<?php if ($this->showSuffix()): ?>
+    <div class="name-suffix form-space">
+        <div class="profile_common_label"><label for="<?php echo $this->getFieldId('suffix')?>"<?php if ($this->isSuffixRequired()) echo ' class="required profile_label"' ?>><?php if ($this->isSuffixRequired()) echo '<i class="airhotel-sprite lock profile_madatory"></i>' ?><?php echo $this->getStoreLabel('suffix') ?></label></div>
+        <div class="profile_input_section">
+        <?php if ($this->getSuffixOptions() === false): ?>
+            <input type="text" id="<?php echo $this->getFieldId('suffix')?>" name="<?php echo $this->getFieldName('suffix')?>" value="<?php echo $this->escapeHtml($this->getObject()->getSuffix()) ?>" title="<?php echo $this->getStoreLabel('suffix') ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('suffix') ?>" <?php echo $this->getFieldParams() ?> />
+        <?php else: ?>
+            <select id="<?php echo $this->getFieldId('suffix')?>" name="<?php echo $this->getFieldName('suffix')?>" title="<?php echo $this->getStoreLabel('suffix') ?>" class="<?php echo $this->helper('customer/address')->getAttributeValidationClass('suffix') ?>" <?php echo $this->getFieldParams() ?>>
+            <?php foreach ($this->getSuffixOptions() as $_option): ?>
+                <option value="<?php echo $_option?>"<?php if ($this->getObject()->getSuffix()==$_option):?> selected="selected"<?php endif; ?>><?php echo $this->__($_option)?></option>
+            <?php endforeach; ?>
+            </select>
+        <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+</div>

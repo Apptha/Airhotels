@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Sociallogin
+ * @version     0.1.8
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ * */
+
+-->
+
+<config>
+    <tabs> 
+        <Apptha translate="label" module="sociallogin">
+            <label>Apptha</label>
+            <sort_order>100</sort_order>
+        </Apptha>
+    </tabs>  
+    <sections> 
+        <sociallogin translate="label" module="sociallogin">
+            <label><![CDATA[<div class="sociallogin_logo"></div> <div class="sociallogin_text">Social Login</div> <div class="clear"></div>]]></label>
+            <tab>Apptha</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>120</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label" module="sociallogin">
+                    <label>General Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>                                           
+                        <enable_redirect translate="label">
+                            <label>Redirect Customer to Account Dashboard after Logging in</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Customer will stay on the current page if "No" is selected.</comment>
+                        </enable_redirect>                    
+                    </fields>   
+                </general>
+                <facebook translate="label" module="sociallogin">
+                    <label>Facebook Login Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>       
+                        <enable_fb translate="label">
+                            <label>Enable Facebook Login</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Enable Facebook Login</comment>
+                        </enable_fb>                        
+                        <fbapp_id translate="label">
+                            <label>Facebook App Id</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Please enter <a href="https://developers.facebook.com/apps" target="_blank">facebook app id</a>]]></comment>
+                        </fbapp_id>
+                        <fbapp_secret translate="label">
+                            <label>Facebook App Secret Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="https://developers.facebook.com/apps" target="_blank">facebook app secret key</a>]]></comment>
+                        </fbapp_secret>
+                    </fields>   
+                </facebook>
+                <twitter translate="label" module="sociallogin">
+                    <label>Twitter Login Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable_twitter translate="label">
+                            <label>Enable Twitter Login</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Enable Twitter Login</comment>
+                        </enable_twitter>
+                        <tw_key translate="label">
+                            <label>Twitter Consumer Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="https://dev.twitter.com/apps/new" target="_blank">twitter consumer key</a>]]></comment>
+                        </tw_key>
+                        <tw_secret translate="label">
+                            <label>Twitter Consumer Secret</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="https://dev.twitter.com/apps/new" target="_blank">twitter consumer secret</a>]]></comment>
+                        </tw_secret>
+                    </fields>
+                </twitter> 
+                <google translate="label" module="sociallogin">
+                    <label>Google Login Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>4</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable_google translate="label">
+                            <label>Enable Google Login</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Enable Google Login</comment>
+                        </enable_google>
+                        <google_id translate="label">
+                            <label>Google Client ID</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="http://developer.google.com/" target="_blank">Google client id</a>]]></comment>
+                        </google_id>
+                        <google_secret translate="label">
+                            <label>Google Client Secret Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="http://developer.google.com/" target="_blank">Google client secret key</a>]]></comment>
+                        </google_secret>
+                        <google_develop translate="label">
+                            <label>Google API Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Please enter <![CDATA[<a href="http://developer.google.com/" target="_blank">Google API key</a>]]></comment>
+                        </google_develop>
+                    </fields>
+                </google>
+            </groups>
+        </sociallogin>
+    </sections>
+</config>

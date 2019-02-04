@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+-->
+<config>
+	<acl>
+		<resources>
+			<all>
+				<title>Allow Everything</title>
+			</all>
+			<admin>
+				<children>
+					<system>
+						<children>
+							<config>
+								<children>
+									<airhotels translate="title" module="airhotels">
+										<title>Airhotels</title>
+									</airhotels>
+								</children>
+							</config>
+						</children>
+					</system>
+					<airhotels>
+						<title>Airhotels</title>
+						<children>
+							<items translate="title" module="airhotels">
+								<title>Property Information</title>
+							</items>
+							<manage_property module="airhotels">
+								<title>Manage Property</title>
+								<sort_order>1</sort_order>
+								<action>airhotels/adminhtml_products</action>
+							</manage_property>
+							<manage_review module="airhotels">
+								<title>Manage Review</title>
+								<sort_order>2</sort_order>
+								<action>adminhtml/catalog_product_review</action>
+							</manage_review>
+							<manage_rating module="airhotels">
+								<title>Manage Rating</title>
+								<sort_order>3</sort_order>
+								<action>adminhtml/rating</action>
+							</manage_rating>
+							<manage_configuration module="airhotels">
+								<title>Airhotels</title>
+								<sort_order>4</sort_order>
+								<action>adminhtml/system_config/edit/section/airhotels
+								</action>
+							</manage_configuration>
+							<uploadimage module="airhotels">
+								<title>Upload Image Video</title>
+								<sort_order>5</sort_order>
+								<action>airhotels/adminhtml_uploadimagevideo</action>
+							</uploadimage>
+							<managebankdetails module="airhotels">
+								<title>Manage Bank Details</title>
+								<sort_order>6</sort_order>
+								<action>airhotels/adminhtml_managebankdetails</action>
+						    </managebankdetails>
+						    <hostpayoutdetails module="airhotels">
+								<title>Host Payout Details</title>
+								<sort_order>7</sort_order>
+								<action>airhotels/adminhtml_hostpayoutdetails</action>
+							</hostpayoutdetails>
+						</children>
+					</airhotels>
+				</children>
+			</admin>
+		</resources>
+	</acl>
+</config>

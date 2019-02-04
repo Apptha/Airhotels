@@ -1,0 +1,373 @@
+<?php
+/**
+* Apptha
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the EULA
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://www.apptha.com/LICENSE.txt
+*
+* ==============================================================
+*                 MAGENTO EDITION USAGE NOTICE
+* ==============================================================
+* This package designed for Magento COMMUNITY edition
+* Apptha does not guarantee correct work of this extension
+* on any other Magento edition except Magento COMMUNITY edition.
+* Apptha does not provide extension support in case of
+* incorrect edition usage.
+* ==============================================================
+*
+* @category    Apptha
+* @package     Apptha_Airhotels
+* @version     0.2.9
+* @author      Apptha Team <developers@contus.in>
+* @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+* @license     http://www.apptha.com/LICENSE.txt
+*
+*/
+?>
+<?php
+
+$initialFeeCount = $trialCount = $subscriptionId = array() ;
+$id = $this->getRequest ()->getParam ( 'id' );
+$subscriptionId = $this->getSubscripitonCollection();
+$product_model = Mage::getModel ( 'airhotels/managesubscriptions' )->load ( $id );
+
+$productId = $product_model->getData ( 'product_id' );
+
+$model = Mage::getModel ( 'airhotels/productsubscriptions' )->getCollection ()->addFieldToFilter ( 'product_id', $productId )->addFieldToFilter ( 'is_delete', 0 );
+
+$data = $model->getData ();
+$trialEnabled = Mage::getModel ( 'airhotels/subscriptiontype' )->getCollection ()->addFieldToFilter ( 'is_trial_enabled', 1 );
+
+$trialValue = $trialEnabled->getData ();
+
+foreach ( $trialValue as $trialCollection ) {
+	
+	$trialCount [] = $trialCollection ['id'];
+}
+
+$initialFeeEnabled = Mage::getModel ( 'airhotels/subscriptiontype' )->getCollection ()->addFieldToFilter ( 'is_initial_fee_enabled', 1 );
+
+$initialValue = $initialFeeEnabled->getData ();
+
+foreach ( $initialValue as $initialfeeCollection ) {
+	
+	$initialFeeCount [] = $initialfeeCollection ['id'];
+}
+?>
+
+
+<?php $subscriptionCollection = Mage::getModel ( 'airhotels/subscriptiontype' )->getCollection();?>
+
+<!-- Div for removing custom option -->
+<div style="display:none">
+	<div id="wrapper_subscription_option_YYY"
+		class="dont-remove option-box apptha_subscription_div">
+		<table id="subscription_option_YYY"
+			class="form-list border subscription_option apptha_product_subscription_table bordertable"
+			cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr>
+					<td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><select id="subscription_type_YYY"
+						class="select select input-text required-entrycc input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+						onchange="changeSubscriptionOption(YYY)"
+						name="subscription_type[]">
+							<option value=""><?php echo Mage::helper('airhotels')->__('Choose'); ?></option>
+								<?php
+								foreach ( $subscriptionCollection as $subscription ) {
+									?>
+								<option value="<?php echo $subscription->getId()?>"><?php echo $subscription->getTitle()?></option>
+								<?php } ?>
+						 		
+								</select></td>
+				</tr>
+
+				<tr>
+					<td class="label"><label for="price_per_iteration"><?php echo Mage::helper('airhotels')->__(' Price Per Iteration'); ?>  <span
+							class="required"> * </span> </label></td>
+					<td class="value"><input id="price_per_iteration_YYY"
+						class="input-text required-entrycc validate-number" type="text"
+						value="" name="price_per_iteration[]" /></td>
+				</tr>
+				<tr>
+					<td class="label"><span></span></td>
+					<td class="editable_buttons">
+						<button id="delete_product_subscription_option_YYY"
+							title="<?php echo 'Remove'; ?>" type="button"
+							class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+							onclick="removeOption(this)">
+							<span><span><?php echo Mage::helper('airhotels')->__('Remove'); ?></span></span>
+						</button>
+						<button
+							class="button scalable add add-product-subscription_option "
+							type="button"
+							onclick="addOption('wrapper_subscription_option_YYY');">
+							<span><span><?php echo Mage::helper('airhotels')->__('Add'); ?></span></span>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!-- Displaying All options list -->
+
+<?php
+
+$collectionCount = 0;
+foreach ( $data as $value ) {
+	
+	?>
+	<!-- Div for removing custom option -->
+	<div id="wrapper_subscription_option_<?php echo $collectionCount; ?>"
+		class="dont-remove option-box apptha_subscription_div">
+		<table id="subscription_option_<?php echo $collectionCount; ?>"
+			class="form-list border subscription_option apptha_product_subscription_table bordertable"
+			cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr>
+					<td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><select
+						id="subscription_type_<?php echo $collectionCount; ?>"
+						class="select select input-text required-entry input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+						name="subscription_type[]"
+						onchange="changeSubscriptionOption(<?php echo $collectionCount; ?>)">
+							<option value=""><?php echo Mage::helper('airhotels')->__('Choose'); ?></option>
+								<?php
+									$selected = $value ['subscription_type'];
+									foreach ( $subscriptionCollection as $subscription ) {
+								?>
+								<option value="<?php echo $subscription->getId();?>"
+								<?php if($selected == $subscription->getId()){echo "selected='selected'";}?>><?php echo $subscription->getTitle();?></option>
+								<?php } ?>
+						</select></td>
+				</tr>
+					<?php //if($value['trial_period_price'] > 0){?>
+				<tr>
+					<td class="label apptha_trial_price"><label
+						for="trial_period_price"
+						id="trial_period_price_label_<?php echo $collectionCount; ?>"> <?php echo Mage::helper('airhotels')->__(' Price Per Iteration '); ?> <span
+							class="required"> * </span>
+					</label></td>
+					<td class="value"><input
+						id="trial_period_price_<?php echo $collectionCount; ?>"
+						class="input-text required-entry validate-number" type="text"
+						value="<?php echo $value['trial_period_price']?>"
+						name="trial_period_price[]" /></td>
+				</tr>
+					<?php //}?>
+					<?php //if ($value['initial_fee']){?>
+				<tr>
+					<td class="label apptha_initial_fee"><label for="initial_fee"
+						id="initial_fee_label_<?php echo $collectionCount; ?>"><?php echo Mage::helper('airhotels')->__(' Initial Fee Price'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><input
+						id="initial_fee_<?php echo $collectionCount; ?>"
+						class="input-text required-entry validate-number" type="text"
+						value="<?php echo $value['initial_fee']?> " name="initial_fee[]" /></td>
+				</tr>
+				<?php //}?>
+				<tr>
+					<td class="label"><label for="price_per_iteration"><?php echo Mage::helper('airhotels')->__(' Price Per Iteration'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><input
+						id="price_per_iteration_<?php echo $collectionCount; ?>"
+						class="input-text required-entry validate-number" type="text"
+						value="<?php echo $value['price_per_iteration']?>"
+						name="price_per_iteration[]" /></td>
+				</tr>
+				<tr>
+					<td class="label"><span></span></td>
+					<td class="editable_buttons">
+						<button
+							id="delete_product_subscription_option_<?php echo $collectionCount; ?>"
+							title="<?php echo 'Remove'; ?>" type="button"
+							class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+							onclick="removeOption(this)" style="">
+							<span><span><?php echo 'Remove'; ?></span></span>
+						</button>
+						<button
+							class="button scalable add add-product-subscription_option "
+							type="button"
+							onclick="addOption('wrapper_subscription_option_<?php echo $collectionCount; ?>');">
+							<span><span> <?php echo 'Add'; ?></span></span>
+						</button>
+
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="add_subscripition_option_list"></div>
+<?php
+	$collectionCount = $collectionCount + 1;
+}
+?>
+
+
+<script type="text/javascript"> 
+
+    var customOptionCount = 1; 
+    var totalSubscriptionTypeCount = <?php echo count($subscriptionCollection); ?>    
+    var classCount = getClassNameCount("apptha_subscription_type").length-1;   
+    function addOption(value) { 
+    	var classElementArray = getClassNameCount("apptha_product_subscription_table");
+        classElementCount = classElementArray.length;  
+        if(classElementCount <= totalSubscriptionTypeCount){
+        var html = $("wrapper_subscription_option_YYY").up("div").innerHTML.replace(/YYY/g, classCount);
+        var replacedDiv = html.replace(/required-entrycc/g, 'required-entry');  
+        $(value).up('div').insert(replacedDiv); 
+        changeSubscriptionOption(classCount);
+        classCount = classCount + 1;
+        customOptionCount = customOptionCount + 1;	
+        }
+        else{
+        	alert('There are no more subscription types to be subscribed by this product.');
+        }       
+        updateSelectionBoxOption(); 
+        	
+        } 
+    function removeOption(value) {
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");
+    classElementCount = classElementArray.length;       
+    var rmid= id;        
+    if(classElementCount <= '2')
+    {
+    alert('You cannot remove this.The product should be subscribed to atleast one subscription type.');
+    $("apptha_product_subscription_table").setAttribute('disabled',true);
+    }
+    else {
+    value.up('div').remove();
+    } 
+    updateSelectionBoxOption(); 
+    
+    }      
+
+	function getClassNameCount(className)
+    {
+    var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
+    var allElements = document.getElementsByTagName("*");
+    var results = [];
+	var element;
+	for (var i = 1; (element = allElements[i]) != null; i++) {
+    var elementClass = element.className;
+    if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass))
+    results.push(element);
+    }     	   	   	   
+    return results;
+    }
+	   	
+    function changeSubscriptionOption(id){
+    	var selectedValue = $('subscription_type_'+id).getValue();		 	
+    	var trialTotal = <?php echo json_encode($trialCount);?>;	 
+    	var result = trialTotal.indexOf(selectedValue);
+    	if(result >-1)
+    	{
+    	$('trial_period_price_'+id).show();
+    	$('trial_period_price_label_'+id).show();
+    	$('trial_period_price_'+id).addClassName('required-entry');
+    	
+    	 
+    	}
+    	else
+    	{
+    	$('trial_period_price_'+id).hide();
+    	$('trial_period_price_label_'+id).hide();
+    	$('trial_period_price_'+id).removeClassName('required-entry');	
+    	}
+    	var initialFeeTotal = <?php echo json_encode($initialFeeCount);?>;	 
+    	var Initialresult = initialFeeTotal.indexOf(selectedValue);
+    	if(Initialresult >-1)
+    	{
+    	$('initial_fee_label_'+id).show();
+    	$('initial_fee_'+id).show();
+    	$('initial_fee_'+id).addClassName('required-entry');	 
+    	
+    	}
+    	else
+    	{
+    	$('initial_fee_label_'+id).hide();
+    	$('initial_fee_'+id).hide();	
+    	$('initial_fee_'+id).removeClassName('required-entry');	
+    		
+    	}
+    	updateSelectionBoxOption();
+    }
+    	        
+    Event.observe(window, "load", function(e){
+    var input = <?php echo json_encode($subscriptionId);?>;
+    subscriptionOptionChange(input);
+    
+    });
+    function subscriptionOptionChange(id){
+    	for(var i=0;i<id.length;i++){
+            var selectedValue = [];        
+    	selectedValue[i] = $('subscription_type_'+i).getValue();
+      
+    	var trialTotal = <?php echo json_encode($trialCount);?>;
+    	
+    	var trialResult = [];		 
+        trialResult[i] = trialTotal.indexOf(selectedValue[i]);
+        	
+    	if(trialResult[i] >-1)
+    	{			
+    	$('trial_period_price_'+i).show();
+    	$('trial_period_price_label_'+i).show();	
+    	$('trial_period_price_'+i).addClassName('required-entry');	
+    	}
+    	else
+    	{
+    	$('trial_period_price_'+i).hide();
+    	$('trial_period_price_label_'+i).hide();	
+    	$('trial_period_price_'+i).removeClassName('required-entry');	
+    	}
+    	var initialFeeTotal = <?php echo json_encode($initialFeeCount);?>;	
+    	var initialResult = [];
+    	initialResult[i] = initialFeeTotal.indexOf(selectedValue[i]);	
+    	if(initialResult[i] >-1)
+    	{
+    	$('initial_fee_label_'+i).show();
+    	$('initial_fee_'+i).show();	
+    	$('initial_fee_'+i).addClassName('required-entry');		
+    	}
+    	else
+    	{
+    	$('initial_fee_label_'+i).hide();
+    	$('initial_fee_'+i).hide();	
+    	$('initial_fee_'+i).removeClassName('required-entry');			
+    	}
+        }
+    	updateSelectionBoxOption();
+        
+    }
+    function updateSelectionBoxOption() {
+    d=document;
+    subscriptionSelectedArray = [];    	
+    var selectClassElementArray = getClassNameCount("apptha_product_subscription_type_select");         	 
+    for (h=0;h<classCount;h++) {
+    if(d.getElementById('subscription_type_'+h)){	             
+    subscriptionSelectedArray[h] = d.getElementById('subscription_type_'+h).value;
+    }
+    }  	  
+    for (a=0;a<classCount;a++) {
+    for (b=1;b<totalSubscriptionTypeCount+1;b++) {
+    if(d.getElementById('subscription_type_'+a)){ 
+    d.getElementById('subscription_type_'+a).options[b].show();
+    for (c=0;c<classCount;c++) {
+    if(d.getElementById('subscription_type_'+a).options[b].value == subscriptionSelectedArray[c]) {
+    d.getElementById('subscription_type_'+a).options[b].hide();	        
+    }
+    }
+    } 
+    }
+    }
+    }
+    
+   
+</script>

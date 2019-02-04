@@ -1,0 +1,228 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+$customerData 	= Mage::getSingleton('customer/session')->getCustomer();
+$customerid 	= $customerData->getId();
+$PropertyCollection = Mage::getModel('airhotels/property')
+        			->getpropertycollection()
+        			->addAttributeToFilter('status', array('eq' => 1))
+        			->addAttributeToFilter('userid', array('eq' => $customerid));
+foreach ($PropertyCollection as $property) {
+    $productId[] = $property->getId();
+}
+$reviews = Mage::getModel('airhotels/property')->getreview();
+/**
+ * My reviews starts
+ */ 
+$myreviewcollection = Mage::getModel('review/review')->getCollection()->addFieldToFilter('customer_id',array('eq'=>$customerid))->setOrder('created_at', 'desc');
+?>
+<div id="rooms">
+    <div id="room" class="clearfix">
+        <div id="left_column">
+            <div id="main_content" class="box">            
+            	<ul id="main_content_sub_nav" class="review_list clearfix">
+                	<li id="manageListing"
+                            onclick="select_tab(&#39;main&#39;, &#39;review_about&#39;, jQuery(this));"
+                            class="main_link selected"><a href="#"><?php echo $this->__('Reviews About You'); ?></a>
+                    </li>
+                    <li id="propertyHistory"onclick="select_tab(&#39;main&#39;, &#39;review_div&#39;, jQuery(this));"
+                            class="main_link"><a href="#"><?php echo $this->__('Reviews By You') ?></a>
+                    </li>
+                    <li id="content_flag"></li>
+				</ul>           
+                <div class="review_body_container">
+                    <div id="review_about" class="main_content" style="display: block;">
+                        <div class="body_grid1">
+                            <div class="reviews_section as_host">
+                                <ul class="reviews-list">
+	                                <?php                               
+	                                $productNameArray = array();
+	                                if (count($reviews)) {
+	                                    for ($i = 0; $i < count($reviews); $i++) {	
+	                                        $customerData 		= Mage::getModel('airhotels/product')->getCustomerPictureById($reviews[$i]["customer_id"]);
+	                                        $productReviewId 	= $reviews[$i]["entity_pk_value"];                                        
+	                                        if(in_array($productReviewId, $productId)){
+	                                            $productCollection = Mage::getModel('catalog/product')->load($productReviewId);
+	                                            $productName 		= $productCollection->getName();
+	                                            $productNameArray[] = $productCollection->getName();
+	                                            $productUrl 		= $productCollection->getProductUrl();
+	                                            ?>
+	                                        	<li class="reviews-list-item clearfix">
+	                                        		<div class="profile_pic">
+		                                                <div class="_pm_container small"><div class="_pm_shadow r"></div>
+		                                                    <div class="_pm_shadow l"></div><div class="_pm">
+		                                                        <div class="_pm_inner clearfix"><div class="_pm_shadow_inner r"></div>
+		                                                            <div class="_pm_shadow_inner l"></div>
+		                                                            <div class="_pm_shadow_inner t"></div>
+		                                                            <div class="_pm_shadow_inner b"></div>                                     
+		                                                            <?php if (!empty($customerData[0]["imagename"])): ?>
+		                                                                <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>" width="68px " height="68px" alt="">
+		                                                            <?php else: ?>
+		                                                                <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" width="68px " height="68px" alt="">
+		                                                            <?php endif; ?>
+		                                                        </div>
+		                                                    </div>
+		                                                </div>          
+		                                                <span class="name"><?php echo $reviews[$i]["nickname"];?></span>
+	                                            	</div>
+	                                            	<div class="bubble">
+		                                                <p class="title profile_review_title">
+		                                                	<span><?php echo $reviews[$i]["title"];?></span>
+		                                                </p>      
+		                                                <p class="message">
+		                                                	<?php echo $reviews[$i]["detail"];?>
+		                                                </p>
+		                                                <p class="message_posted"><a style="color: #545454;font-size: 12px;font-weight: normal;margin: 0 10px 0 0px;" href="<?php echo $productUrl; ?>"> <?php echo $productName; ?></a>
+			                                                <span style="color: #545454;font-size: 12px;" class="date">         
+			                                                  <?php echo date("jS, F Y", strtotime($reviews[$i]["created_at"]));?>
+			                                                </span>
+		                                                </p>
+	                                            	</div>
+	                                         </li><?php 
+	                                        }
+	                                      }
+	                                    }                                     
+	                                    if(count($productNameArray) < 1){?>
+	                                		<p class="no_transaction_records"><?php echo $this->__("No reviews available");?></p>
+	                                    <?php }?>
+                                 	</ul>
+                               </div>
+                    		</div>
+                		</div>
+                    	<div id="review_div" class="main_content norecords"
+	                        <?php
+	                        if (!$this->getRequest()->getParam('from')){
+	                            echo " style='display:none' "; 
+	                        }else{
+	                        	echo " style='display:block' class='main_link selected' ";
+	                        }  ?>>
+                        	<div class="body_grid1">
+                            	<div class="reviews_section as_host">
+                               		<ul class="reviews-list">
+	                               		 <?php 
+	                               		  /**
+	                               		   * Displays review by me collections
+	                               		   * Message of first review by me
+	                               		   * Status of first review by me
+	                               		   * Status for review by me me pending in blue
+	                               		   * Status for review by me approved in green
+	                               		   * Status for  review by me rejected in red 
+	                               		   * Date of  review by me
+                               		   		*/
+                               		 	if (count($myreviewcollection)) {
+                               		 		foreach ($myreviewcollection as $comments){ 
+		                                        $pId		= $comments['entity_pk_value'];
+		                                        $model 		= Mage::getModel('catalog/product');
+		                                        $_product 	= $model->load($pId);
+		                                        $userId 	= $_product->getUserid();
+		                                        $customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($userId);                                     
+                                        		?>                               		
+                               		 			<li class="reviews-list-item clearfix" ><div id="openReview" class="openReview"><div class="profile_pic">
+                    				              <div class="_pm_container small"><div class="_pm_shadow r"></div><div class="_pm_shadow l"></div>
+                    				  			       <div class="_pm">
+                    				   			          <div class="_pm_inner clearfix"><div class="_pm_shadow_inner r"></div><div class="_pm_shadow_inner l"></div><div class="_pm_shadow_inner t"></div><div class="_pm_shadow_inner b"></div>
+                    					     			       <?php if (!empty($customerData[0]["imagename"])): ?>
+                                                                  <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>" width="68px " height="68px" alt="">
+                                                              <?php else: ?>
+                                                                  <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" width="68px " height="68px" alt="">
+                                                              <?php endif; ?>
+                    				                      </div>
+                    						          </div>
+                    						      	</div>
+                    						       <span class="name"><?php echo $customerData[0]['name'];?></span>       
+                    					       </div>                    					      
+                    					       <?php                   					       
+                    					       $productCollection 	= Mage::getModel('catalog/product')->load($comments->getEntityPkValue());
+                    					       $productName 		= $productCollection->getName();
+                    					       $productUrl 			= $productCollection->getProductUrl();
+                    					       ?>
+                    					       <div class="bubble">
+                    					           <p class="title profile_review_title"><span><?php echo $comments->getTitle();?></b></p>
+                    					           <p class="message">                    					        
+                    					             <?php echo $comments->getDetail();?>
+                    					           </p><p class="message_posted">
+                    					           <?php 
+                      						       /**
+                      						       * if status is 2
+                      						       * display pending as status
+                      						       */
+                        					       ?>
+                    					           <?php if($comments->getStatusId()=='2'){?>
+                            					        <span class="status-blue" style="color: #ff471a;font-size: 13px;font-weight: normal;margin: 0 10px 0 0;">
+                            					        	<?php echo ucfirst('pending');?>
+                            					        </span>
+                    					           <?php 
+                      						       /**
+                      						       * if status is 1
+                      						       * display as approved
+                      						       */
+                    					      	   ?>
+                    					           <?php }else if($comments->getStatusId()=='1'){?>
+                        					       <span class="status-green" style="color: #A414F7;font-size: 13px;font-weight: normal;margin: 0 10px 0 0;">
+                        					       	 <?php echo ucfirst('approved');?>
+                        					       </span>
+                    					           <?php 
+                      						      /**
+                      						       * if status is 3
+                      						       * display as rejected
+                      						       */
+                    					      	   ?>
+                    					           <?php }else if($comments->getStatusId()=='3'){?>
+                        					       <span class="status-red" style="color: #F7C614;font-size: 13px;font-weight: normal;margin: 0 10px 0 0;">
+                        					          <?php echo ucfirst('rejected');?>
+                        					       </span>
+                        					       <?php }?>
+                    					           <?php 
+                        						   /**
+                        					        * Date of loaded review message.
+                        					        */
+                        					      	?>
+                        					      
+                                                  <a style="color: #545454;font-size: 12px;font-weight: normal;margin: 0 10px 0 0px;" href="<?php echo $productUrl; ?>"> <?php echo $productName; ?></a>
+                                                  <span style="color:#545454;font-size:12px;" class="date">         
+                                                    <?php echo date("jS, F Y", strtotime($comments["created_at"]));?>
+                                                  </span>  </p>                                         
+                         				       </div>
+                         				 	</div>
+                               		 	</li>                               		 
+                               		<?php } 
+                               		}else {?>
+                                	<p class="no_transaction_records">  <?php  echo $this->__("No reviews available");?></p>
+                               	<?php }?>           		 	
+                           		</ul>                               		 	 
+                        	</div>
+                     	</div>
+                  	</div>
+                </div>
+             </div>
+         </div>
+     </div>
+ </div>  

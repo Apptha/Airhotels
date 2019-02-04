@@ -1,0 +1,172 @@
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * Initilizing Property data
+ */
+
+$countryCode = Mage::getSingleton('customer/session')->getBankCountryCode();
+$currencyCode = Mage::getSingleton('customer/session')->getBankCurrencyCode();
+if($countryCode){
+    $increment = "";
+    $country 		= Mage::getModel('directory/country')->loadByCode($countryCode);    
+    $countryName	= $country->getName();
+    $getCurrency	= Mage::getModel('airhotels/allcurrency')->getCollection()->getData();
+    $allCurrency	= "";
+    $imcrement		= 0;
+    foreach($getCurrency as $getCurrency) {
+        $currencyLabel	= $getCurrency['label'];
+        $currencyValue	= $getCurrency['value'];
+        if($increment == 0 && $currencyCode == ""){
+            $currencyCode = $currencyValue;
+        }
+        if($currencyCode == $currencyValue){          
+            $select = 'selected';
+        }else{
+            $select = '';
+        }
+        $increment++;        
+        $allCurrency .= "<option id='" . $currencyValue . "' name='". $currencyLabel ."' value='" . $currencyValue . "' $select>" . $currencyLabel . "</option>";
+    }   
+}
+$countryList = Mage::getModel('directory/country')->getResourceCollection()->loadByStore()->toOptionArray(false);
+$countryselect = '';
+$countryselect .= "<option value=''>Select country...</option>";
+foreach ($countryList as $country) {
+    $value = $country['value'];
+    if($countryCode == $value){
+        $selected = 'selected';
+    }else{
+        $selected = '';
+    }
+    if ($value != '') {
+        $countryselect .= "<option id='" . $country['value'] . "' name='". $country['label'] ."' value='" . $country['value'] . "' $selected>" . $country['label'] . "</option>";
+    }
+}
+?>
+<div class="my-account">
+   	<div class="page-title" style="margin:0;">
+    <h1 class="dashboard_leftside_heading"><?php echo $this->__('SECURE BANK TRANSFER');?></h1>
+	<a class="payment_close"  href="<?php echo Mage::getBaseUrl() . 'property/dashboard/payment/' ?>" style="background: none;color: #545454;font-size: 20px;position: relative;top: -4px;right: -14px;"><i class="airhotel-sprite close"></i></a>
+</div>
+<div class="payment_form clearfix">
+	<div class="secure_direct_deposit">
+			<h3 class="payout_title" style="margin:0 0 6px"><?php echo $this->__('Secure Direct Deposit')?></h3>
+			<p>Pick your country from the dropdown. If you don't see your country it means we cannot yet payout in your local currency, but hopefully will soon!</p></br>
+			<form id="bank_country_form" class="bank_country_form clearfix" name="bank_country_form" method="post" action="<?php echo Mage::getBaseUrl() . 'property/payout/getcurrency/' ?>" enctype="multipart/form-data">
+				<div class="field select_country clearfix" id="select_country">
+					<div class="profile_common_label">
+						<label style="font-size:13px;" class="lable_inner profile_label"><?php echo Mage::helper('airhotels')->__('Where is your bank located? '); ?></label>
+					</div>
+					<div class="profile_input_section">
+						<select name="country" id="country" class="select profile_input required-entry input-text_country" onchange="selectOne(this.value,'bank_country_form');">
+						<?php echo $countryselect; ?>
+						</select>
+					</div>
+				</div>
+				<button type="submit" name="bank_country_form_submit" id="bank_country_form_submit" value="" style="display:none"></button>
+			</form>
+		<?php 
+		if($countryCode) {			
+			$modelData	=	Mage::getModel('airhotels/managebankdetails')-> getCollection()
+							->addFieldToFilter('country_code', array('like' => "%".$countryCode."%"))
+							->addFieldToFilter('currency_code',array('like'=>"%".$currencyCode."%"));							
+			$modelData  = $modelData->getData(); ?>
+	        <p><?php echo $this->__("Pick your country from the dropdown. If you don't see your country it means we cannot yet payout in your local currency, but hopefully will soon!"); ?></p></br>
+	      	<form id="bank_currency_form" class="bank_currency_form clearfix" name="bank_currency_form" method="post" action="<?php echo Mage::getBaseUrl() . 'property/payout/getfields/' ?>" enctype="multipart/form-data">
+	 			<div class="field select_currency" id="select_currency">
+					<div class="profile_common_label"><label class="lable_inner profile_label" style="font-size:13px;"><?php echo Mage::helper('airhotels')->__('Recieve Currency '); ?></label></div>
+					<div class="profile_input_section">
+						<select name="currency" id="currency" class="select profile_input required-entry input-text_country" onchange="selectOne(this.value,'bank_currency_form');">
+			        	<?php echo $allCurrency; ?>
+			        	</select>
+		        	</div></br>
+		        	<button type="submit" name="bank_currency_form_submit" id="bank_currency_form_submit" value="" style="display:none"></button>
+	        	</div>
+	        </form>
+	        <form id="bank_details_form" class="bank_details_form clearfix" name="bank_details_form" method="post" action="<?php echo Mage::getBaseUrl() . 'property/payout/payoutsave/' ?>" enctype="multipart/form-data">
+	        	<div class="selected_country_payment" style="text-align:center;margin:20px 0">
+		        	<input type="hidden" name="country_id" value="<?php echo $countryCode;?>"/>
+		        	<input type="radio" name="country_code" value="<?php echo $countryName;?>" class="radio" id="country_code" checked/>
+		        	<input type="hidden" name="currency_id" id="currency_id" value="<?php echo $currencyCode;?>"/>		        	
+	        	</div>
+	        	<div class="clearfix" style="margin:20px 0 0">
+	        		<?php if($modelData) {
+	        			foreach($modelData as $data){
+							$filedName	=	$data['field_name'];
+							$fieldTitle	=	$data['field_title'];
+							$reruired	=	$data['field_required'];?>
+							<div class="payee_account_details clearfix"><div class="profile_common_label"><label  for="" class="<?php if($reruired){echo "required";} ?> profile_label"><?php echo $fieldTitle; if($reruired){ ?><i class="airhotel-sprite lock profile_madatory"></i><?php } ?></label></div>
+							<div class="profile_input_section"><input type="text" name="<?php echo $filedName;?>" class="profile_input <?php if($reruired){echo "required-entry";}?>" /></div></div>
+						<?php 	} ?>
+	        			<div style="margin:10px 0;text-align:right" class="clearfix">
+	        				<p class="required "><i class="airhotel-sprite lock profile_madatory" style="margin:0 4px 0 0;"></i><span style="font-size:11px"><?php echo $this->__('Required Fields'); ?></span></p>
+	        					<div class="clearfix"><button  type="submit" class="import_button">Submit</button>
+	        					<a style="position:relative;top:1px;" class="payment_buttons import_button" href="<?php echo Mage::getBaseUrl() . 'property/dashboard/payment/' ?>">Cancel</a></div>
+	        			</div>
+	        		<?php  } else { ?>
+	        			<div style="margin:10px 0 10px;text-align:center;" class="clearfix">
+	        				<label style="color:rgb(255, 10, 10);"><?php echo Mage::helper('airhotels')->__('No content available'); ?></label>
+	        			</div>
+					<?php } ?>
+	        	</div>
+			</form>
+	   <?php } ?>
+	   </div>
+   </div>
+</div>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();
+    var basicForm = new VarienForm('bank_details_form');
+	function selectOne(value,formName){		
+		if(formName == "bank_currency_form"){
+			jQ("#currency_id").val(jQ("#currency option:selected").val());
+			//return false;
+		}
+		if(value!="") {			
+			 jQ("#"+formName+"_submit").trigger("click");
+		}
+		return false;
+	}
+</script>
+<script>
+    var formValidate = new VarienForm('form-validate', true);
+    jQ(document).ready(function() {
+    	jQ("input:text, textarea, select").focus(function(){
+    		jQ(this).css('border', '1px solid #5aaee5');
+    		jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    	});
+    	jQ("input:text, textarea, select").blur(function(){
+    		jQ(this).css('border', '1px solid #dbdbdb');
+    		jQ(this).css('box-shadow', 'none');
+		});
+	});
+</script>

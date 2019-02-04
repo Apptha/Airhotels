@@ -1,0 +1,1942 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+ 
+-->
+
+<layout version="0.1.0">       
+        <default>
+        <remove name="left.permanent.callout" />
+        <remove name="cart_sidebar" /> 
+        <remove name="catalog.compare.sidebar"/>
+        <reference name="top.menu">
+            <block type="airhotels/navigation" name="airhotels.topnav" template="airhotels/navigation/top.phtml"/>           
+        </reference> 
+        <action method="addCss">
+            <script>css/gallery.css</script>
+        </action>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <reference name="head">    		              
+            <action method="addJs">
+                <script>airhotels/jquery.min.js</script>
+            </action>  
+        </reference>
+    </default>
+    <customer_logged_in>
+    <!-- Account Menu -->
+	    <reference name="head">         	          
+            <action method="addJs">
+                <script>airhotels/ajaxwishlist.js</script>
+            </action>
+        </reference>  
+	</customer_logged_in>        
+    <customer_account>
+     <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>  
+         <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>                
+            </block>
+        </reference>       
+        <reference name="left">            
+            <remove name="left.permanent.callout" />
+            <remove name="catalog.compare.sidebar" />
+            <remove name="cart_sidebar" />            
+            <remove name="sale.reorder.sidebar" />           
+        </reference>
+       <reference name="customer_account_navigation">
+       		<action method="removeLinkByName"><name>OAuth Customer Tokens</name></action>            
+            <action method="removeLinkByName"><name>billing_agreements</name></action>
+            <action method="removeLinkByName"><name>recurring_profiles</name></action>
+            <action method="removeLinkByName"><name>tags</name></action>
+            <action method="removeLinkByName"><name>wishlist</name></action>
+            <action method="removeLinkByName"><name>downloadable_products</name></action>
+            <action method="removeLinkByName"><name>reviews</name></action>
+            <action method="addLink" translate="label" module="airhotels">
+                <name>Airhotels request</name>
+                <path>airhotels/property/propertyrequest</path>
+                <label>My Property Request </label>
+            </action>
+       </reference> 
+    </customer_account>   
+    <airhotels_index_index>
+        <reference name="head">         	          
+            <action method="addJs">
+                <script>airhotels/responsiveslides.min.js</script>
+            </action>  
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>                   
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+             <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>  
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action> 		
+        </reference>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>    	
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>       
+        <reference name="content"> 
+         <block type="airhotels/airhotels" name="airhotels" template="airhotels/airhotels.phtml"/>         
+            <block type="airhotels/property_list" name="airhotels.property" template="airhotels/property/list.phtml"/>  
+        </reference>
+    </airhotels_index_index>
+    <airhotels_property>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/gallery.css</script>
+            </action>
+            <action method="addCss">
+                <script>redmond/jquery-ui-1.8.16.custom.css</script>
+            </action>
+            <action method="addCss">
+                <script>gallery.css</script>
+            </action>
+        </reference>
+    </airhotels_property>
+	 <airhotels_hourly>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/gallery.css</script>
+            </action>
+            <action method="addCss">
+                <script>redmond/jquery-ui-1.8.16.custom.css</script>
+            </action>
+            <action method="addCss">
+                <script>gallery.css</script>
+            </action>
+        </reference>
+    </airhotels_hourly>
+    <airhotels_property_form>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="airhotels_menu"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>        
+       <reference name="head">
+         <action method="removeItem">
+	            <type>skin_css</type>
+	            <name>css/print.css</name>
+	        </action> 	     
+	       <action method="addJs">
+                <script>airhotels/gallery/swfupload/swfupload.js</script>
+            </action> 
+           <action method="addJs">
+                <script>airhotels/gallery/jquery.swfupload.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/gallery/jquery.form.js</script>
+            </action>            
+            <action method="addJs">
+                <script>airhotels/gallery/jquery.uploadfile.min.js</script>
+            </action>   	        
+	        <action method="addCss">
+                <script>css/gallery.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/jqueryuploader.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap-formhelpers.min.css</script>
+            </action>	        
+            <action method="addCss">
+                <script>css/bootstrap.min.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>             
+            <action method="addJs">
+                <script>airhotels/bootstrap.min.js</script>
+            </action>             
+            <action method="addJs">
+                <script>crop/jquery.imgareaselect.js</script>
+            </action>
+            <action method="addJs">
+                <script>crop/jquery.awesome-cropper.js</script>
+            </action>    
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap-formhelpers.min.js</script>
+            </action>                   
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>           
+            <action method="addCss">
+                <script>css/crop/imgareaselect-default.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/crop/jquery.awesome-cropper.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/bootstrap-dialog.min.js</script>
+            </action>   
+            <action method="addJs">
+                <script>airhotels/form-map.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/tabs/query.steps.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">            
+            <block type="airhotels/property_form" name="airhotels.form" template="airhotels/property/form.phtml">              	
+            <block type="airhotels/property_form" name="basic_form" template="airhotels/property/basic.phtml"></block>
+            <block type="airhotels/property_form" name="photos_form" template="airhotels/property/photos.phtml"></block>    
+            <block type="airhotels/property_form" name="profile_form" template="airhotels/property/profile.phtml"></block>
+            <block type="airhotels/property_form" name="publish_form" template="airhotels/property/publish.phtml"></block>
+            </block>            
+        </reference>
+    </airhotels_property_form>
+    <airhotels_general_show>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+         <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/listingleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>      
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.yourlist" template="airhotels/property/yourlist.phtml">              	
+            </block>
+        </reference>           
+        <!--  <update handle="customer_account"/> -->
+    </airhotels_general_show>  
+     <airhotels_product_history>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/listingleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>      
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">
+            <block type="airhotels/property_propertyhistory" name="airhotels.property" template="airhotels/property/propertyhistory.phtml">              	
+            </block>
+        </reference>        
+    </airhotels_product_history>  
+   <airhotels_product_vieworder>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/listingleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>      
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">
+            <block type="airhotels/property_vieworder" name="airhotels.property" template="airhotels/property/vieworder.phtml">              	
+            </block>
+        </reference>        
+    </airhotels_product_vieworder>    
+        <airhotels_general_yourtrip>
+        <label>Request Trips</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>   
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/tripsleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>   
+        <reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.yourtrip" template="airhotels/property/yourtrip.phtml"></block>
+        </reference>        
+    </airhotels_general_yourtrip>
+        <airhotels_invitefriends_currenttrip>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference> 
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/tripsleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>     
+        <reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.currenttrip" template="airhotels/property/currenttrip.phtml">              	
+            </block>
+        </reference>        
+    </airhotels_invitefriends_currenttrip>
+    <airhotels_invitefriends_previoustrip>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>   
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/tripsleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>   
+        <reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.previoustrip" template="airhotels/property/previoustrip.phtml">              	
+            </block>
+        </reference>        
+    </airhotels_invitefriends_previoustrip>
+    <airhotels_property_search>
+        <reference name="head">   
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>    		
+        </reference>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>    	
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">
+            <block type="airhotels/property_search" name="airhotels.search" template="airhotels/property/search.phtml">              	
+            </block>
+        </reference>
+    </airhotels_property_search>
+    <airhotels_property_info>
+        <reference name="head">      
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>        
+        </reference>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>    	
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">
+            <block type="airhotels/property_info" name="airhotels.info" template="airhotels/property/info.phtml">              	
+            </block>
+        </reference>
+    </airhotels_property_info>
+    
+	<airhotels_general_review>        
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/listingleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>   
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.yourlist" template="airhotels/property/review.phtml">
+            </block>
+        </reference>        
+    </airhotels_general_review>
+    
+      
+    <airhotels_hourly_contact>
+        <label>Contact Form</label>
+        <remove name="header"/>
+        <remove name="airhotels_menu"/>
+        <remove name="footer"/>
+        <remove name="head"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.contact" template="airhotels/property/contact.phtml">
+            </block>
+        </reference>
+    </airhotels_hourly_contact>
+    <airhotels_property_inbox>
+        <label>Inbox</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>            
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>              
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/inboxleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>        
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.yourlist" template="airhotels/property/inbox.phtml">
+            </block>
+        </reference>                     
+    </airhotels_property_inbox>    
+ 	<airhotels_product_dashboardinbox>
+        <label>Inbox</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="head">          
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/bootstrap.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.min.css</script>
+            </action>           
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>            
+        </reference>        
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/dashboardleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>        
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.yourlist" template="airhotels/property/dashboardinbox.phtml">
+            </block>
+        </reference>                     
+    </airhotels_product_dashboardinbox>
+     <!-- 
+    Invite friends return action start here
+     -->
+     <airhotels_invitefriends_index>
+        <label>Friends</label>
+        <remove name="left.newsletter" />
+        <remove name="airhotels_menu" />
+        <remove name="left.permanent.callout" />
+        <remove name="right.permanent.callout" />
+        <remove name="cart_sidebar" />
+        <remove name="catalog.compare.sidebar" />
+        <remove name="right.poll" />
+        <reference name="head"> 
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="airhotels/invitefriends_invite" name="invitefriends_invite"
+                template="airhotels/invitefriends/invite.phtml">
+            </block>
+        </reference>
+    </airhotels_invitefriends_index>
+    <airhotels_property_senditem>
+        <label>Send item</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>           
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/inboxleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.yourlist" template="airhotels/property/outbox.phtml">
+            </block>
+        </reference>        
+    </airhotels_property_senditem>    
+    <!-- request property -->
+    <airhotels_property_showmessage>
+        <label>Show message</label>
+        <remove name="header"/>
+        <remove name="footer"/>
+        <remove name="head"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/empty.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.message" template="airhotels/property/message.phtml">
+            </block>
+        </reference>
+    </airhotels_property_showmessage>    
+    <airhotels_property_uploadphoto>
+        <label>Profile picture</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">         	  
+        	<action method="addJs">
+                <script>airhotels/bootstrap.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>crop/jquery.imgareaselect.js</script>
+            </action>
+            <action method="addJs">
+                <script>crop/jquery.awesome-cropper.js</script>
+            </action>                       
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>           
+            <action method="addCss">
+                <script>css/crop/imgareaselect-default.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/crop/jquery.awesome-cropper.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  	      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.uploadphoto" template="airhotels/property/profilepicture.phtml">
+            </block>
+        </reference>        
+    </airhotels_property_uploadphoto>       
+	 <airhotels_property_advsearch>
+        <remove name="left.newsletter"/>
+        <remove name="airhotels_menu"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">
+         <action method="addJs">
+                <script>airhotels/responsiveslides.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/searchmap.js</script>
+             </action>   
+             <action method="addJs">
+                <script>airhotels/ajaxwishlist.js</script>
+             </action>  
+            <action method="addJs">
+                <script>airhotels/markerlabel.js</script>
+             </action>   
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/priceslider.js</script>
+            </action>       
+            <action method="addCss">
+                <script>css/redmond/jquery-ui-1.8.16.custom.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/gallery.css</script>
+            </action>
+    	    <action method="setTitle" translate="title"><title>Advanced Search</title></action>   
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>        
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.advsearch" template="airhotels/property/advsearch.phtml">
+            </block>
+        </reference>
+    </airhotels_property_advsearch>
+    <airhotels_calendar_searchresult>
+        <label>Search Result </label>
+        <remove name="header"/>
+        <remove name="footer"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/empty.phtml</template>
+            </action>
+        </reference>        
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.searchresult" template="airhotels/property/result.phtml">
+            </block>
+        </reference>
+    </airhotels_calendar_searchresult>    
+    <airhotels_property_blockcalendar>
+        <label>Calendar</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">   
+        	<action method="addItem"><type>js_css</type><name>calendar/calendar-win2k-1.css</name><params/><!--<if/><condition>can_load_calendar_js</condition>--></action>
+            <action method="addItem"><type>js</type><name>calendar/calendar.js</name><!--<params/><if/><condition>can_load_calendar_js</condition>--></action>
+            <action method="addItem"><type>js</type><name>calendar/calendar-setup.js</name><!--<params/><if/><condition>can_load_calendar_js</condition>--></action>         
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>        
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap.min.js</script>
+            </action>    
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap-formhelpers.min.js</script>
+            </action>   
+           <action method="addCss">
+                <script>css/bootstrap-formhelpers.min.css</script>
+            </action>                   
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action>            
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>    	
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/listingleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  
+        <reference name="content">
+            <block type="airhotels/property_blockcalendar" name="airhotels.calendar" template="airhotels/property/calendar.phtml"/>
+        </reference>        
+      </airhotels_property_blockcalendar>
+    <!-- Profile page start -->
+	<airhotels_index_profile>
+        <reference name="head">          
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>        
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap.min.js</script>
+            </action>    
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap-formhelpers.min.js</script>
+            </action>   
+           <action method="addCss">
+                <script>css/bootstrap-formhelpers.min.css</script>
+            </action>                   
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action>
+        </reference>
+        <remove name="airhotels_menu"/>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="content">
+           <block type="airhotels/property_yourlist" name="airhotels.personalinfo" template="airhotels/property/personalinfo.phtml">
+           </block>
+        </reference>
+    </airhotels_index_profile>
+    <!-- Profile page end-->    
+        <airhotels_invitefriends_abouthost>
+        <label>Profile picture</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">                      
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>            
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  	      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.uploadphoto" template="airhotels/property/ownerdetails.phtml">
+            </block>
+        </reference>        
+    </airhotels_invitefriends_abouthost>     
+        <airhotels_dashboard_notifications>
+        <label>Notifications</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>                         
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+      	<reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.yourtrip" template="airhotels/property/notifications.phtml">              	
+            </block>
+        </reference>       
+    </airhotels_dashboard_notifications>    
+    <!--Most popular page start-->
+    <airhotels_general_popular>
+        <reference name="head">    		
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>             
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+          
+            <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>   
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action>   		
+        </reference>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>    	
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>       
+        <reference name="content">            
+            <block type="airhotels/property_popular" name="airhotels.popular" template="airhotels/property/popular.phtml"/>      
+        </reference>
+    </airhotels_general_popular>     
+    <!-- Most popular end-->     
+    <!--Wish list start-->
+    <airhotels_general_wishlist>
+        <reference name="head">    		
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>             
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>            
+            <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>   
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action>  		
+        </reference>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>    	
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>       
+        <reference name="content">            
+            <block type="airhotels/property_wishlist" name="airhotels.wishlist" template="airhotels/property/wishlist.phtml"/>        
+        </reference>
+    </airhotels_general_wishlist>    
+    <!-- Wish list end-->         
+    <sales_order_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender">
+                <type>property</type>
+                <block>airhotels/sales_order_items_renderer_default</block>
+                <template>sales/order/invoice/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_invoice>
+    <sales_order_shipment>
+        <reference name="shipment_items">
+            <action method="addItemRender">
+                <type>property</type>
+                <block>airhotels/sales_order_items_renderer_default</block>
+                <template>sales/order/shipment/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_shipment>
+    <sales_order_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender">
+                <type>property</type>
+                <block>airhotels/sales_order_items_renderer_default</block>
+                <template>sales/order/creditmemo/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_creditmemo> 
+    <sales_order_print translate="label">
+        <label>Sales Order Print View</label>
+        <reference name="sales_order_totals">            
+            <action method="addItemRender">
+             <type>property</type>
+             <block>airhotels/sales_order_items_renderer_default</block>
+             <template>sales/order/items/renderer/default.phtml</template>
+            </action>            
+        </reference>
+    </sales_order_print>
+    <sales_email_order_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>property</type>
+                <block>airhotels/sales_order_items_renderer_default</block>
+                <template>email/order/items/order/default.phtml</template>
+            </action>            
+        </reference>
+    </sales_email_order_items>
+    <sales_email_order_invoice_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>property</type>
+                <block>airhotels/sales_order_items_renderer_default</block>
+                <template>email/order/items/invoice/default.phtml</template>
+            </action>            
+        </reference>
+    </sales_email_order_invoice_items>    
+    <catalog_product_view>
+        <remove name="product.info"/>
+        <remove name="breadcrumbs" />
+        <remove name="left.newsletter"/>
+         <remove name="airhotels_menu"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>        
+        <remove name="right.poll"/>
+        <reference name="head">
+            <action method="addJs">
+                <script>airhotels/stickySidebar.js</script>
+            </action> 
+            <action method="addJs">
+                <script>airhotels/gallery/jquery.timepicker.js</script>
+            </action> 
+			<action method="addCss">
+                <script>css/slider/jquery.fancybox.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/jquery.timepicker.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/slider/jquery.fancybox-thumbs.css</script>
+            </action>  
+            <action method="addCss">
+                <script>css/facebox.css</script>
+            </action> 
+             <action method="addJs">
+                <script>airhotels/jquery.bxslider.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/view-map.js</script>
+            </action>           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>   
+            <action method="addJs">
+             	<script>airhotels/slider/jquery.mousewheel-3.0.6.pack.js</script>
+             </action>
+             <action method="addJs">
+             	<script>airhotels/slider/jquery.fancybox.js</script>
+             </action>          
+             <action method="addJs">
+             	<script>airhotels/responsiveslides.min.js</script>
+             </action>
+             <action method="addJs">
+             	<script>airhotels/slider/jquery.fancybox-thumbs.js</script>
+             </action>     
+             <action method="addJs">
+             	<script>airhotels/facebox.js</script>
+             </action> 
+            <block type="core/template" name="open-graph" as="open-graph" template="airhotels/opengraph.phtml" />
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>            
+        </reference>      
+        <reference name="content">    	
+            <block type="airhotels/property_view" name="airhotels.view" template="airhotels/property/view.phtml">                  
+            </block>
+        </reference>
+</catalog_product_view>
+     <!-- Profile view page start -->
+    <airhotels_multistep_viewprofile>
+        <reference name="head">          
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>   
+            <action method="addJs">
+                <script>airhotels/bootstrap.min.js</script>
+            </action>           
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.min.css</script>
+            </action>
+        </reference>
+        <remove name="airhotels_menu"/>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/viewprofileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="content">
+           <block type="airhotels/property_yourlist" name="airhotels.personalinfo" template="airhotels/property/viewprofile.phtml">
+            </block>
+        </reference>
+    </airhotels_multistep_viewprofile>
+    <!-- Profile view page end-->
+<checkout_onepage_success translate="label">
+        <label>One Page Checkout Success</label>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>        
+    </checkout_onepage_success>
+   <airhotels_multistep_verification>
+        <label>Profile picture</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">         	  
+        	<action method="addJs">
+                <script>sociallogin/sociallogin.js</script>
+            </action>  
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  	      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" before="-" name="airhotels.uploadphoto" template="airhotels/property/verification.phtml">
+            <block type="captcha/captcha" name="captcha">
+                    <reference name="head">
+                        <action method="addJs">
+                            <file>mage/captcha.js</file>
+                        </action>
+                    </reference>
+                    <action method="setFormId">
+                        <formId>user_create</formId>
+                    </action>
+                    <action method="setImgWidth">
+                        <width>230</width>
+                    </action>
+                    <action method="setImgHeight">
+                        <width>50</width>
+                    </action>
+                </block>
+            </block>
+        </reference>        
+    </airhotels_multistep_verification> 
+    
+    <!-- review page start -->
+    <airhotels_dashboard_reviewpage>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>            
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addJs">
+                <script>airhotels/jquery.flexslider-min.js</script>
+            </action>
+            <action method="addCss">
+                <script>css/flexslider.css</script>
+            </action>
+        </reference>
+        <remove name="airhotels_menu"/>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>            
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>             
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="content">            
+            <block type="airhotels/profilepage" name="reviewpage" as="reviewblock" template="airhotels/profile/reviewpage.phtml" after="profilepage"/>
+        </reference>
+    </airhotels_dashboard_reviewpage>
+    <!-- review page end-->       
+        <airhotels_dashboard_transactionhistory>		
+        <label>List your Space</label>		
+        <remove name="left.newsletter"/>		
+        <remove name="left.permanent.callout"/> 		
+        <remove name="right.permanent.callout"/>		
+        <remove name="cart_sidebar"/>		
+        <remove name="catalog.compare.sidebar"/>		
+        <remove name="right.poll"/>		
+        <reference name="head">                 		
+            <action method="addJs">		
+                <script>airhotels/common.js</script>		
+            </action>		
+            <action method="addJs">		
+                <script>airhotels/page3.js</script>		
+            </action>		
+            <action method="addCss">		
+                <script>css/common-data.css</script>		
+            </action>		
+            <action method="addCss">		
+                <script>css/page.css</script>		
+            </action>		
+        </reference>		
+        <reference name="header">		
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>		
+                <action method="setTemplate" >		
+                    <template>airhotels/leftnavigation.phtml</template>		
+                </action>		
+            </block>		
+        </reference>		
+        <reference name="left">		
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">		
+                <label>Quick Links</label>               		
+            </block>		
+            <remove name="tags_popular"/>            		
+        </reference>      		
+        <reference name="root">		
+            <action method="setTemplate">		
+                <template>page/2columns-left.phtml</template>		
+            </action>            		
+        </reference>      		
+        <reference name="content">		
+            <block type="airhotels/property_transactionhistory" name="airhotels.property" template="airhotels/property/transactionhistory.phtml">              			
+            </block>		
+        </reference>        		
+    </airhotels_dashboard_transactionhistory>
+    <airhotels_dashboard_invitetransactionhistory>		
+        <label>List your Space</label>		
+        <remove name="left.newsletter"/>		
+        <remove name="left.permanent.callout"/> 		
+        <remove name="right.permanent.callout"/>		
+        <remove name="cart_sidebar"/>		
+        <remove name="catalog.compare.sidebar"/>		
+        <remove name="right.poll"/>		
+        <reference name="head">                 		
+            <action method="addJs">		
+                <script>airhotels/common.js</script>		
+            </action>		
+            <action method="addJs">		
+                <script>airhotels/page3.js</script>		
+            </action>		
+            <action method="addCss">		
+                <script>css/common-data.css</script>		
+            </action>		
+            <action method="addCss">		
+                <script>css/page.css</script>		
+            </action>		
+        </reference>		
+        <reference name="header">		
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>		
+                <action method="setTemplate" >		
+                    <template>airhotels/leftnavigation.phtml</template>		
+                </action>		
+            </block>		
+        </reference>		
+        <reference name="left">		
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">		
+                <label>Quick Links</label>               		
+            </block>		
+            <remove name="tags_popular"/>            		
+        </reference>      		
+        <reference name="root">		
+            <action method="setTemplate">		
+                <template>page/2columns-left.phtml</template>		
+            </action>            		
+        </reference>      		
+        <reference name="content">		
+        	<block type="airhotels/property_invitefriends" name="airhotels.invitehistory" template="airhotels/property/invitehistory.phtml"></block>	
+        </reference>        		
+    </airhotels_dashboard_invitetransactionhistory>
+        <!-- Payment action for host payment details -->        
+    <airhotels_dashboard_payment>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>  
+           <action method="addJs">
+                <script>airhotels/gallery/bootstrap.min.js</script>
+            </action>   
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap-formhelpers.min.js</script>
+            </action>                 
+            <action method="addCss">
+                <script>css/bootstrap-formhelpers.min.css</script>
+            </action>
+             <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+      	<reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.yourtrip" template="airhotels/property/payment.phtml">              	
+            </block>
+        </reference>       
+    </airhotels_dashboard_payment>
+    <!-- Payout action for add bank details -->
+         <airhotels_dashboard_security> 
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/jquery.validate.js</script>
+            </action> 
+        </reference>        
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>    
+        <reference name="header">		
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>		
+                <action method="setTemplate" >		
+                    <template>airhotels/leftnavigation.phtml</template>		
+                </action>		
+            </block>		
+        </reference>		
+        <reference name="left">		
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">		
+                <label>Quick Links</label>               		
+            </block>		
+            <remove name="tags_popular"/>            		
+        </reference>             
+        <reference name="content">  
+        	<block type="customer/form_edit" name="customer_edit" template="customer/form/edit.phtml"/>         
+            <block type="airhotels/property_yourlist" name="security" template="airhotels/property/security.phtml" after="-"/>
+        </reference>
+    </airhotels_dashboard_security>     
+     <!-- Invite friends -->
+      <airhotels_invitefriends_invite>
+        <label>Friends</label>
+        <remove name="left.newsletter" />
+        <remove name="airhotels_menu" />
+        <remove name="left.permanent.callout" />
+        <remove name="right.permanent.callout" />
+        <remove name="cart_sidebar" />
+        <remove name="catalog.compare.sidebar" />
+        <remove name="right.poll" />
+        <reference name="head"> 
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="airhotels/invitefriends_invite" name="invitefriends_invite" template="airhotels/invitefriends/invite.phtml"></block>
+        </reference>
+    </airhotels_invitefriends_invite>
+    
+    
+        <airhotels_invitefriends_invitefriends> 
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>      
+        <reference name="head">              
+            <action method="addCss">
+                <script>css/facebox.css</script>
+            </action>                 
+            <action method="addJs">
+                <script>airhotels/facebox.js</script>
+            </action>           
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>             
+        <reference name="content">           
+            <block type="airhotels/property_invitefriends" name="invitefriends" template="airhotels/property/invitefriends.phtml" after="-"/>
+        </reference>
+    </airhotels_invitefriends_invitefriends>
+    
+    <!-- Invite friends -->    
+        <airhotels_invitefriends_accountverification>
+        <label>Profile picture</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>        
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>        
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  	      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.uploadphoto" template="airhotels/property/accountverification.phtml">
+            </block>
+        </reference>        
+    </airhotels_invitefriends_accountverification>     
+     <!-- Payout action for add bank details -->
+    <airhotels_payout_payout>
+        <label>List your Space</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">            
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>       
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap.min.js</script>
+            </action>   
+            <action method="addJs">
+                <script>airhotels/gallery/bootstrap-formhelpers.min.js</script>
+            </action>              
+            <action method="addJs">
+                <script>airhotels/page3.js</script>
+            </action>            
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+             <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+      	<reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.yourtrip" template="airhotels/property/banktransfer.phtml">              	
+            </block>
+        </reference>        
+    </airhotels_payout_payout>    
+
+   <airhotels_dashboard_settings>
+        <label>Settings</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/> 
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">           
+            <action method="addJs">
+                <script>airhotels/calender/jquery-ui.min.js</script>
+            </action>                         
+            <action method="addCss">
+                <script>css/common-data.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/page.css</script>
+            </action>
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/accountleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+      	<reference name="content">
+            <block type="airhotels/property_yourtrip" name="airhotels.yourtrip" template="airhotels/property/settings.phtml">              	
+            </block>
+        </reference>       
+    </airhotels_dashboard_settings>
+    <airhotels_product_accountverification>
+        <label>Profile picture</label>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>        
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="head">
+         <action method="addJs">
+                <script>airhotels/common.js</script>
+            </action>                      
+            <action method="addCss">
+                <script>css/bootstrap.css</script>
+            </action>                
+        </reference>
+        <reference name="header">
+          	<block type="airhotels/leftnavigation" name="airhotels_leftnavigation" before='-'>
+                <action method="setTemplate" >
+                    <template>airhotels/leftnavigation.phtml</template>
+                </action>
+            </block>
+        </reference>
+        <reference name="left">
+            <block type="airhotels/account_navigation" name="dashboard.wrapper" translate="label" template="airhotels/account/profileleftmenu.phtml">
+                <label>Quick Links</label>               
+            </block>
+            <remove name="tags_popular"/>            
+        </reference>  	      
+        <reference name="content">
+            <block type="airhotels/property_yourlist" name="airhotels.uploadphoto" template="airhotels/property/accountverification.phtml">
+            </block>
+        </reference>        
+    </airhotels_product_accountverification> 
+</layout>

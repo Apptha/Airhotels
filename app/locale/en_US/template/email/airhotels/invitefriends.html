@@ -1,0 +1,54 @@
+<!--@subject Invitation is waiting for your response  @-->
+<!--@vars
+{"store url=\"\"":"Store Url",
+"var logo_url":"Email Logo Image Url",
+"htmlescape var=$customer.name":"Customer Name",
+"store url=\"customer/account/\"":"Customer Account Url",
+"var customer.email":"Customer Email",
+"htmlescape var=$customer.password":"Customer Password"}
+@-->
+
+<!--@styles
+body,td { color:#2f2f2f; font:11px/1.35em Verdana, Arial, Helvetica, sans-serif; }
+@-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body style="background:#F6F6F6; font-family:Verdana, Arial, Helvetica, sans-serif; font-size:12px; margin:0; padding:0;">
+<div style="background:#F6F6F6; font-family:Verdana, Arial, Helvetica, sans-serif; font-size:12px; margin:0; padding:0;">
+<table cellspacing="0" cellpadding="0" border="0" height="100%" width="100%">
+        <tr>
+            <td align="center" valign="top" style="padding:20px 0 20px 0">
+                <!-- [ header starts here] -->
+                <table bgcolor="FFFFFF" cellspacing="0" cellpadding="10" border="0" width="650" style="border:1px solid #E0E0E0;">
+                    <tr>
+                        <td valign="top">
+                            <a href="{{store url=""}}"><img src="{{var logo_url}}" alt="{{var logo_alt}}" style="margin-bottom:10px;" border="0"/></a></td>
+                    </tr>
+                <!-- [ middle starts here] -->
+                 <tr>
+                    <td><p style="font-family: 'helvetica neue',helvetica,arial,sans-serif;font-size: 14px;color: #211922;line-height: 20px;margin: 0;padding: 5px 0 5px 15px;">Hi <b>Friend, </b></p><br/><br/></td>    
+                 </tr>
+                 <tr>
+                    	<td valign="top">                         
+                            <img src="{{var image}}" width="80" height="80" style="vertical-align: top;outline: none;border: none;" />
+                        </td>
+                        <td>
+			               <p style="font-family: 'helvetica neue',helvetica,arial,sans-serif;font-size: 14px;color: #211922;line-height: 20px;margin: 0;padding: 5px 0 5px 15px;"><b>{{var sendername}}</b> has invited you to the new stuff. Get started with Booking Experiences.<br/><br/>
+			               
+			               <b>{{var sendername}}</b> has a message for you:<br/><br/>
+						  
+						  <b>{{var message}}</b><br/></p>
+						</td>
+						<td> 
+						<a href="{{var url}}" style="background: #09F;border: #ffffff 1px solid;border-radius: 5px;padding: 8px 35px 6px;color: white;font-weight: bold;font-size: 16px;display: block;float: right;font-family: arial;text-decoration: none;"> Accept Invite </a><br/>							            
+			             
+			             </td>
+			        </tr>                     
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>

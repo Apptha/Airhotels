@@ -1,0 +1,144 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="my-account" >
+<div class="page-title" style="margin:0">
+    <h1 class="dashboard_leftside_heading"><?php echo $this->__('Change password') ?></h1>
+</div>
+<?php $actionName = Mage::app()->getRequest()->getActionName();
+?>
+<form action="<?php echo $this->getUrl('customer/account/editPost') ?>" method="post" id="form-validate" autocomplete="off">
+    <div class="profile_container" style="background:#fff;border: 1px solid #dce0e0;border-top:none;border-bottom:none;padding-bottom:0">
+        <?php echo $this->getBlockHtml('formkey')?>
+        <ul class="form-list" >            
+        <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
+        <?php if ($_dob->isEnabled()): ?>
+            <li><?php echo $_dob->setDate($this->getCustomer()->getDob())->toHtml() ?></li>
+        <?php endif ?>
+        <?php $_taxvat = $this->getLayout()->createBlock('customer/widget_taxvat') ?>
+        <?php if ($_taxvat->isEnabled()): ?>
+            <li><?php echo $_taxvat->setTaxvat($this->getCustomer()->getTaxvat())->toHtml() ?></li>
+        <?php endif ?>
+        <?php $_gender = $this->getLayout()->createBlock('customer/widget_gender') ?>
+        <?php if ($_gender->isEnabled()): ?>
+            <li><?php echo $_gender->setGender($this->getCustomer()->getGender())->toHtml() ?></li>
+        <?php endif ?>          
+        </ul>
+    </div>
+    <div class="profile_container" style="background:#fff;border: 1px solid #dce0e0;border-top:none;border-bottom:none;">
+        <ul class="form-list">
+            <li>
+            <div class="profile_common_label"><label for="current_password" class="profile_label required"><?php echo $this->__('Current Password') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                <div class="form-space profile_input_section">
+                    <input type="text" class="input-text no-display" name="dummy" id="dummy" />
+                    <input type="password" title="<?php echo $this->__('Current Password') ?>" class="profile_input" name="current_password" id="current_password" />
+                </div>
+            </li>
+            <li>
+            <div class="profile_common_label"><label for="password" class="profile_label required"><?php echo $this->__('New Password') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                <div class="form-space profile_input_section">
+                    <input type="password" title="<?php echo $this->__('New Password') ?>" class="profile_input validate-password" name="password" id="password" />
+                    </div>
+               </li>
+               <li>
+               <div class="profile_common_label"><label for="confirmation" class="profile_label required"><?php echo $this->__('Confirm New Password') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                <div class="form-space profile_input_section">
+                   <input type="password" title="<?php echo $this->__('Confirm New Password') ?>" class="profile_input validate-cpassword" name="confirmation" id="confirmation" />
+                </div>
+            </li>
+        </ul>
+    </div>
+    <input type="hidden" name="change_password" id="change_password" value="1" />
+    <input type="hidden" name="action" value="<?php echo $actionName; ?>" id="action">
+    <div class="buttons-set" style="clear: both;margin:0;padding:10px;border-top: none!important;text-align: right;border: 1px solid #ccc;background-color: #fff;">
+       <p class="required "><i class="airhotel-sprite lock profile_madatory"></i><?php echo $this->__('Required Fields'); ?></p>
+        <a style="float:left" class="import_button" href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>"><?php echo $this->__('<< Back') ?></a>
+        <button type="submit" title="<?php echo $this->__('Save') ?>" class="import_button"><?php echo $this->__('Save') ?></button>
+    </div>
+   
+</form>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+    var dataForm = new VarienForm('form-validate', true);
+    function setPasswordForm(arg){
+        if(arg){
+            $('current_password').up(3).show();
+            $('current_password').addClassName('required-entry');
+            $('password').addClassName('required-entry');
+            $('confirmation').addClassName('required-entry');
+
+        }else{
+            $('current_password').up(3).hide();
+            $('current_password').removeClassName('required-entry');
+            $('password').removeClassName('required-entry');
+            $('confirmation').removeClassName('required-entry');
+        }
+    }
+
+    
+        setPasswordForm(true);
+    
+//]]>
+</script>
+
+    <script>
+    var jQ = jQuery.noConflict();
+    jQ(document).ready(function() {
+    	   // Setup form validation on the #register-form element
+    	    jQ("#form-validate").validate({
+    	    	rules: {
+    	      // Specify the validation rules    	        
+    	          current_password:{
+    	            	remote: {
+    	                    url: "<?php echo Mage::getUrl('customer/account/checkoldpassword') ?>",
+    	                   type: "post"
+    	                },    	            	
+    	              },
+    	            
+    	    	},
+    	    	messages:{
+    	    	current_password:"Enter correct password"
+    	    	}
+    	    });
+
+    	  }); 
+    jQ(document).ready(function() {
+    	jQ("input:text, textarea, input:password,select").focus(function(){ 		
+    		jQ(this).css('border', '1px solid #5aaee5');
+    		jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    });
+    	jQ("input:text ,textarea, input:password,select").blur(function(){ 
+    		jQ(this).css('border', '1px solid #dbdbdb');
+    		jQ(this).css('box-shadow', 'none');
+    });
+});
+</script>

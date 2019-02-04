@@ -1,0 +1,586 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$baseUrl = $this->getBaseUrl();
+$skinUrl = $this->getSkinUrl();
+/**
+ * get the Country code by IP
+ */
+$smsEnabledOrNot    = Mage::helper('airhotels/smsconfig')->getSmsEnabledOrNot();
+if($smsEnabledOrNot == 0){
+ $country = '';
+ $countryIsdCode = '';
+ $IP = $_SERVER['REMOTE_ADDR'];
+ if (!empty($IP)) {
+ 	$country = unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip='.$IP));
+ }
+ $className 		= Mage::getConfig()->getBlockClassName('Apptha_Airhotels_Block_Property_Form');
+ $block 			= new $className();
+ $getISDCode 	= $block->getIsdCode();
+ $isdCode 		= explode(";",$getISDCode);
+ $count 			= count($isdCode);
+ for($i=0;$i<$count;$i++) {
+ 	$getCountryCode = explode("=",$isdCode[$i]);
+ 	if("countryCodeList['$country']" == $getCountryCode[0]) {
+ 		$countryIsdCode = $getCountryCode[0];
+ 	}else{
+ 		$countryIsdCode = '+91';
+ 	}
+ }
+}
+/**
+ * Get the current Customer ID
+ */
+$customerId = Mage::getSingleton('customer/session')->getId();
+$host = Mage::getSingleton('customer/session')->getCustomer();
+/**
+ * First Name
+ */
+$hostFirstName = $host->getFirstname();
+/**
+ * Last Name
+ */
+$hostLastName 	= $host->getLastname();
+$hostGender 	= $host->getGender();
+$hostEmail 		= $host->getEmail();
+$hostDob 		= $host->getDob();
+$dobMonth 		= date("F",strtotime($hostDob));
+$dobDay 		= date("d",strtotime($hostDob));
+$dobYear 		= date("Y",strtotime($hostDob));
+$months 		= array("1"=>'January',"2"=>'February',"3"=>'March',"4"=>'April',"5"=>'May',"6"=>'June',"7"=>'July',"8"=>'August',"9"=>'September',"10"=>'October',"11"=>'November',"12"=>'December');
+$currentYear 	= date('Y');
+$range 			= range($currentYear, $currentYear-60);
+$years 			= array_combine($range, $range);
+/**
+ * Get logged in customer data
+ */
+$customerData 		= Mage::getModel('airhotels/product')->getCustomerPictureById($customerId);
+if($smsEnabledOrNot == 0){
+ $phoneNumberVerify	= $customerData[0]['mobile_verified_profile'];
+ $contactNumberArray = $customerData[0]['contact_number'];
+ $contactNumberArray = unserialize($contactNumberArray);
+ $contactNumber 		= $contactNumberArray['contact_number'];
+ $contactIsdCode 	= $contactNumberArray['isd_code'];
+ $contactCountryCode = $contactNumberArray['country_code'];
+ if($contactCountryCode == ""){
+     $contactCountryCode = $country['geoplugin_countryCode'];
+ }
+}else{
+    $phoneNumberVerify	= $customerData[0]['mobile_verified_profile'];
+    $contactNumberArray = $customerData[0]['contact_number'];
+    $contactNumberArray = unserialize($contactNumberArray);
+    $contactNumber 		= $contactNumberArray['contact_number'];
+}
+?>
+<div class="my-account">
+	<?php if($phoneNumberVerify != "verified" && $smsEnabledOrNot == 0){ ?>
+	<div class="page-title">
+	<?php echo $this->__('You need to verify your phone number before update your profile.'); ?>
+	</div>
+	<?php } ?>
+	<div class="personal-info">
+	    <div class="page-title" style="margin:0;">
+	    <h1 class="dashboard_leftside_heading"><?php echo $this->__('Required') ?></h1>
+	</div>
+	<div class="profile_information_body">
+	<form action="<?php echo Mage::getBaseUrl()."property/index/updatemore" ?>" method="post" id="form-validate" role="form" enctype="multipart/form-data">
+	    <div class="profile_container" style="border-top:none;">
+	        <div class="clear"></div>
+	        <ul class="form-list profile_info">
+	            	<li><div id="host_firstName" class="form-space">
+	             		<div class="profile_common_label">
+	             			<label class="profile_label">
+	             				<?php echo $this->__('First Name') ?><i class="lock airhotel-sprite profile_madatory"></i>
+	             			</label>
+	             		</div>
+	             		<div class="profile_input_section">
+	             		<input type="text" id="firstName" name="firstName" class="profile_input required-entry" placeholder="First Name" value="<?php if(isset($hostFirstName)){ echo $hostFirstName; } ?>"/>
+	              		</div>
+	             	</div></li>
+	            <li>
+	                <div id="host_lastName" class="form-space"><div class="profile_common_label">
+
+	                    	<label class="profile_label">
+	                    		<?php echo $this->__('Sur Name') ?><i class="lock airhotel-sprite profile_madatory"></i>
+	                    	</label>
+	                    </div>
+	                    <div class="profile_input_section"><input type="text" id="lastName" name="lastName" class="profile_input required-entry" placeholder="Last Name" value="<?php if(isset($hostLastName)){ echo $hostLastName; } ?>"/>
+	              		<p class="profile_hint_text"><?php echo $this->__("This is only shared once you have a confirmed property with another user.");?></p>
+	              		</div>
+	               </div>
+	            </li>
+	            <li>
+	                <div id="host_gender" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('I am') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section">
+	                    <select name="gender" id="gender" class="validate-select profile_input" title="gender" >
+	                    <?php 
+	                    $options = Mage::getResourceSingleton('customer/customer')->getAttribute('gender')->getSource()->getAllOptions();?>
+	    				<?php 
+	    				foreach ($options as $option):?>
+	    					<option name="<?php echo $this->getFieldName('gender')?>" value="<?php echo $option['value'] ?>"  <?php if ($option['value'] == $hostGender) echo 'selected="selected"' ?>><?php if( empty($option['label']) ){ echo Mage::helper('airhotels')->__('Select Gender'); }else{ if($option['label']==1){echo 'Male';}elseif($option['label'] == 2){echo 'Female';}else{ echo $option['label'];}; } ?></option>
+	   					<?php endforeach;?>
+	                    </select>
+	                     <p class="profile_hint_text"><?php echo $this->__("We use this data for analysis and never share it with other users.");?></p>
+	              		</div>
+	               </div>
+	            </li>
+	            <li>
+	                <div id="host_gender" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Birth Date') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section">
+	                    <select name="month" id="month" class="validate-select profile_input" title="Month" >
+	                    <option name="month" value=""  <?php if ($hostDob == '') echo ' selected="selected"' ?>> Month </option>
+	                   	<?php  foreach($months as $month): ?>
+	                   		<option name="<?php echo $month;?>" value="<?php echo $month; ?>" <?php if ($hostDob !='' && $month == $dobMonth) echo ' selected="selected"' ?>><?php echo $month; ?></option>
+	                   	<?php endforeach;?>
+	                    </select>
+	                    <select name="day" id="day" class="validate-select profile_input" title="Day" >
+	                    <option name="day" value=""  <?php if ($hostDob == '') echo ' selected="selected"' ?>> Day </option>
+	                   	<?php  for($i=1;$i<=31;$i++){ ?>
+	                   		<option name="day<?php echo $i; ?>" value="<?php echo $i; ?>" <?php if ($hostDob != '' && $i == $dobDay) echo ' selected="selected"' ?>><?php echo $i; ?></option>
+	                   	<?php } ?>
+	                    </select>
+	                    <select name="year" id="year" class="validate-select profile_input" title="Year" >
+	                    <option name="year" value=""  <?php if ($hostDob == '') echo ' selected="selected"' ?>> Year </option>
+	                   	<?php foreach($years as $year): ?>
+	                   		<option name="<?php echo $year;?>" value="<?php echo $year; ?>" <?php if ($hostDob != '' && $year == $dobYear) echo ' selected="selected"' ?>><?php echo $year; ?></option>
+	                   	<?php endforeach;?>
+	                    </select>
+	                    <p class="profile_hint_text"><?php echo $this->__("The magical day you were dropped from the sky by a strok. We use this data for analysis and never share it with other users.");?></p>
+	              		</div>
+	               </div>
+	            </li>
+	             <li>
+	                <div id="host_firstname" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Email Address') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section"><input type="text" id="email" name="email" class="profile_input required-entry validate-email" readonly value="<?php if(isset($hostEmail)){ echo $hostEmail; } ?>"/>
+	                    <p class="profile_hint_text"><?php echo $this->__("We wont't share your private email address with other users.");?></p>
+	              		</div>
+	               </div>
+	            </li>
+	            <?php if($smsEnabledOrNot == 0){?>
+	           <li>
+	                <div id="profile_contact" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Phone Number') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section">
+	                    	<input type="hidden" name="edit_profile" value="edit"/>
+	                   	 	<?php $displayContactNumber = substr($contactNumber, -4); if($phoneNumberVerify=="verified") { ?>
+							<div class="verifiedtextclass">
+								<p class="verify_box">
+								<p class="phonenumber_section"><span class="phone_number_verified"><?php echo "+$contactIsdCode****$displayContactNumber";?></span></p>
+								<p id="btnShowModal" class="changephonenumber">Change phone number</p>
+								</p>
+							</div>
+							<input type="hidden" name="emergencyContactCheck" class="contact_number" value="<?php echo $contactNumber; ?>">
+							<?php } else { ?>
+							<div class="verifynowprocess">
+								<p class="verify_box" id="verify_box_content">
+								<input type="button" id="btnShowModal" class="verify_profile_no" value="<?php echo ucfirst("Verify Phone Number"); ?>"/>
+								<p class="profile_hint_text"><?php echo $this->__("To get texts for notifications we need to verify your contact number. It only takes a minute.");?></p>
+								</p>
+							</div>
+							<?php } ?>
+							<p class="profile_hint_text"><?php echo $this->__("This is only shared once you have a confirmed property with another user.");?></p>
+						    <p class="profile_hint_text"><?php echo $this->__("This is how call we can all get in touch.");?></p>
+	                	</div>
+	                </div>
+	            </li>
+	            <?php } else{ ?>
+	            <li>
+	                <div id="host_firstname" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Phone Number') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section"><input type="text" name="contact" value="<?php if(isset($contactNumber)){ echo $contactNumber; } ?>" class="profile_input required-entry validate-mobileno" placeholder="Phone Number">
+	                    
+	              		</div>
+	               </div>	            
+	             </li>	            
+	            <input type="hidden" name="sms_enabled" class="sms_enabled" value="<?php echo $smsEnabledOrNot; ?>">
+	            <?php }?>
+	            <li>
+	                <div id="profile_country" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Where you Live') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section">
+	                    <?php
+	                    $_countries = Mage::getResourceModel('directory/country_collection')
+	                            ->loadData()
+	                            ->toOptionArray(false)
+	                    ?>
+	                            <?php if (count($_countries) > 0) { ?>
+	                        <select name="country" id="country" class="validate-select profile_input" title="Country" >
+	                            <option value="">-- Please Select --</option>
+	                            <?php foreach ($_countries as $_country) { ?>
+	                            <option value="<?php echo $_country['value']; ?>" <?php echo $customerData[0]['country'] == $_country['value'] ? ' selected="selected"' : ''; ?>>
+	                            <?php echo $_country['label'] ?>
+	                             </option>
+	                            <?php } ?>
+	                        </select>
+	                    <?php } ?>
+	                    </div>
+	                </div>
+	            </li>
+	             <li>
+	                <div id="profile_city" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label"><?php echo $this->__('City') ?><i class="lock airhotel-sprite profile_madatory"></i></label></div>
+	                    <div class="profile_input_section"><input type="text" id="city" name="city" class="profile_input required-entry" value="<?php if(isset($customerData[0]['city'])){ echo $customerData[0]['city']; } ?>"/>
+	              		</div>
+	               </div>
+	            </li>
+	        	<li>
+	        		<div class="">
+						<div class="profile_common_label"><label for="moreAboutHost" class="moreAboutHost profile_label">Describe Yourself<i class="lock airhotel-sprite profile_madatory"></i></label></div>
+						<div class="profile_input_section"><textarea cols="5" rows="5" name="moreAboutHost" id="moreAboutHost" class="profile_input required-entry" style="border: 1px solid rgb(219, 219, 219); box-shadow: none;"><?php if(isset($customerData[0]['more_host'])){ echo $customerData[0]['more_host']; } ?></textarea>
+							<ul class="clearfix hintlist">
+							<li><p class="profile_hint_text"><?php echo $this->__("Tell them about the things you like: What are 5 things you cant't live without?");?></p></li>
+							<li><p class="profile_hint_text"><?php echo $this->__("Share your favorite travel destinations, books, movies, shows, music, food.");?></p></li>
+							<li><p class="profile_hint_text"><?php echo $this->__("Tell them what it's like to have you as a guest or host: What's your style of traveling of our hosting?");?></P></li>
+							<li><p class="profile_hint_text"><?php echo $this->__("Tell them about you : Do you have a life moto?");?></p></li>
+							</ul>
+							</div>
+
+					</div>
+				</li>
+				</ul>
+				</div>
+				    <div class="profile_container" style="margin:30px 0 0;padding:0">
+	        <div class="clear"></div>
+	        <h1 class="dashboard_leftside_heading" style="border-top:none;border-right:none;border-left:none;"><?php echo $this->__('Optional') ?></h1>
+	        <ul class="form-list profile_info" style="padding:10px">
+	             <li>
+	                <div id="host_school" class="form-space"><div class="profile_common_label">
+	                    <label class="profile_label">
+	                    <?php echo $this->__('School') ?>
+	                    </label></div><div class="profile_input_section">
+	                    <input type="text" id="school" name="school" class="profile_input" placeholder="School" value="<?php if(isset($customerData[0]['school'])){ echo $customerData[0]['school']; } ?>"/>
+	              		</div></div>
+	            </li>
+	             <li>
+	                <div id="host_work" class="form-space">
+	                    <div class="profile_common_label">
+	                    <label class="profile_label"><?php echo $this->__('Work') ?></label>
+	                    </div>
+	                    <div class="profile_input_section">
+	                    <input type="text" id="work" name="work" class="profile_input" placeholder="Work" value="<?php if(isset($customerData[0]['work'])){ echo $customerData[0]['work']; } ?>"/></div></div>
+	            </li><li><div id="profile_timezone" class="form-space">
+	                  	<div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Time Zone') ?></label></div>
+	          			<div class="profile_input_section">
+	          			<select id="time_zone" name="time_zone" class="validate-select profile_input">
+	        			<?php $className = Mage::getConfig()->getBlockClassName('Apptha_Airhotels_Block_Property_Form');
+						$block = new $className();
+						$timeZones = $block->getTimezone();
+	         				echo $timeZones; ?>
+	     			 	</select>
+	     			 	<p class="profile_hint_text"><?php echo $this->__("Your home time zone.");?></p>
+	     			 	</div>
+	      			</div>
+	        	</li>
+	         	<li>
+	                <div id="host_emergencyContact" class="form-space">
+	                    <div class="profile_common_label"><label class="profile_label" style="vertical-align:top;"><?php echo $this->__('Emergency Contact') ?></label></div>
+	                    <div class="profile_input_section">
+	                    <?php $emergencyContact = $customerData[0]['emergency_contact'];
+	                    $emergencyContact = unserialize($emergencyContact);
+	                    $emergencyContactName = $emergencyContact["emergencyContactName"];
+	                    $emergencyContactPhone = $emergencyContact["emergencyContactPhone"];
+	                    $emergencyContactEmail = $emergencyContact["emergencyContactEmail"];
+	                    $emergencyContactRelationship = $emergencyContact["emergencyContactRelationship"];
+	                    if((isset($emergencyContact)) && ((!empty($emergencyContactName))) || (!empty($emergencyContactPhone)) || (!empty($emergencyContactEmail)) || (!empty($emergencyContactRelationship))){ ?>
+	                    <span class="edit_contact" id="edit_contact" onclick="showFrom('edit');" style="color:#479BFF;cursor:pointer;">+ Edit</span>
+	                    <?php } else { ?>
+	                    <span class="add_contact" id="add_contact" onclick="showFrom('add');" style="font-weight:700;color:#479BFF;cursor:pointer;">+ Add Contact</span>
+	                    <?php } ?>
+	              		<p class="profile_hint_text"><?php echo $this->__("Give our Customer  Experience team a trusted contact we can alert in an urgent.");?></p>
+	              		<div class="emergency_contact_form form_hide" id="emergency_contact_form">
+	              		<div class="profile_common_label"><label class="profile_label" style="text-align: left;vertical-align: top;height: 20px;margin: 10px 0 0;display: block;"><?php echo $this->__('Name') ?></label></div>
+	              		<div class="profile_input_section" style="margin: 0 0 28px"><input  type="text" id="emergencyContactName" name="emergencyContactName" class="profile_input" placeholder="Name" value="<?php if(isset($emergencyContactName)){ echo $emergencyContactName; } ?>"/></div>
+	              		<div class="profile_common_label"><label class="profile_label" style="text-align: left;vertical-align: top;height: 20px;"><?php echo $this->__('Phone') ?></label></div>
+	              		<div class="profile_input_section" style="margin: 0 0 28px"><input  type="text" id="emergencyContactPhone" name="emergencyContactPhone" class="profile_input validate-number" placeholder="Phone" value="<?php if(isset($emergencyContactPhone)){ echo $emergencyContactPhone; } ?>"/></div>
+	              		<div class="profile_common_label"><label class="profile_label" style="text-align: left;vertical-align: top;height: 20px;"><?php echo $this->__('Email') ?></label></div>
+	              		<div class="profile_input_section" style="margin: 0 0 28px"><input type="text" id="emergencyContactEmail" name="emergencyContactEmail" class="profile_input validate-email" placeholder="sample@xxx.com" value="<?php if(isset($emergencyContactEmail)){ echo $emergencyContactEmail; } ?>"/></div>
+	              		<div class="profile_common_label"><label class="profile_label" style="text-align: left;vertical-align: top;height: 20px;"><?php echo $this->__('Relationship') ?></label></div>
+	              		<div class="profile_input_section" style="margin: 0 0 28px"><input  type="text" id="emergencyContactRelationship" name="emergencyContactRelationship" class="profile_input" placeholder="Relationship" value="<?php if(isset($emergencyContactRelationship)){ echo $emergencyContactRelationship; } ?>"/></div>
+	              		</div>
+	              		</div>
+	               </div>
+	            </li>
+	            <li>
+	            <p class="required "><i class="lock airhotel-sprite profile_madatory" style="margin:0 4px 0 0"></i><span class="rgba(249, 30, 1, 0.6)!important"><?php echo $this->__('Required Fields'); ?></span></p>
+	                <button style="float:right;" type="submit" title="<?php echo $this->__('Update profile information') ?>" class="import_button"><?php echo $this->__('Update profile information') ?></button>
+	            </li>
+	            </ul>
+	            </div>
+	            <div class="profile_container" style="display:none;">
+	        <div class="clear"></div>
+	        <ul class="form-list profile_info">
+	            <h4>Documents</h4>
+	            <?php $verificationTags = Mage::getModel('airhotels/tagsverification')->getCollection();
+	     		foreach ($verificationTags as $verificationTag){
+	            if($verificationTag->getDirectUrl()==0){ ?>
+	        	<li>
+	            	<div class="form-space">
+	                	<label class="label_align"><?php echo ucfirst($verificationTag->getTagName()).$this->__(' File') ?></label>
+	                	<input type="file" id="<?php echo $verificationTag->getTagName() ?>" name="<?php echo $verificationTag->getTagName() ?>"  value="<?php if(isset($customerData[0]['document_url'])){ echo $customerData[0]['document_url']; } ?>"/>
+	            	</div>
+	        	</li>
+	       		<?php } elseif($verificationTag->getDirectUrl()==1){
+	        	$filePath=Mage::getModel('airhotels/verifyhost')->getCollection()
+	        	->addFieldToFilter('host_id',array('eq'=>$customerId))
+	        	->addFieldToFilter('tag_id',array('eq'=>$verificationTag->getId()))
+	        	->getFirstItem()->getFilePath();
+	     		?>
+	       		<li>
+	          		<div  class="form-space">
+	             	  <label class="label_align"><?php echo ucfirst($verificationTag->getTagName()).$this->__(' File Link') ?></label>
+	              	  <input type="hidden" id="<?php echo $verificationTag->getTagName() ?>" name="<?php echo $verificationTag->getTagName() ?>" class="btn-primary" value="<?php if(isset($filePath)){ echo $filePath; } ?>"/>
+	           		</div>
+	         	</li>
+	      		<?php }?>
+	     	 	<?php }?>
+	      		<li>
+	                <div id="profile_preview">
+	                    <label class="profile_label"> <?php echo $this->__('Profile Preview') ?></label>
+	                    <input class="profile_input" onclick="window.open('<?php echo Mage::getBaseUrl().'property/property/uploadphoto/'; ?>', '_blank');" type="button" id="preview" value="<?php echo $this->__('Click here to preview profile page'); ?>" name="preview_button">
+	                </div>
+	            </li>
+	            <li>
+	            <p class="required "><i class="lock airhotel-sprite profile_madatory"></i><?php echo $this->__('Required Fields'); ?></p>
+	                <button style="float:right;" type="submit" title="<?php echo $this->__('Update profile information') ?>" class="import_button"><?php echo $this->__('Update profile information') ?></button>
+	            </li>
+	        </ul>
+	    </div>
+	    </form>
+	    </div>
+	</div>
+</div>
+<script type="text/javascript">
+		jQ = jQuery.noConflict();
+		jQ(document).ready(function () {
+  		jQ("#btnShowSimple").click(function (e) {
+  			ShowDialog(false);
+  			e.preventDefault();
+  		});
+		jQ("#btnShowModal").click(function (e)	{
+  			ShowDialog(true);
+  			e.preventDefault();
+  		});
+  		jQ("#btnClose").click(function (e)	{
+  			HideDialog();
+  			e.preventDefault();
+  		});
+  		jQ(".bfh-selectbox-options li a").on('click', function() {
+  			var countryCode = jQ(this).data('option');
+  			changeCountry(countryCode);
+  		});
+		});
+  		function ShowDialog(modal) {
+  		jQ("#overlay").show().attr('style','display: table');
+  		jQ("#dialog").fadeIn(300);
+  			if (modal)
+  			{
+  			  	jQ("#overlay").unbind("click");
+  			}
+  			else
+  			{
+  			   	jQ("#overlay").click(function (e)
+  			   	{
+  			   		HideDialog();
+  			    });
+  			}
+   	   	}
+  		function HideDialog()
+  			{
+  				jQ('.phone_container').show();
+				jQ('.confirmation-code').hide();
+				jQ("#overlay").hide().attr('style','');
+  			    jQ("#dialog").fadeOut(300);
+  		  	}
+
+  	//<![CDATA[
+  		if(Validation) {
+  		Validation.addAllThese([
+  		['validate-mobileno','Enter correct mobile number (Eg:9986858483)',
+  		function(v){
+  		var timePat ="^((\+){0,1}91(\s){0,1}(\-){0,1}(\s){0,1}){0,1}9[0-9](\s){0,1}(\-){0,1}(\s){0,1}[1-9]{1}[0-9]{7}$";  		
+  		if(v.length > 0){
+  		if(v.length !=10){
+  		    return false;
+  		   }
+  		return true;
+  		}else {
+  		return false;
+  		}
+  		}
+  		]])};
+  var countryCodeList = new Array();
+  <?php echo $getISDCode; ?>
+  function changeCountry(countryCode)
+  {
+    if ( countryCode != "" )
+    {
+      countryCode=countryCode.toUpperCase();
+      var country=countryCodeList[countryCode];
+      jQ("#isdcode").val(country);
+      jQ("#phoneCountryCode").val(countryCode);
+    }
+    else
+    {
+    	jQ("#isdcode").val("");
+        return false;
+    }
+  }
+  function sendcode(){
+	  jQ("#country_verify_error").hide();
+	  var phoneNumber = jQ("#phonenumber").val();
+	  var countryCode = jQ("#isdcode").val();
+	  var PhoneCountrycode = jQ("#phoneCountryCode").val();
+	  if(PhoneCountrycode == ""){
+		  jQ("#country_verify_error").html("Please Select country").show();
+		  return false;
+	  }
+	  if(phoneNumber=="" || countryCode==""){
+			jQ("#form_verify_error").html("ISD code and Phone number is required").show();
+			return false;
+		  }
+	  else{
+		  	var intsOnly = /^\d+$/;
+			if(!intsOnly.test(phoneNumber)) {
+				jQ("#form_verify_error").html("Please enter valid phone number").show();
+				return false;
+			}
+	  }
+	  jQ("#form_verify_error").hide();
+	  jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/sendcode/phonenumber/'?>"+phoneNumber+'/countrycode/'+countryCode+"/phoneCountryCode/"+phoneCountryCode,
+          type: "POST",
+          beforeSend: function(data){
+        	  jQ("#verify_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');jQ("#verify_form_submit").hide();
+           },
+          success: function(data){
+			if(data=="success"){
+              jQ("#verify_form_submit").show(); jQ("#verify_form_loader").html(""); var currentIsdCode = jQ('#isdcode').val();
+        	  var CurrentPhoneNumber = jQ('#phonenumber').val();
+        	  jQ("#current_phone_number").html("We send verification code to "+currentIsdCode+" "+CurrentPhoneNumber);
+        	  jQ('.phone_container').hide();jQ('.confirmation-code').show();
+			}
+			else{
+				jQ("#verify_form_loader").html(""); jQ("#verify_form_submit").show();jQ("#form_verify_error").html(data).show();
+			}
+          }
+      });
+  }
+  function codeverification(){
+	  var code = jQ("#code").val();
+	  if(code == ""){
+			jQ("#code_verify_error").html("Confirm code is required").show();
+			return false;
+		  }
+	  jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/codeverification/code/'?>"+code,
+          type: "POST",
+          beforeSend: function(data)
+          {
+        		jQ("#confirm_alert").hide();
+        	  	jQ("#confirm_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+        	  	jQ("#confirm_form_submit").hide();
+          },
+          success: function(data)
+          {
+             if(data == 1){
+            	 jQ("#confirm_form_loader").html("");
+             	 jQ("#confirm_form_submit").show();
+            	 HideDialog();
+            	 jQ("#verify_box_content").html('<p class="success_verified_text"><i class="fa fa-check verified_icon"></i><span>Verified successfully</span></p><span style="display:block;color:#A5A4A4;font-size:13px;margin:10px 0 0 0">Your phone number has been verified successfully</span>');
+               }else{
+                	jQ("#confirm_form_loader").html("");
+               		jQ("#confirm_form_submit").show();
+            	  	jQ("#confirm_alert").html('<span>Sorry that code could not be verified.</span>');
+            	  	jQ("#confirm_alert").show();
+              }
+          }
+      });
+  }
+  </script>
+	<div id="output"></div>
+	<div id="overlay" class="web_dialog_overlay">
+	<div style="display: table-cell;vertical-align:middle;">
+	<div id="dialog" class="web_dialog">
+	<div class="phone_verify_close" id="popupclosesection"><span class="btnClose closebutton" id="btnClose"><i class="airhotel-sprite close close_icon_btn" style="right:-6px"></i></span></div>
+		<div class="phonenumber-error"></div>
+		<div class="phone_container">
+			<h3 style="margin-bottom:10px;" class="verify_phone_number_title"><?php echo $this->__("Verify Phone Number");?></h3>
+			<div class="choose_country">
+			<span class="choose_country_flag">Choose Country</span>
+			<div class="bfh-selectbox bfh-countries country_select_for_phone" data-country="<?php if($contactCountryCode){echo $contactCountryCode;} ?>" data-flags="true"></div>
+			<span class="form_verify_error" id="country_verify_error" style="display:none;"></span>
+			</div>
+    		<form class="form-verify phone_number_verify" role="form" method="POST" action="">
+    			<div class="clearfix choose_number">
+    			<span for="phonenumber" class="label_phonenumber"><?php echo $this->__("Add a phone number");?></span>
+    			<input name="isdcode" type="tel" id="isdcode" class="form-control country_extension" value=<?php if($contactIsdCode){echo "'+$contactIsdCode'";}else{echo $countryIsdCode;}?> disabled required>
+       			<input name="number" type="tel" class="form-control user_phone_number" id="phonenumber" value="<?php if($contactNumber) { echo $contactNumber;} ?>" placeholder="Phone number" required autofocus>
+       			<input name="phoneCountryCode" type="hidden" id="phoneCountryCode" value="<?php if($contactCountryCode){echo $contactCountryCode;} ?>">
+       			<span class="form_verify_error" id="form_verify_error" style="display:none;"></span>
+       			</div>
+
+       			<span id="verify_form_loader" class="verify_form_loader"></span>
+       			<div class="popup_verify_button"><button style="width: 100%	;height: auto;box-sizing: border-box;font-size: 18PX;font-family: 'Droid Sans', 'Belgrano', sans-serif;border-radius: 3px;float: none;text-align: center;" class="btn btn-lg btn-primary btn-block" type="button" id="verify_form_submit" onclick="sendcode();"><?php echo $this->__("Verify");?></button></div>
+    		</form>
+		</div> <!-- /container -->
+		<div class="confirmation-code" style="display:none;">
+  			<h3 class="form-verify-heading"><?php echo $this->__("Confirm Your Code");?></h3>
+			<span class="" id="current_phone_number" style="display:block;margin:0 0 20px;"></span>
+  			<input style="box-sizing: border-box;margin-bottom: 15px;" name="code" id="code" type="text" class="form-control" placeholder="Confirm code" required autofocus>
+  			<span class="form_verify_error" id="code_verify_error" style="display:none;"></span>
+  			<span id="confirm_form_loader" class="confirm_form_loader"></span>
+  			<button class="btn btn-lg btn-primary btn-block" id="confirm_form_submit" type="button" onclick="codeverification();"><?php echo $this->__("Confirm");?></button>
+      		<div class="alert alert-info" id="confirm_alert" role="alert" style="display:none";>
+     	 	</div>
+		</div>
+	</div>
+	</div>
+</div>
+    <script>
+    	var formValidate = new VarienForm('form-validate', true);
+    	jQ(document).ready(function() {
+    		jQ("input:text, textarea, select").focus(function(){ 		jQ(this).css('border', '1px solid #5aaee5'); jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)'); });
+			jQ("input:text, textarea, select").blur(function(){
+				jQ(this).css('border', '1px solid #dbdbdb');
+				jQ(this).css('box-shadow', 'none');});
+		});
+		function showFrom(type) {
+			if(jQ("#emergency_contact_form").hasClass('form_hide')) {
+				jQ("#emergency_contact_form").removeClass('form_hide');
+				jQ("#emergency_contact_form").addClass('form_show');
+				}
+			else {
+				jQ("#emergency_contact_form").removeClass('form_show');
+				jQ("#emergency_contact_form").addClass('form_hide');
+				}
+			}
+	</script>

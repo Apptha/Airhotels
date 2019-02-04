@@ -1,0 +1,73 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<!-- Get the currency Code -->
+<?php if($this->getCurrencyCount() > 0): ?>
+<span style="display:none">Select Currency:</span>
+<script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS).'airhotels/jquery.jqtransform.js'; ?>"></script>
+<!-- Jquery for noConflict -->
+<script type="text/javascript">
+    var no_query = jQuery.noConflict();
+no_query(function(){
+no_query('div.sort_grid').jqTransform();
+});
+</script>
+<!-- Get the list of currency types -->    
+        <div class="country_currency_options sort_grid">
+<select name="custom-currency-selector" id="custom-currency-selector" onchange="window.location.href=this.value" style="padding: 0px">
+<?php foreach ($this->getCurrencies() as $_code => $_name): ?>    
+    <option value="<?php echo $this->getSwitchCurrencyUrl($_code)?>"
+        <?php if($_code == $this->getCurrentCurrencyCode()): ?>
+            selected="SELECTED"
+        <?php endif; ?>>
+        <?php echo $_code ?>
+    </option>
+<?php endforeach; ?>
+</select>
+    
+   </div> 
+<?php endif; ?>
+<!--<div class="skinnedSelect">
+        <div class="text" id="text1">One</div>
+      <select name="name" onChange="setText('text1', this);">
+      <option value="1">One</option>
+      <option value="2">Two</option>
+      <option value="3">Three</option>
+      </select>
+     </div>-->
+<script type="text/javascript">
+//jQuery.noConflict()
+//(function($cur) {
+//    //now I can use $ locally
+//})(jQuery)
+//    $cur('custom-currency-selector').observe('change',function(evt){
+//        window.location = $('custom-currency-selector').value;
+//    });
+</script>

@@ -1,0 +1,162 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Host Property list page
+ *
+ *  @see Apptha_airhotels_Block_Property_Yourlist
+ */
+?>
+<?php
+/**
+ * Loggin Customer details
+ */
+$customer = Mage::getSingleton('customer/session')->getCustomer();
+$cusId = $customer->getId();
+?>
+<div class="my-account" style="padding:0">
+        <h1 class="dashboard_leftside_heading"><?php echo $this->__('Property History');?></h1>
+                     <!-- Property History  Starts-->
+                    <div id="reserve_div" class="main_content norecords clearfix">
+                        <div id="propertyform" style="padding:10px;  box-sizing: border-box;">
+                            <h2 class="property_history" style="display:none;"><?php echo $this->__('Property History'); ?></h2>
+                            <div class="clear"></div>
+                                <script type="text/javascript">
+                                var jQ = jQuery.noConflict();
+                                jQ(function() {
+                                    jQ( "#propertyfrom, #propertyTo" ).datepicker({
+
+                                        dateFormat: 'yy-mm-dd',
+                                        onSelect: function( selectedDate ) {
+                                        }
+                                    });
+                                });
+                            </script> <?php
+                            $fromDate = $this->getRequest()->getParam('from');
+                           $toDate = $this->getRequest()->getParam('to');
+                        if ($fromDate)
+                            echo "<script> document.getElementById('propertyHistory').className = 'main_link selected';  document.getElementById('manageListing').className = 'main_link'; </script>";
+                        ?>
+                            <form action="" method="get">
+                                <div class="property_from left">
+                                    <h3 class="property_history_from"><?php echo $this->__('Start on'); ?></h3>
+                                    <input type="text" id="propertyfrom" <?php if ($fromDate): ?>
+                                               value="<?php echo $fromDate ?>" <?php endif; ?> autocomplete="off"
+                                           name="from" value="yyyy-mm-dd"
+                                           onfocus="if (this.value=='yyyy-mm-dd') this.value = ''" /></div>
+                                <div class="property_to left">
+                                    <h3 class="property_history_to"><?php echo $this->__('End on'); ?></h3>
+                                    <input type="text" id="propertyTo" <?php if ($toDate): ?>
+                                               value="<?php echo $toDate ?>" <?php endif; ?> autocomplete="off"
+                                           name="to" value="yyyy-mm-dd"
+                                           onfocus="if (this.value=='yyyy-mm-dd') this.value = ''" /></div>
+                                <div class="left" style="margin:23px 0 0">
+                                <input type="hidden" name="clear" value="0" id="bookclear" />
+                                <input type="submit" value="<?php echo $this->__('Search'); ?>" class="common_button" onclick="return propertySearch();"/>
+                                <input type="submit" value="<?php echo $this->__('Clear'); ?>" style="margin-left: 5px" class="common_button" onclick="clearForm()" />
+                                </div>
+                            </form>
+                        </div>
+                        <?php
+                        $currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+                        $collection = $this->getPropertyHistory();
+                        if (count($collection) != 0) {//Productcollection Start
+                            ?>
+                            <div style="clear: both; margin-top: 10px"></div>
+                            <div class="property_history_responsivetable">
+                            <?php if (count($collection) != 0) { ?>
+                                <table cellspacing="2" cellpadding="2" border="1" id="property_history_table" class="property_history"> <!-- property_property -->
+                                    <thead><tr>
+                                        <th style="width: 12%;"><?php echo $this->__('Order #'); ?></th>
+                                        <th style="width: 17%;"><?php echo $this->__('Property'); ?></th>
+                                        <th style="width: 14%;"><?php echo $this->__('Price'); ?></th>
+                                        <th style="width: 14%;"><?php echo $this->__('Start on'); ?></th>
+                                        <th style="width: 14%;"><?php echo $this->__('End on'); ?></th>
+                                        <th style="width: 10%;"><?php echo $this->__('Order Status'); ?></th>
+                                        <th style="width: 14%;"><?php echo $this->__('Action'); ?></th>
+                                    </tr></thead>
+                                    <?php
+                                    $config = Mage::getStoreConfig('airhotels/custom_group');
+                                    foreach ($collection as $arr_row) {
+                                            echo '<tr>';
+                                            echo '<td style="width: 8%;">' . $arr_row['order_id'] . '</td>';
+                                            echo '<td style="width: 17%;">' . $arr_row['product_name'] . '</td>';
+                                            echo '<td style="width: 14%;">' . $currencySymbol . $arr_row["subtotal"] . '</td>';
+                                            echo '<td style="width: 14%;">' . date("d, M Y", strtotime($arr_row["fromdate"])) . '</td>';
+                                             echo '<td style="width: 14%;">' . date("d, M Y", strtotime($arr_row["todate"])) . '</td>';
+                                             $statusLabel = '';
+                                             
+                                            if($arr_row['cancel_request_status'] == '3'){
+                                                $statusLabel = 'Closed';
+                                            }else if($arr_row['order_status'] == '1'){
+                                                $statusLabel = 'Complete';
+                                            }
+                                            echo '<td style="width: 14%;">' . $statusLabel . '</td>'; ?>
+                                            <td style="width: 14%;"><a href="<?php echo Mage::getBaseUrl();?>property/product/vieworder/order_id/<?php echo $arr_row["order_item_id"]; ?>">View Order</a></td>
+                                            <?php echo '</tr>';
+                                    }
+
+                                } else {
+                                    echo '<table cellspacing="2" cellpadding="2" border="1" id="property_property">';
+                                    echo '<tr><td ><p class="no_records_found">' . $this->__('Current month no records found') . '</p><td></tr>';
+                                }
+                                ?>
+                            </table></div>
+
+                            <div style="clear: both"></div>
+                            <?php
+                          }else {
+                                echo "<p class='no_records_found'>" . $this->__('No records found') . "</p>";
+                        }
+                        ?></div>
+                        <?php echo $this->getPagersHtml(); ?>
+                        
+                        </div>
+
+<script type="text/javascript">
+    function propertySearch(){
+        var fromDate = jQ("#propertyfrom").val();
+        var toDate = jQ("#propertyTo").val();
+        if (toDate < fromDate) {
+            alert("To date should not be prior to From date.");
+            return false;
+        }
+        if(fromDate == "" || fromDate == "yyyy-mm-dd" || toDate == "" || toDate == "yyyy-mm-dd"){
+           alert('<?php echo $this->__("Please choose From date and To date!"); ?>');
+          return false;
+        }
+    }
+    function clearForm(){
+        jQ("#propertyfrom").attr("value","yyyy-mm-dd");
+        jQ("#propertyTo").attr("value","yyyy-mm-dd");
+        jQ("#bookclear").attr("value","1");
+    }
+</script>

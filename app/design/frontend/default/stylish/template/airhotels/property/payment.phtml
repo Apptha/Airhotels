@@ -1,0 +1,416 @@
+<?php /**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+$smsEnabledOrNot    = Mage::helper('airhotels/smsconfig')->getSmsEnabledOrNot();
+if($smsEnabledOrNot == 0){
+  $country = '';
+  $countryISDCode = '';
+  $IP = $_SERVER['REMOTE_ADDR'];
+  if (!empty($IP)) {
+  	$country = file_get_contents('http://api.hostip.info/country.php?ip='.$IP);
+  }
+  $countryISDCode = "";
+  $classname 	= Mage::getConfig()->getBlockClassName('Apptha_Airhotels_Block_Property_Form');
+  $blockName 	= new $classname();
+  $getIsdCode = $blockName->getIsdCode();
+  $IsdCode 	= explode(";",$getIsdCode);
+  $countNo 	= count($IsdCode);
+  for($i=0;$i<$countNo;$i++) {
+  	$getCountrycode = explode("=",$IsdCode[$i]);
+  	if("countryCodeList['$country']" == $getCountrycode[0]) {
+  		$countryISDCode = $getCountrycode[1];
+  	}else{
+  		$countryISDCode = '+91';
+  	}
+  }
+}
+
+$customerId 	= Mage::getSingleton('customer/session')->getId();
+$customerData 	= Mage::getModel('airhotels/customerphoto')->load($customerId);
+$bankDetails	= $customerData['bank_details'];
+$paypalEmail	= $customerData['paypal_email'];
+$bankDetailsArray	= unserialize($bankDetails);
+
+$rows = unserialize ( $bankDetails );
+$rowKeys = array ();
+$rowKeys = array_keys ( $rows );
+$count = count ( $rowKeys );
+
+$accountNumber		= $bankDetailsArray['Account_Number'];
+$newAccountNumber="";
+if(isset($accountNumber)){
+ $newAccountNumber	= substr($accountNumber, -4);
+}
+if($smsEnabledOrNot == 0){
+$phoneNumberVerify	= $customerData['mobile_verified_profile'];
+$contactNumberArray = $customerData['contact_number'];
+$contactNumberArray = unserialize($contactNumberArray);
+$displayContactNumber 	= substr($contactNumberArray['contact_number'], -4);
+$contactNumber 			= $contactNumberArray['contact_number'];
+$contactIsdCode 		= $contactNumberArray['isd_code'];
+$contactCountryCode 	= $contactNumberArray['country_code'];
+}
+?>
+<div class="my-account">
+	<div class="payment_form">
+            	<div class="bank_details" style="margin:0 0 20px">
+            	<h3 class="payout_title dashboard_leftside_heading"><?php echo $this->__('Secure Bank Transfer')?></h3>
+
+            	<?php if(isset($bankDetails)) { ?>
+                <div class="payment_container_section"> <?php
+                for($i = 0; $i <= $count - 1; $i ++) {
+   $fieldKey = $rowKeys [$i];
+    if ($fieldKey == "country_code") {
+        echo "<div style='font-weight:bold;line-height: 2.5;'>  Country :     " . $rows [$fieldKey]."</div>";
+    }
+    if ($fieldKey == "currency_id") {
+        echo "<div style='font-weight:bold;line-height: 2.5;'>Currency :      ";
+        $currency = Mage::getModel ( 'airhotels/allcurrency' )->loadByValue ( $rows [$fieldKey] );
+        echo  $currency."</div>";
+    }
+    if ($fieldKey != "submit" && $fieldKey != "country_id" && $fieldKey != "currency_id" && $fieldKey != "country_code") {
+        echo "<div style='font-weight:bold;line-height: 2.5;'>$fieldKey :     ";
+        echo $rows [$fieldKey]."</div>";
+}
+} ?>
+
+			<div class="mobile_visible_account_details">
+				<div class="payee_mobile">
+					<p class="title_payee"><?php echo $this->__('Payee'); ?></p>
+					<p class="input_payee"><?php if(isset($bankDetailsArray['Payee'])){ echo $bankDetailsArray['Payee'];}?></p>
+				</div>
+				<div class="bankaname_mobile">
+					<p class="title_payee"><?php echo $this->__('Bank Name'); ?></p>
+					<p class="input_payee"><?php if(isset($bankDetailsArray['Bank_Name'])){ echo $bankDetailsArray['Bank_Name'];}?></p>
+				</div>
+				<div class="account_mobile">
+					<p class="title_payee"><?php echo $this->__('Account'); ?></p>
+					<p class="input_payee"><?php if(isset($accountNumber)){ echo "XXXXXX - ".$newAccountNumber;}?></p>
+				</div>
+
+			</div>
+            	<div style="margin:0;padding:10px;text-align:right">
+            	<a class="import_button btnShowModal" id="bank_transfer_account" href="javascript:void(0)"><?php echo $this->__('Change'); ?></a>
+            	<a class="import_button btnShowModal" id="bank_transfer_remove" href="javascript:void(0)"><?php echo $this->__('Remove'); ?></a>
+            	</div></div>
+            	<?php } else { ?>
+            	<a style="display:block;padding:10px;" class="payment_buttons btnShowModal" id="bank_transfer_account" href="javascript:void(0)"><span class="import_button">Add Bank Transfer</span></a>
+            	<?php } ?>
+
+            </div>
+            	<form id="paypal_form" class="paypal_form" name="paypal_form" action="<?php echo Mage::getBaseUrl()."property/payout/paypalSave/"?>" enctype="multipart/form-data" method="post">
+            	<div class="paypall payment_form_class" id="paypall_section" style="margin:0 0 20px">
+					<h3 class="payout_title dashboard_leftside_heading"><?php echo $this->__('Paypal')?></h3>
+					<div class="payment_container_section">
+					<p><?php echo $this->__('Any Property releases payouts via Paypal once a week. Time until
+						funds arrive to your bank account after Any Property releases them:'); ?>
+					</p>
+					<ul class="paypall_transfer_time">
+						<li><?php echo $this->__('Within the US: < 1 business day (+ transfer time to your bank)'); ?></li>
+						<li><?php echo $this->__('Outside the US: < 1 business day (+ transfer time your bank)'); ?></li>
+					</ul>
+					<p style="margin:0 0 10px"><?php echo $this->__('PayPal charges a withdrawal fee. Please keep in mind that funds
+						cannot be deposited on bank holidays, so this may add delays.'); ?></p>
+						<span id="paypal_success"></span>
+						<div id="paypal_textbox" style="display:none;">
+						<div class="clearfix" style="padding:0 0 28px 0"><div class="profile_common_label"><label class="profile_label" for="paypal_email">Paypal Account <i class="lock airhotel-sprite profile_madatory"></i></label></div>
+						 <div class="profile_input_section"><input type="text" name="paypal_email" id="paypal_email" class="profile_input required-entry validate-email" value="<?php if(isset($paypalEmail)){ echo $paypalEmail;}?>" placeholder="example@xxx.com" /></div></div>
+						<div class="clearfix" style="text-align:right;"><button  type="submit" name="submit" class="import_button" id="paypal_save_link" value="Save">Save</button></div>
+						</div>
+						<?php if(isset($paypalEmail)) { ?>
+						<div id="paypal_email_content">
+					<h5 id="default_email" class="paypal_email" style="padding:10px 0;font-size:13px;font-weight:700;color:#479BFF"><?php  echo $paypalEmail; ?></h5>
+					<a class="import_button btnShowModal" id="paypal_edit_link"><?php echo $this->__('Change'); ?></a>
+					<a class="import_button btnShowModal"  id="paypal_remove_link"><span><?php echo $this->__('Remove'); ?></span></a>
+						</div>
+
+					<?php } else { ?>
+					<a class="payment_buttons btnShowModal" name="paypal_edit_button" id="paypal_edit_link"><span class="import_button"><?php echo $this->__('Add Paypal'); ?></span></a>
+					<?php } ?>
+					</div>
+				</div>
+				</form>
+
+
+   </div>
+</div>
+<?php if($smsEnabledOrNot == 0){ ?>
+<script type="text/javascript">
+		jQ = jQuery.noConflict();
+		jQ(document).ready(function () {
+  		jQ("#btnShowSimple").click(function (e) {
+  			ShowDialog(false);
+  			e.preventDefault();
+  		});
+		jQ(".btnShowModal").click(function (e)	{
+				jQ("#current_selection").val(e.currentTarget.id);
+  				ShowDialog(true);
+  				e.preventDefault();
+  		});
+  		jQ("#btnClose").click(function (e)	{
+  			HideDialog();
+  			e.preventDefault();
+  			jQ("#phonenumber").val("");
+      	    jQ("#code").val("");
+      	   	jQ("#verify_form_loader").html("");
+      	 	jQ("#verify_form_submit").show();
+  		});
+  		jQ(".bfh-selectbox-options li a").on('click', function() {
+  			var countryCode = jQ(this).data('option');
+  			changeCountry(countryCode);
+  		});
+		});
+  		function ShowDialog(modal) {
+  		jQ("#overlay").show().attr('style','display: table');
+  		jQ("#dialog").fadeIn(300);
+  			if (modal) {
+  			  jQ("#verification_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+  			  jQ("#overlay").unbind("click");
+  			  var phoneVerify = "<?php echo $phoneNumberVerify;?>";
+  			  if(phoneVerify == "verified") {
+  			  jQ('.confirmation-code').show();
+  			  var phoneNumber = "<?php echo $contactNumber;?>";
+  			  var displayPhoneNumber = "<?php echo $displayContactNumber;?>";
+  			  var countryCode = "<?php echo $contactIsdCode;?>";
+  			  var phoneCountryCode = "<?php echo $contactCountryCode;?>";
+  			  jQ.ajax({ // ajax call starts
+  		          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/sendcode/phonenumber/'?>"+phoneNumber+'/countrycode/'+countryCode+'/payout/payout/phoneCountryCode/'+phoneCountryCode,
+  		          type: "POST",
+  		          success: function(data) {
+  		        	jQ("#verification_loader").html('');
+  		        	jQ("#code").show();
+  					if(data=="success"){
+  		              jQ("#verify_form_submit").show();
+  		              jQ("#verify_form_loader").html("");
+  		              jQ("#security_check").html("To help protect your account, please pass the check on your verified mobile phone before continuing to add a new payout method.");
+  		        	  jQ("#current_phone_number").html("Verify phone number ending in "+displayPhoneNumber);
+  		        	  jQ('.phone_container').hide();
+  		              jQ('.confirmation-code').show();
+  					}else{
+  						jQ("#verify_form_loader").html("");
+  						jQ("#verify_form_submit").show();
+  					}
+  		          }
+  		      });
+  			}
+  			}else {
+  			   	jQ("#overlay").click(function (e) {
+  			   		HideDialog();
+  			    });
+  			}
+   	   	}
+  		function HideDialog() {
+				jQ('.confirmation-code').hide();
+				jQ("#overlay").hide().attr('style','');
+  			    jQ("#dialog").fadeOut(300);
+  		  	}
+  var countryCodeList = new Array();
+  <?php echo $getIsdCode; ?>
+  function changeCountry(countryCode) {
+    if ( countryCode != "" ) {
+      countryCode=countryCode.toUpperCase();
+      var country=countryCodeList[countryCode];
+      jQ("#isdcode").val(country);
+    }else {
+    	jQ("#isdcode").val("");
+        return false;
+    }
+  }
+  function sendcode(){
+	  var phoneNumber = jQ("#phonenumber").val();
+	  var countryCode = jQ("#isdcode").val();
+	  if(phoneNumber=="" || countryCode==""){
+			jQ("#form_verify_error").html("ISD code and Phone number is required").show();
+			return false;
+		  }
+	  else{
+		  	var intsOnly = /^\d+$/;
+			if(!intsOnly.test(phoneNumber)) {
+				jQ("#form_verify_error").html("Please enter valid phone number").show();
+				return false;
+			}
+	  }
+	  jQ("#form_verify_error").hide();
+	  jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/property/sendcode/phonenumber/'?>"+phoneNumber+'/countrycode/'+countryCode+'/payout/payout',
+          type: "POST",
+          beforeSend: function(data){
+        	  jQ("#verify_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+        	  jQ("#verify_form_submit").hide();
+           },
+          success: function(data) {
+			if(data=="success"){
+              jQ("#verify_form_submit").show(); jQ("#verify_form_loader").html(""); var currentIsdCode = jQ('#isdcode').val();
+        	  var currentPhoneNumber = jQ('#phonenumber').val(); jQ("#current_phone_number").html("Verify phone number ending in "+currentPhoneNumber);
+        	  jQ('.phone_container').hide();
+              jQ('.confirmation-code').show();
+              jQ("#phonenumber").val("");
+        	  jQ("#code").val("");
+			}
+			else{
+				jQ("#verify_form_loader").html("");
+				jQ("#verify_form_submit").show();
+				jQ("#form_verify_error").html(data).show();
+			}
+          }
+      });
+  }
+  function codeverification(){
+	  var code = jQ("#code").val();
+	  if(code == "") {
+		  jQ("#code_verify_error").html("Confirm code is required").show();
+			return false;
+		  }
+	  jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/codeverification/code/'?>"+code+'/payout/payout',
+          type: "POST",
+          beforeSend: function(data) {
+        		jQ("#confirm_alert").hide();
+        	  	jQ("#confirm_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+        	  	jQ("#confirm_form_submit").hide();
+          },
+          success: function(data){
+             if(data == 1){
+            	 jQ("#confirm_form_loader").html("");
+             	 jQ("#confirm_form_submit").show();
+            	 HideDialog();
+            	 jQ("#phonenumber").val("");
+           	     jQ("#code").val("");
+            	 var currentSelection =  jQ("#current_selection").val();
+            	 if(currentSelection != "" && currentSelection == "paypal_edit_link") {
+            		 jQ("#paypal_success").html('<p class="success_verified_text"><i class="fa fa-check verified_icon"></i><span>Verified successfully</span></p>');
+            		 accountEmailAction('edit','paypal');
+            	 }
+            	 else if(currentSelection !="" && currentSelection == "bank_transfer_account") {
+                	 window.location.href = "<?php echo Mage::getBaseUrl() . 'property/payout/payout/' ?>";
+            	 }
+            	 else if(currentSelection != "" && currentSelection == "paypal_remove_link") {
+            		 accountEmailAction('delete','paypal');
+            	 }
+            	 else if(currentSelection != "" && currentSelection == "bank_transfer_remove") {
+            		 window.location.href = "<?php echo Mage::getBaseUrl() . 'property/payout/payoutDelete/' ?>"
+            	 }
+               	}else{
+                	jQ("#confirm_form_loader").html("");
+               		jQ("#confirm_form_submit").show();
+            	  	jQ("#confirm_alert").html('<span>Sorry that code could not be verified.</span>');
+            	  	jQ("#confirm_alert").show();
+              }
+          }
+      });
+  }
+  </script>
+
+  	<input type="hidden" id="current_selection" name="current_selection"/>
+	<div id="output"></div>
+	<div id="overlay" class="web_dialog_overlay">
+	<div style="display: table-cell;vertical-align:middle;">
+	<div id="dialog" class="web_dialog">
+	<div class="phone_verify_close" id="popupclosesection"><span class="btnClose closebutton" id="btnClose"><i class="airhotel-sprite close close_icon_btn" style="right:-6px"></i></span></div>
+		<?php if($phoneNumberVerify != "verified") { ?>
+		<h3 style="margin:0 0 10px;font-size:16px;" class="verify_phone_number_title">Please verify your phone number from profile edit page!</h3>
+		<?php } else { ?>
+		<div class="phonenumber-error"></div>
+		<div class="phone_container" style="display:none;">
+			<h3 style="margin:0 0 10px;font-size:16px;" class="verify_phone_number_title">Verify phone number</h3>
+			<div class="choose_country">
+			<span class="choose_country_flag">Choose Country</span>
+
+			</div>
+    		<form class="form-verify phone_number_verify" role="form" method="POST" action="">
+    			<div class="clearfix choose_number">
+    			<span for="phonenumber" class="label_phonenumber">Add a phone number</span>
+    			<input name="isdcode" type="tel" id="isdcode" class="form-control country_extension" value=<?php echo $countryISDCode;?> disabled required>
+       			<input name="number" type="tel" class="form-control user_phone_number" id="phonenumber" placeholder="Phone number" required autofocus>
+       			</div>
+       			<span class="form_verify_error" id="form_verify_error" style="display:none;"></span>
+       			<span id="verify_form_loader" class="verify_form_loader"></span>
+       			<div class="popup_verify_button"><button style="width: 100%	;height: auto;box-sizing: border-box;font-size: 18PX;font-family: 'Droid Sans', 'Belgrano', sans-serif;border-radius: 3px;float: none;text-align: center;" class="btn btn-lg btn-primary btn-block" type="button" id="verify_form_submit" onclick="sendcode();">Verify</button></div>
+    		</form>
+		</div> <!-- /container -->
+		<?php } ?>
+		<div class="confirmation-code" style="display:none;">
+  			<h3 class="form-verify-heading" style="margin:0 0 10px;font-size:16px;">Confirm Your Code</h3>
+  			<span class="" id="security_check" style="display:block;margin:0 0 20px;"></span>
+			<span class="" id="current_phone_number" style="display:block;margin:0 0 20px;"></span>
+			<span id="verification_loader"></span>
+  			<input style="box-sizing: border-box;margin-bottom: 18px;display:none;" name="code" id="code" type="text" class="form-control" placeholder="Confirm code" required autofocus>
+  			<span class="form_verify_error" id="code_verify_error" style="display:none;"></span>
+  			<span id="confirm_form_loader" class="confirm_form_loader"></span>
+  			<button class="btn btn-lg btn-primary btn-block" id="confirm_form_submit" type="button" onclick="codeverification();">Confirm</button>
+      		<div class="alert alert-info" id="confirm_alert" role="alert" style="display:none";>
+     	 	</div>
+		</div>
+	</div>
+	</div>
+</div>
+<div class="phonenumber-verified"></div>
+<!--  paypalEmailAction function it will shows the email address is editable textbox. -->
+<?php } else { ?>
+<script type="text/javascript">
+ var currentSelection =  jQ("#current_selection").val();
+ jQ(document).ready(function () {
+   jQ( "#paypal_edit_link" ).click(function() {
+    accountEmailAction('edit','paypal');
+   });
+   jQ( "#bank_transfer_account" ).click(function() {
+    window.location.href = "<?php echo Mage::getBaseUrl() . 'property/payout/payout/' ?>";
+   });
+   jQ( "#paypal_remove_link" ).click(function() {
+    accountEmailAction('delete','paypal');
+   });
+   jQ( "#bank_transfer_remove" ).click(function() {
+    window.location.href = "<?php echo Mage::getBaseUrl() . 'property/payout/payoutDelete/' ?>"
+   });
+ });
+<?php } ?>
+</script>
+<script type="text/javascript">
+var paypalForm = new VarienForm('paypal_form');
+function choosePaymentType(method) {
+	var array = document.getElementsByClassName('payment_form_class');
+	for (var i = 0; i < array.length; i++){
+	    array[i].style.display = 'none';
+	}
+	document.getElementById(method+'_form').style.display="block";
+
+}
+function accountEmailAction(type,account) {
+	if(type=="edit" && account=="paypal") {
+		document.getElementById("paypal_textbox").style.display="block";
+		document.getElementById("paypal_edit_link").style.display="none";
+		document.getElementById("paypal_email_content").style.display="none";
+
+	}
+	if(type=="delete" && account=="paypal") {
+		window.location.href="<?php echo Mage::getBaseUrl().'property/payout/paypaldelete/'?>";
+
+	}
+}
+</script>

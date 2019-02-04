@@ -1,0 +1,74 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * @see Mage_Checkout_Block_Cart_Totals
+ */
+
+$productId = Mage::getSingleton('core/session')->getHourlyProductId();
+/**
+ * For hourly wise property
+ */  
+$propertyTime = Mage::getModel('catalog/product')->load($productId)->getPropertyTime();
+$propertyTimeData = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId(); 
+$seats = (int) Mage::getSingleton('core/session')->getAccomodate();
+?>
+<?php if ($this->getTotals()): ?>
+<tfoot>
+    <?php $_colspan = $this->helper('tax')->displayCartBothPrices() ? 5 : 6; ?>
+    <?php
+    /**
+     * For hourly property
+     */ 
+    if($propertyTime == $propertyTimeData){
+    $hourlyNightFee = Mage::getSingleton('core/session')->getHourlyNightFee();
+    if(!(empty($hourlyNightFee)) && ($hourlyNightFee >= 1) ){
+    $_colspan = $_colspan + 1;    
+    }
+}
+    if($seats <= 0){
+    $_colspan = $_colspan - 1;    
+    }    
+    ?>
+    
+    <?php echo $this->renderTotals(null, $_colspan); ?>
+    <?php echo $this->renderTotals('footer', $_colspan); ?>
+    <?php if ($this->needDisplayBaseGrandtotal()):?>
+    <tr>
+        <td class="a-right" colspan="<?php echo $_colspan; ?>">
+            <small><?php echo $this->helper('sales')->__('Your credit card will be charged for') ?></small>
+        </td>
+        <td class="a-right">
+            <small><?php echo $this->displayBaseGrandtotal() ?></small>
+        </td>
+    </tr>
+    <?php endif?>
+</tfoot>
+<?php endif; ?>

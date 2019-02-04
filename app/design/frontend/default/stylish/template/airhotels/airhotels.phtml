@@ -1,0 +1,299 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+echo $this->getMessagesBlock()->getGroupedHtml();
+?>
+<script type="text/javascript">
+function initialize() {
+    var mapOptions = {zoom: 13, mapTypeId: google.maps.MapTypeId.ROADMAP };
+    var map = new google.maps.Map(document.getElementById('map_canvas'),mapOptions);
+    var input = document.getElementById('searchTextField');
+    var autocomplete = new google.maps.places.SearchBox(input);
+    autocomplete.bindTo('bounds', map);
+    // Autocomplete.
+    function setupClickListener(id, types) {
+        var radioButton = document.getElementById(id);
+        google.maps.event.addDomListener(radioButton, 'click', function() {
+            autocomplete.setTypes(types);
+        });
+        google.maps.event.addListener(autocomplete, 'places_changed', function() 
+        { 
+            showFromdate();
+    	});}
+}google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+<script type="text/javascript">
+var jQ = jQuery.noConflict();
+function showFromdate(){
+	jQ( "#checkinDate").datepicker("show");
+}
+function validateSearch(){    
+	jQ("#searchResult").html("");
+	jQ("#searchTextField").css("border-color","#D2D2D2");
+    window.location.href = "<?php echo Mage::getBaseUrl() . 'property/property/advsearch/' ?>";
+    jQ("#searchResult").html("Please set location");
+    return true;
+}                     
+jQ(function() {
+        var dates = jQ( "#checkinDate, #checkinTo" ).datepicker({ changeMonth: false,numberOfMonths: 1,minDate: '0',
+                onSelect: function( selectedDate ) {
+                  var option = this.id == "checkinDate" ? "minDate" : "maxDate", instance = jQ( this ).data( "datepicker" ), date = jQ.datepicker.parseDate( instance.settings.dateFormat || jQ.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+                  		  dates.not( this ).datepicker( "option", option, date );
+                  		  
+                          jQ("#checkinDate" ).datepicker("option","maxDate","");
+                          if(this.id == "checkinDate"){ instance = jQ( this ).data( "datepicker" )
+	                          var depart = jQ.datepicker.parseDate(jQ.datepicker._defaults.dateFormat, selectedDate);
+	                          <?php if(Mage::helper('airhotels/product')->getHourlyEnabledOrNot() != 0){ ?>
+	                          
+	                          depart.setDate(depart.getDate() + 1);
+	                          <?php }else{ ?>
+	                          depart.setDate(depart.getDate());<?php } ?>  
+	                          jQ("#checkinTo" ).datepicker(  "option", "minDate", depart ); }
+                }
+        });
+});
+jQ('#searchTextField').on('change', function() {
+	alert( this.value ); 
+});
+var dates = jQ( "#checkinDate" ).datepicker({
+    changeMonth: false,
+    minDate: '0',
+    numberOfMonths: 1,
+    onSelect: function( selectedDate ) {        
+       setTimeout(function(){
+       jQ( "#checkinTo").datepicker("show");
+       }, 600);
+    }
+});
+</script>   
+<div id="banner-container"> 
+<div class="home_banner_overlay"></div>
+<?php
+/**
+* Checking whether hourly property enabled or not
+*/
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+$propertyTimeData  	= Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();    
+$currencySymbol 	= Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+$videoEnabled 		= Mage::helper('airhotels/url')->getVideoCollection();    
+$WebmEnableUrl 		= array();
+if(count($videoEnabled) > 0){
+ foreach($videoEnabled as $_videoEnabled){
+ 	$mpVideoUrl 		=  Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$_videoEnabled->getVideoUrlMp4());
+     $webmVideoUrl 		= Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$_videoEnabled->getVideoUrlWebm());  
+     $WebmEnableUrl[] 	= $_videoEnabled->getVideoUrlWebm();
+     $imageUrlserialize 	= unserialize($_videoEnabled->getImageUrl());    	
+     $random_keys 		= array_rand($imageUrlserialize); // $imageUrlserialize[$random_keys[0]] - Getting images randomly    	
+     if(count($imageUrlserialize) > 1){    	 	
+     	$imageUrl = Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$imageUrlserialize[$random_keys]);
+     }else{
+     	$imageUrl = Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$imageUrlserialize[0]);
+     }
+ } 
+}  
+?>
+<div id="playHere"></div>
+<?php 
+/**
+* If the current device is mobile then display images in video banner  
+*/
+if(Mage::helper('airhotels/mobile')->isMobile()){ ?>
+<div class="video_image_banner">
+	<img src= "<?php echo $imageUrl;?>" alt="" title="<?php echo $this->__('Video Banner'); ?>" />
+</div>
+<?php } 
+/**
+* Get current browser with version to play video or display image
+*/   
+if(count($videoEnabled)){ ?>    
+<script type="text/javascript">
+    var htmlContent;
+    var videoTest = "";   
+    var videoTest = checkVideo(); //returns html5 video or images       
+    if (videoTest == "webm") {
+            //play webm video
+            htmlContent = ' <div class="video-wrapper video_image_banner">'+
+                '<video class="video" autoplay loop=loop muted="muted">' +                
+                '<source src="<?php echo $webmVideoUrl; ?>" type="video/webm" codecs="vp8, vorbis"/>' + 
+          '</video>' +
+         '</div>';                
+     }else if (videoTest == "mp4") {
+            //play mp4 video            
+        	htmlContent = ' <div class="video-wrapper video_image_banner">'+
+            '<video class="video" autoplay loop=loop muted="muted">' +
+            '<source src="<?php echo $mpVideoUrl; ?>" type="video/mp4" codecs="avc1.42E01E, mp4a.40.2"/>' +            
+      '</video>' +
+     '</div>'; 
+     }else {
+            // Display images in video banner
+        	 htmlContent = '<div class="video_image_banner">' +
+             '<img src= "<?php echo $imageUrl;?>" alt=""/>' +
+         '</div>';
+     }
+     document.getElementById("playHere").innerHTML = htmlContent;     
+     /**
+     * Get current browser with version to play video or display image
+     */
+     function checkVideo() {
+        if (document.createElement('video').canPlayType) { //if browser supports HTML5 video
+            var vidTest = document.createElement("video");
+            webmTest = vidTest.canPlayType('video/webm; codecs="vp8, vorbis": "probably"'); //webm format
+            mp4Test = vidTest.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2": "probably"'); //mp4 format
+            var webmUrl = "<?php echo $WebmEnableUrl[0]; ?>";
+            if (webmTest == "probably" && webmUrl) { //if it support .webm format              
+            	return "webm"; //play webm video
+            }else if(mp4Test == "probably"){//if it support .mp4 format            	
+            	return "mp4"; //play mp4 video
+            }else{                
+            	return "image"; // Display images
+            }               
+        }else { //browser doesnot support HTML5 video, display image instead.                                            
+            return "image";
+        }
+     }   
+</script>
+<?php 
+}else{ ?>
+    <script type="text/javascript">
+    htmlContent = '<div class="video_image_banner">' +
+    '<img src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'/airhotels/banner/banner.jpg'?>" alt=""/>' +
+    '</div>';
+    document.getElementById("playHere").innerHTML = htmlContent;  
+    </script>
+    <?php 
+}
+/**
+* The muted attribute of the video tag is not supported in Internet Explorer 9 and earlier versions.
+* We added javascript the code for muted in IE9. 
+*/
+?>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();
+    jQ("video").prop('muted', true);
+</script>
+
+<?php 
+/**
+* Text to be displayed on the vide oor image
+*/?>    
+<div class="banner_outer">
+	<div class="banner_text">
+          <h1><?php echo $this->__('Experience with locals'); ?><span><?php echo $this->__('Live thousands of new lives around the globe'); ?></span></h1>                
+    </div>
+</div>
+<!-- Search experience form -->            
+<div class="search-area">
+	<div class="container <?php if($hourlyEnabledOrNot == 0){ echo 'hourly_enabled'; } ?>">               
+    <form action="<?php echo Mage::getBaseUrl() . 'property/property/advsearch/' ?>" id="search" method="get" enctype="multipart/form-data" class="custom">
+    	<input id="searchTextField" name="searchTextField" type="text" class="searchmainpage sprimg <?php if($hourlyEnabledOrNot == 1){echo ' dailyHomePageSearchField';} ?>"  placeholder="<?php echo $this->__('Where do you want to go?'); ?>" autocomplete="off" />
+        <div id="search_options">
+	        <div class="search_date">
+	        	<input type="text"  id="checkinDate"  name="from"  placeholder="<?php echo $this->__('From'); ?>" autocomplete="off" readonly />                                              
+	            <select id="property_service_from" name="property_service_from" class="time airhotel-sprite" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>
+	            	<option value="hh"><?php echo $this->__('Time') ?></option> 
+	                <?php for ($inc = 1; $inc <= 12; $inc++) { ?>  
+	                <option value="<?php echo $inc; ?>">
+	                	<?php echo $inc; ?>
+	                </option>
+	                <?php } ?>
+	            </select>
+	            <select id="property_service_from_period" name="property_service_from_period" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>
+	            	<option value="AM"><?php echo $this->__('AM'); ?></option>
+	                <option value="PM"><?php echo $this->__('PM'); ?></option>
+	            </select>                             
+	         </div>
+	         <div class="search_date"><input type="text"   id="checkinTo"  name="to"  placeholder="<?php echo $this->__('To'); ?>" autocomplete="off" readonly />
+	         	<select id="property_service_to" name="property_service_to" class="time airhotel-sprite" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>
+	            	<option value="hh"><?php echo $this->__('Time') ?></option> 
+	                <?php for ($inc = 1; $inc <= 12; $inc++) { ?>  
+	                	<option value="<?php echo $inc; ?>"><?php echo $inc; ?></option>
+	                <?php } ?>
+	            </select>
+	            <select id="property_service_to_period" name="property_service_to_period" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>                          
+	            	<option value="AM"><?php echo $this->__('AM'); ?></option>
+	                <option value="PM"><?php echo $this->__('PM'); ?></option>
+	            </select>
+	         </div>                             
+	         <div class="search_guests">
+	         	<select id="number_of_guests" name="number_of_guests">
+	         		<option value="0"><?php echo $this->__('Guests'); ?></option>
+	            	<?php for($i=1;$i<=16;$i++) { ?>
+	                	<option value="<?php echo $i; ?>"><?php if($i==1){echo $i ." Guest ";}else{ if($i == 16){echo $i.'+'." Guests ";}else{echo $i." Guests ";}} ?></option>
+	                <?php } ?>
+	            </select>
+	         </div>                                                      
+        </div>                    
+        <div class="home_search_button">                        
+        	<button type="submit" class="large pink btn icon-only" id="submit_location" onclick="return validateSearch();">
+            <?php echo $this->__('Search'); ?> </button>
+        </div>
+        <div id="map_canvas" style="width:427px;"></div>
+        	<p id="<?php if($hourlyEnabledOrNot == 0){ echo "error_message_for_location";}else{echo "error_message_daily_location";}?>" style="display: none;">
+            	<?php echo Mage::helper('airhotels')->__('Please enter location'); ?>
+            </p>
+          </form>
+        </div>
+    </div>
+</div> 
+
+<script type="text/javascript">
+if(navigator.userAgent.indexOf('Mac') > 0)
+	jQ('body').addClass('macos');
+jQ(document).ready(function(){
+	jQ("#searchTextField").change(function(){
+    	if( jQ("#searchTextField").val() == ''){
+    		jQ('#error_message_for_location').show(); 
+    		jQ('#error_message_daily_location').show(); 
+            return false;
+         }else{
+        	 jQ('#error_message_for_location').hide(); 
+        	jQ('#error_message_daily_location').hide(); 
+        }    
+    });
+});
+function hideErrorMessageForLocation(){
+	jQ('#error_message_for_location').hide();  
+	jQ('#error_message_daily_location').hide(); 
+}
+function validateSearch(){    
+	if( jQ("#searchTextField").val() == ''){
+		jQ('#error_message_for_location').show(); 
+		jQ('#error_message_daily_location').show(); 
+        return false;
+	}else{
+    	 jQ('#error_message_for_location').hide(); 
+    	 jQ('#error_message_daily_location').hide(); 
+    }    
+	jQ("#searchResult").html("");
+	jQ("#searchTextField").css("border-color","#D2D2D2");
+    window.location.href = "<?php echo Mage::getBaseUrl() . 'property/property/advsearch/' ?>";   
+    jQ("#searchResult").html("Please set location");
+    return true;
+}
+</script>

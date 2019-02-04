@@ -1,0 +1,93 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+
+$customer = Mage::getSingleton('customer/session')->getCustomer();
+$cus_id = $customer->getId();
+$collection = Mage::getModel('log/visitor')->getCollection()->addFieldToFilter('store_id', array('eq' => 1));
+$collection->getSelect()
+->join(
+array('log_visitor_info'=> $collection->getTable('log/visitor_info')),
+      'main_table.`visitor_id`= log_visitor_info.`visitor_id`');
+$collection->getSelect()
+->join(
+array('log_customer'=> $collection->getTable('log/customer')),
+      'main_table.`visitor_id`= log_customer.`visitor_id` and log_customer.`customer_id` ='.$cus_id
+);
+$collection->getSelect()->order('log_customer.log_id DESC');
+$collection->getSelect()->limit(10);
+$customerData = $collection->getData();
+
+
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="security_details">
+  <h1 class="dashboard_leftside_heading"><?php echo $this->__('Login History') ?></h1>
+  <div class="property_history_responsivetable">
+  <table id="security_details_table" class="security_details_table">
+    <thead>
+      <th width="30%"><?php echo $this->__('Browser/Devices');?></th>
+      <th width="20%"><?php echo $this->__('Recent Activity');?></th>
+      <th width="20%"><?php echo $this->__('Status');?></th>
+    </thead>
+    <tbody>
+      <?php
+
+          foreach ($customerData as  $item) {
+            $browser 		= Mage::helper('airhotels/calendar')->getBrowser($item['http_user_agent'], true);
+            $currentDate 	= date('Y-m-d H:i:s');
+            $currentTimestamp = strtotime($currentDate);
+            $logout 	= $item['logout_at'];
+            if(isset($logout)){
+              $logoutTimestamp = strtotime($logout);
+              $time = $currentTimestamp-$logoutTimestamp;
+              $time = Mage::helper('airhotels/calendar')->secondsToWords($logoutTimestamp);
+            }else{
+              $time = $this->__('Session Expired');
+            }
+            if($item['logout_at'] !=''){
+          ?>
+          <tr>
+            <td width="30%"><?php echo $browser['name'].' '.$browser['version'].'<br/><span class="section_separator">/</span> '.$browser['platform']; ?></td>
+            <td width="20%"><?php echo $time; ?></td>
+            <td width="20%" class="login_status"><?php echo $this->__('Logout'); ?></td>
+          </tr>
+          <?php }
+          }?>
+    </tbody>
+  </table>
+  </div>
+  <div class="security_changepassword"><p>If you see something unfamilier, then <a href="#" style="color:#479BFF;font-size:13px;">change password</a></p></div>
+</div>
+<?php
+$ua = Mage::helper('airhotels/calendar')->getBrowser(null);
+$yourbrowser= "Your browser: " . $ua['name'] . " " . $ua['version'] . " on " .$ua['platform'] . " reports: <br >" . $ua['userAgent'];
+return $yourbrowser;
+?>

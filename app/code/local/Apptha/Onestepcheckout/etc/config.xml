@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<!-- 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Onestepcheckout
+ * @version     0.1.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ * */
+ -->
+<config>
+    <modules>
+        <Apptha_Onestepcheckout>
+           <version>0.1.9</version>
+        </Apptha_Onestepcheckout>
+    </modules>
+    <frontend>
+        <routers> 
+            <onestepcheckout>
+                <use>standard</use>
+                <args>
+                    <module>Apptha_Onestepcheckout</module>
+                    <frontName>onestepcheckout</frontName>
+                </args>
+            </onestepcheckout>
+        </routers>
+        <layout>
+            <updates>
+                <onestepcheckout>
+                    <file>onestepcheckout.xml</file>
+                </onestepcheckout>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Onestepcheckout>
+                    <files>
+                        <default>Apptha_Onestepcheckout.csv</default>
+                    </files>
+                </Apptha_Onestepcheckout>
+            </modules>
+        </translate>
+        <events>
+             <checkout_type_onepage_save_order>
+                <observers>
+                    <onestepcheckout>
+                        <type>model</type>
+                        <class>onestepcheckout/observer</class>
+                        <method>save_newsletter_checkout</method>
+                    </onestepcheckout>
+                </observers>
+            </checkout_type_onepage_save_order>
+        </events>
+         <secure_url>
+            <checkout_cart>/checkout/cart</checkout_cart>
+            <onestepcheckout>/onestepcheckout</onestepcheckout>
+        </secure_url>
+    </frontend>
+    <admin>
+        <routers>
+            <Apptha_Onestepcheckout>
+                <use>admin</use>
+                <args>
+                    <module>Apptha_onestepcheckout</module>
+                    <frontName>onestepcheckoutadmin</frontName>
+                </args>
+             </Apptha_Onestepcheckout>
+        </routers>
+    </admin>
+    <adminhtml>
+     
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <Apptha_Onestepcheckout>
+                            <title>Onestepcheckout Module</title>
+                            <sort_order>10</sort_order>
+                        </Apptha_Onestepcheckout>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <layout>
+            <updates>
+                <onestepcheckout>
+                    <file>onestepcheckout.xml</file>
+                </onestepcheckout>
+            </updates>
+        </layout>
+		<translate>
+            <modules>
+                <Apptha_Onestepcheckout>
+                    <files>
+                        <default>Apptha_Onestepcheckout.csv</default>
+                    </files>
+                </Apptha_Onestepcheckout>
+            </modules>
+        </translate>
+    </adminhtml>
+    <global>
+        <models>
+            <onestepcheckout>
+                <class>Apptha_Onestepcheckout_Model</class>
+                <resourceModel>onestepcheckout_mysql4</resourceModel>
+            </onestepcheckout>
+            <onestepcheckout_mysql4>
+                <class>Apptha_Onestepcheckout_Model_Mysql4</class>
+                <entities>
+                    <onestepcheckout>
+                        <table>onestepcheckout</table>
+                    </onestepcheckout>
+                </entities>
+            </onestepcheckout_mysql4>
+        </models>
+        <resources>
+            <onestepcheckout_setup>
+                <setup>
+                    <module>Apptha_Onestepcheckout</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </onestepcheckout_setup>
+            <onestepcheckout_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </onestepcheckout_write>
+            <onestepcheckout_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </onestepcheckout_read>
+        </resources>
+        <rewrite>
+            <apptha_onestepcheckout_checkout_cart>
+                <from><![CDATA[#^/checkout/cart/#]]>
+                </from>
+                <to>/onestepcheckout/checkout_cart/</to>
+            </apptha_onestepcheckout_checkout_cart>
+        </rewrite>
+        <blocks>
+            <onestepcheckout>
+                <class>Apptha_Onestepcheckout_Block</class>
+            </onestepcheckout>
+            <checkout>
+                <rewrite>
+                    <onepage_link>Apptha_Onestepcheckout_Block_Checkout_Onepage_Link</onepage_link>
+                </rewrite>              
+            </checkout>
+            <checkout>
+                <rewrite>
+                    <links>Apptha_Onestepcheckout_Block_Checkout_Links</links>
+                </rewrite>
+            </checkout>
+             <checkout>
+                <rewrite>
+                  <cart_sidebar>Apptha_Onestepcheckout_Block_Checkout_Cart_Sidebar</cart_sidebar>
+                </rewrite>
+            </checkout>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_view_items>Apptha_Onestepcheckout_Block_Adminhtml_Sales_Order_View_Comment</sales_order_view_items>
+                </rewrite>
+            </adminhtml>
+        </blocks>
+        <helpers>
+            <onestepcheckout>
+                <class>Apptha_Onestepcheckout_Helper</class>
+            </onestepcheckout>
+        </helpers>
+        
+    </global>
+</config>

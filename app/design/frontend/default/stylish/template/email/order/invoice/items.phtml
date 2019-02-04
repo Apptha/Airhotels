@@ -1,0 +1,96 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS);?>airhotels/jquery.min.js"></script>
+<?php $_invoice = $this->getInvoice(); ?>
+<?php $_order   = $this->getOrder();
+$items = $_order->getItemsCollection();
+foreach($items as $item){
+	$orderId =  $item['order_id'];
+	$details = unserialize($item['product_options']);
+     foreach($details as $det){
+	   /**
+ 		* Get the Value of ServiceFee
+ 		*/
+		$securityFee	= $det['securityFee'];
+		$productId		= $det['product'];
+		$serviceFee		= $det['serviceFee'];
+        if(isset($det['property_service_from'])&&isset($det['property_service_from_period'])&& isset($det['property_service_to'])&&isset($det['property_service_to_period'])&&isset($det['overall_total_hours'])&&isset($det['hourly_night_fee'])){
+        $overallTotalHours =  $det['overall_total_hours'];
+        $hourlyNightFee =  $det['hourly_night_fee'];
+        }
+     }
+}
+Mage::getSingleton('core/session')->setorderEmailStatus(1);
+$getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+$product = Mage::getModel ( 'catalog/product' )->load ( $productId );?>
+<?php if ($_invoice && $_order): ?>
+<table cellspacing="0" cellpadding="0" border="0" width="650" style="border:1px solid #EAEAEA;">
+    <thead>
+        <tr>
+            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Item') ?></th>
+            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Sku') ?></th>
+            <th align="center" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Qty') ?></th>
+            <th align="right" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Subtotal') ?></th>
+        </tr>
+    </thead>
+
+    <?php $i=0; foreach ($_invoice->getAllItems() as $_item): ?>
+    <?php if($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
+    <tbody<?php echo $i%2 ? ' bgcolor="#F6F6F6"' : '' ?>>
+        <?php echo $this->getItemHtml($_item) ?>
+    </tbody>
+    <?php endforeach; ?>
+
+    <tfoot>
+        <?php
+if (($getSecurityEnabledOrNot == 0 || $securityFee == 0) && !$subscriptionOrder) {
+	$allOptions = $product->getOptions ();
+	if ($allOptions) {
+		foreach ( $allOptions as $option ) {
+			foreach ( $option->getValues () as $key => $value ) { ?>
+
+		<tr class="invoice_<?php echo strtolower($value->getDefaultTitle ()); ?>_fee"><td colspan="3" align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><strong><?php echo $this->__($value->getDefaultTitle ().' Fee'); ?></strong></td><td align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$value->getPrice (), 2, '.', '');?></span></td></tr>
+		<?php
+			}
+		}
+	}
+  }
+$productPrice	 = $product->getFinalPrice();
+$commissionFee 	 = ($product->getFinalPrice() * (Mage::getStoreConfig('airhotels/custom_group/airhotels_hostfee')))/100;
+?>
+	<tr class="invoice_processing_fee"><td colspan="3" align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><strong>Processing Fee</strong></td><td align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><span style="font-family:&quot;Helvetica Neue&quot;,Verdana,Arial,sans-serif"><?php echo $orderCurrencySymbol.  number_format((float)$serviceFee, 2, '.', '');?></span></td></tr>
+	<?php echo $this->getChildHtml('invoice_totals')?>
+    </tfoot>
+</table>
+
+<?php endif; ?>
+
+

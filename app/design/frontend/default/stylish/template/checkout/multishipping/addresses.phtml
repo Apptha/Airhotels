@@ -1,0 +1,104 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Ship to multiple address template
+ *
+ * @see Mage_Checkout_Block_Multishipping_Addresses
+ */
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<form id="checkout_multishipping_form" action="<?php echo $this->getPostActionUrl() ?>" method="post">
+    <div class="multiple-checkout">
+        <div class="page-title title-buttons">
+            <h1><?php echo $this->__('Ship to Multiple Addresses') ?></h1>
+            <button type="button" title="<?php echo $this->__('Enter a New Address') ?>" class="button" onclick="$('add_new_address_flag').value=1; $('checkout_multishipping_form').submit();">
+            <span><span><?php echo $this->__('Enter a New Address') ?></span></span></button>
+        </div>
+        <input type="hidden" name="continue" value="0" id="can_continue_flag" />
+        <input type="hidden" name="new_address" value="0" id="add_new_address_flag" />
+        <h2><?php echo $this->__('Please select shipping address for applicable items') ?></h2>
+        <table class="data-table" id="multiship-addresses-table">
+            <col />
+            <col width="1" />
+            <col width="1" />
+            <col width="1" />
+            <thead>
+                <tr>
+                    <th><?php echo $this->__('Product') ?></th>
+                    <th class="a-center"><?php echo $this->__('Qty') ?></th>
+                    <th><?php echo $this->__('Send To') ?></th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="100" class="a-right"><button type="submit" title="<?php echo $this->__('Update Qty &amp; Addresses') ?>" class="button" onclick="$('can_continue_flag').value=0">
+                    <span><span><?php echo $this->__('Update Qty &amp; Addresses') ?></span></span></button></td>
+                </tr>
+            </tfoot>
+            <tbody>
+            <?php 
+            /**
+             * Iterating loop
+             */
+     foreach ($this->getItems() as $_index => $_item): ?>
+                <?php if ($_item->getQuoteItem()) :?>
+                <tr>
+                    <td><?php echo $this->getItemHtml($_item->getQuoteItem())?></td>
+                    <td><input type="text" name="ship[<?php echo $_index ?>]
+                    [<?php echo $_item->getQuoteItemId() ?>][qty]" 
+                    value="<?php echo $this->htmlEscape($_item->getQty()) ?>" size="2" class="input-text qty" /></td>
+                    <td><?php if ($_item->getProduct()->getIsVirtual()):
+                     echo $this->__('Shipping selection is not applicable.'); 
+                    else: 
+                    echo $this->getAddressesHtmlSelect($_item, $_index); 
+                    endif; ?></td>
+                    <td class="a-center"><a href="<?php echo $this->getItemDeleteUrl($_item) ?>"
+                     title="<?php echo $this->__('Remove Item') ?>" class="btn-remove2">
+                     <?php echo $this->__('Remove Item') ?></a></td>
+                </tr>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <script type="text/javascript">decorateTable('multiship-addresses-table')</script>
+        <div class="buttons-set">
+            <p class="back-link"><a href="<?php echo $this->getBackUrl() ?>"><small>&laquo; </small>
+            <?php echo $this->__('Back to Shopping Cart') ?></a></p>
+            <button type="submit" title="<?php echo $this->__('Continue to Shipping Information') ?>" 
+            class="button<?php if ($this->isContinueDisabled()):?>
+             disabled<?php endif; ?>" 
+             onclick="$('can_continue_flag').value=1"<?php if ($this->isContinueDisabled()):?> disabled="disabled"<?php endif; ?>>
+             <span><span><?php echo $this->__('Continue to Shipping Information') ?></span></span></button>
+        </div>
+    </div>
+</form>

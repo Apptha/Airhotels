@@ -1,0 +1,1804 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$isSubscriptionEnabled = Mage::getStoreConfig('airhotels/subscription/activate_subscription_enable');
+
+$ignoreArray = array('userid','accomodates','propertytype','privacy','state','city','country','hostemail','propertyadd','property_website','cancelpolicy','banner','propertyapproved','amenity','property_time','property_overnight_fee','property_minimum','property_maximum','property_service_from_time','property_service_to_time','google_calendar_ics_url','auto_ics_sync','latitude','longitude','video_url','video_type','security','people_min','people_max','bed_type','bed_rooms');
+/**
+ * Initilizing experience data
+ */
+$currentUrl = Mage::helper('core/url')->getCurrentUrl();
+/**
+ * Currency Country Value
+ */
+$currencyCountry = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getBaseCurrencyCode())->getName();
+/**
+ * check the hourly enabled or not.
+ */
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+/**
+ * Get the Request Variable.
+ */
+$request = $this->getRequest('step');
+/**
+ * Get the Current Controller Action anme
+ */
+$controllerAction = $request->getActionName();
+$action = $this->getRequest()->getParam('step');
+/**
+ * Get the current experience ID
+ */
+$getSecurityEnabledOrNot = Mage::helper('airhotels/product')->getSecurityEnabledOrNot();
+$currentExperienceId = Mage::getSingleton('customer/session')->getCurrentExperienceId();
+$experienceName = $experienceLocation = $experienceDescription = $experienceCity = $experiencePrice = $experiencePropertyType = $experienceCity = $experienceState = $experienceLatitude = $experienceLongitude = $experienceCountry = "";
+$experiencePeopleMinimum = $privateNotes = $experienncePeopleMaximum = $experienceDuration = $experiencePriceType = $experienceTags = $experiencePropertyTime = "";
+/**
+ * Check the current Experience has been set.
+ */
+if($currentExperienceId){
+	 /**
+     * setting store id
+     */
+    $storeIdVal = $this->getRequest()->getParam('storeId');
+    $storeId = 0;
+    if(!empty($storeIdVal)){
+     $storeId = $storeIdVal;
+    }
+    /**
+     * Checking product id is not equal to empty
+     * Initilize product data
+     */
+    $_product = $this->getProductData ( $currentExperienceId, $storeId );
+	$experienceName 			= $_product->getName();
+	$experienceLocation 		= $_product->getPropertyadd();
+	$experienceDescription 		= $_product->getDescription();
+	$privateNotes 				= $_product->getPrivateNotes();
+	$experiencePrice 			= $_product->getPrice();
+	$experiencePropertyType 	= $_product->getPropertytype();
+	$experienceCity 			= $_product->getCity();
+	$experienceState 			= $_product->getState();
+	$experienceLatitude 		= $_product->getLatitude();
+	$experienceLongitude 		= $_product->getLongitude();
+	$experienceCountry 			= $_product->getcountry();
+	$experiencePeopleMinimum 	= $_product->getPeopleMin();
+	$experienncePeopleMaximum 	= $_product->getPeopleMax();
+	$experienceDuration 		= $_product->getDuration();
+	$experiencePriceType 		= $_product->getPricingType();
+	$experienceTags 			= $_product->getTag();
+	$experiencePropertyTime 	= $_product->getPropertyTime();
+	$subscriptionId             = $this->getSubscripitonCollection();
+	$model                      = Mage::getModel ( 'airhotels/productsubscriptions' )->getCollection ()->addFieldToFilter ( 'product_id', $currentExperienceId )->addFieldToFilter ( 'is_delete', 0 );
+	$experienceTax 				= $_product->getTaxClassId();
+	$data                       = $model->getData ();
+}
+/**
+ * Get the Property time ID
+ */
+$customerId = Mage::getSingleton('customer/session')->getId();
+$customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($customerId);
+$propertyTimeId 		= Mage::helper('airhotels/airhotel')->getPropertyTime();
+$propertyAttribute 		= Mage::getModel('eav/config')->getAttribute('catalog_product', $propertyTimeId);
+$propertyTypeId 		= Mage::helper('airhotels/product')->getpropertytype();
+$cancelPolicyId 		= Mage::helper('airhotels/product')->getcancelpolicy();
+$propertyTypeAttribute 	= Mage::getModel('eav/config')->getAttribute('catalog_product', $propertyTypeId);
+$currencyCode 			= Mage::app()->getStore()->getCurrentCurrencyCode();
+$currencySymbol 		=  Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+$PropertyType 	= array();
+$verifyTags 	= Mage::getModel('airhotels/tagsverification')->getCollection();
+$helper			= Mage::helper('airhotels');
+$selectPropertyType = '<option value="">' . $this->__('Select') . '</option>';
+$selectPropertyOption = '<option value="">' . $this->__(' -- Please Select --') . '</option>';
+
+foreach ($propertyTypeAttribute->getSource()->getAllOptions() as $option) {
+  $value = $option['value'];
+  if ($value != '') {
+    $PropertyType[$value] = $option['label'];
+    $selected = "";
+    if($experiencePropertyType==$option['value']){ $selected="selected";}
+    	$selectPropertyType .= "<option value='" . $option['value'] . "' ".$selected.">" . $option['label'] . "</option>";
+  }
+}
+?>
+<form id="basic_form" class="list_an_experience_forms wizard clearfix" name="basic_form" method="post" action="<?php echo Mage::getBaseUrl() . 'airhotels/general/basicsave/' ?>" enctype="multipart/form-data" onsubmit="return checkValue();">
+	<div class="content clearfix">	
+		<h3 class='title current'><?php echo $this->__('Basic');?></h3>
+		<fieldset class="body current contentcontainer">
+		    <!-- store view select -->
+		    <?php if($currentExperienceId){ ?>
+              <div class="fields"><label for="store-view" class="required"><?php echo $this->__('Select Store'); ?><i class="fa fa-star mandatory_star"></i></label>
+                  <div class="input-box">
+                      <select id="store-view" name="store_id" class="select select input-text required-entry input-text_pro" onchange="setStoreId(this.value)">
+                          <option value="0"><?php echo $this->__('All Store View'); ?></option>
+                           <?php
+                          $allStores = Mage::app()->getStores();
+                          foreach ($allStores as $_eachStoreId => $val) {
+                              $_storeCode = Mage::app()->getStore($_eachStoreId)->getCode();
+                              $_storeName = Mage::app()->getStore($_eachStoreId)->getName();
+                              $_storeId = Mage::app()->getStore($_eachStoreId)->getId();
+                              $selected_status = $storeId==$_storeId?'selected=selected':"";
+                              echo '<option value="'.$_storeId.'"'.$selected_status.'>'.$_storeName.'</option>';
+                          }
+                           ?>
+                      </select>
+                  </div>
+              </div>
+          <?php } ?>
+			<div class="list_title">		   
+		    	<label for="name"><?php echo $this->__('Experience Name'); ?>
+		    	<i class="fa fa-star mandatory_star"></i></label>
+				<p class="basictitle">
+					<input name="name" value="<?php echo $experienceName; ?>"
+						data-content='EXAMPLE: "Shanghai historic pub tour" (No more than 60 characters)'
+						data-placement="right" data-title="EXPERIENCE NAME"
+						placeholder="<?php echo Mage::helper('airhotels')->__('The name should be clear and descriptive');?>"
+						id="name" maxlength="60" value=""
+						class="required-entry input_width" type="text"
+						<?php if(!Mage::helper('airhotels/mobile')->isMobile()) { ?>
+						rel="popover" <?php } ?> onchange="contentChanges();" />
+				</p>
+				<input type="hidden" name="selected_tab" id="selected_tab" value="" />
+			</div>
+			<div class="list_location">		  	
+		    <label for="propertyadd"><?php echo $this->__('Location');?>
+		    	<i class="fa fa-star mandatory_star"></i>
+		    </label>		    
+				<p class="basictitle">
+					<input type="text" class="required-entry input_width"
+						value="<?php echo $experienceLocation;?>" name="propertyadd"
+						id="propertyadd" onchange="contentChanges()"
+						data-content="Example: 123 Hipster Avenue, Brooklyn, NY 11249."
+						data-placement="right" data-title="MEETING ADDRESS"
+						placeholder="<?php echo Mage::helper('airhotels')->__('Search Your Location');?>"
+						<?php if(!Mage::helper('airhotels/mobile')->isMobile()) { ?>
+						rel="popover" <?php } ?> />				
+					<input type="hidden" name="latitude" id="latitude" value="<?php echo $experienceLatitude;?>" /> 
+					<input type="hidden" name="longitude" id="longitude" value="<?php echo $experienceLongitude; ?>" /> 
+					
+					
+					
+				</p>
+			</div>	
+			<div class="experienceCity">
+				<label for="city"><?php echo $this->__('City');?>
+		    		<i class="fa fa-star mandatory_star"></i>
+		    	</label>	
+		    	<p class="basictitle">
+		    		<input type="text" class="required-entry input_width" name="city" id="city" placeholder="<?php echo Mage::helper('airhotels')->__('city');?>" value="<?php $experienceCity ?>" />
+		    	</p>
+			</div>	
+			<div class="experienceState">
+				<label for="state"><?php echo $this->__('State');?>
+		    		<i class="fa fa-star mandatory_star"></i>
+		    	</label>	
+		    	<p class="basictitle">
+		    		<input type="text" class="required-entry input_width" name="state" id="state" placeholder="<?php echo Mage::helper('airhotels')->__('State');?>" value="<?php echo $experienceState;?>" /> 
+		    	</p>
+			</div>
+			<div class="experienceCountry">
+				<label for="country"><?php echo $this->__('Country');?>
+		    		<i class="fa fa-star mandatory_star"></i>
+		    	</label>	
+		    	<p class="basictitle">
+		    		<input type="text" class="required-entry input_width" name="country" id="country" placeholder="<?php echo Mage::helper('airhotels')->__('Country');?>" value="<?php $experienceCountry ?>" /> 
+		    	</p>
+			</div>	
+			<!-- Load Map -->
+			<div class="map_address_locator">
+				<div id="mapWrapper"></div>
+				<div id="map_canvas"></div>
+			</div>
+			<!--  Summary-->
+			<div class="summary">
+				<label for="description"><?php echo $this->__('Summary') ?> <i
+					class="fa fa-star mandatory_star"></i></label>
+				<p class="basictitle">
+					<textarea name="description" id="description"
+						class="required-entry"
+						data-content='EXAMPLE: "Our Shanghai pub tour is a gentle 4 km amble through some of Shanghai is old streets, enjoying fine views, quirky history and a couple of drinks along the way...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Stopping at least 5 unique Shanghai pubs to quench our thirst, the small group provides a personal touch and the local feel..."'
+						data-placement="right" data-title="SUMMARY"
+						placeholder="<?php echo Mage::helper('airhotels')->__('Every experience on Airhotels is unique.Highlight what makes your experience welcoming so that it stands out to travellers who want as the local companion.');?>"
+						cols="5" rows="5"
+						<?php if(!Mage::helper('airhotels/mobile')->isMobile()) { ?>
+						rel="popover" <?php } ?> onchange="contentChanges();"><?php echo $experienceDescription;?></textarea>
+				</p>
+			</div>
+			<!-- People -->
+			<div class="basic_accommodates">
+				<label for="accommodate"><?php echo $this->__('Accommodate(s)') ?> <i
+					class="fa fa-star mandatory_star"></i></label> <input
+					class="required-entry validate-number booking_input_field"
+					id="accommodate_minimum" name="accommodate_minimum" size="30"
+					type="number" min="1" max="10"
+					value="<?php if($experiencePeopleMinimum){echo $experiencePeopleMinimum;}else{echo "1";} ?>"
+					onchange="contentChanges();" onblur="checkIsEmpty(this.value,this)" />
+				<span class="min_max"><?php echo $this->__('Min'); ?></span> <input
+					class="required-entry validate-number booking_input_field"
+					id="accommodate_maximum" name="accommodate_maximum" size="30"
+					type="number" min="1" max="10"
+					value="<?php if($experienncePeopleMaximum){echo $experienncePeopleMaximum;}else{ echo "4";} ?>"
+					onchange="contentChanges();" onblur="checkIsEmpty(this.value,this)" />
+				<span class="min_max"><?php echo $this->__('Max'); ?></span>
+			</div>
+	   <?php
+	   $_product = Mage::getModel ( 'catalog/product' )->load ($currentExperienceId);
+	   /**
+	   * For hourly based property
+	   */
+       $propertyTimeValueData = $_product->getPropertyTime();
+       /**
+       * Get the Property overnight Fee
+       */
+       $propertyOvernightFeeData = $_product->getPropertyOvernightFee();
+       /**
+       * Get the Property Maximum
+       */
+       $propertyMaximumData = $_product->getPropertyMaximum();
+       /**
+       * Get the Property Minimum
+       */
+       $propertyMinimumData =  $_product->getPropertyMinimum();
+       /**
+       * Get the PropertyService From Time
+       */
+       $propertyServiceFromTimeData = $_product->getPropertyServiceFromTime();
+       /**
+       * Get the Property Service To Time
+       */
+       $propertyServiceToTimeData = $_product->getPropertyServiceToTime();
+       $propertyServiceFromArray = explode(":", $propertyServiceFromTimeData);
+       /**
+       * check whether the property service exist
+       */
+       if($propertyServiceFromArray[0]){
+       		$propertyServiceFromData =  $propertyServiceFromArray[0];
+       }
+       if(isset($propertyServiceFromArray[1])){
+       		$propertyServiceFromPeriodData = $propertyServiceFromArray[1];
+       }
+       /**
+       * Explode the propertyServiceToTimeData Array
+       */
+       $propertyServiceToArray = explode(":", $propertyServiceToTimeData);
+       /**
+       * Save the Value t0 propertyServiceToData
+       */
+       $propertyServiceToData =  $propertyServiceToArray[0];
+       /**
+       * Check weather the Value has been enabled
+       */
+       if(isset($propertyServiceToArray[1])){
+       		$propertyServiceToPeriodData = $propertyServiceToArray[1];
+       }
+       /**
+       * Get the Property Maximum
+       */
+       $propertyMaximumData = $_product->getPropertyMaximum();
+       /**
+       * Get the Property Minimum
+       */
+       $propertyMinimumData =  $_product->getPropertyMinimum();
+       /**
+       * get the Value of Cancelpolicy
+       */
+       $cancelpolicy = $_product->getCancelpolicy();
+       /**
+       * cancelPolicy
+       */
+       $cancelpolicy_select = $countryselect = $pets_select = $bedtype_select = '';
+       /**
+       * Get the cancelation policy Id
+       */
+       $cancelpolicyId = Mage::helper('airhotels/product')->getcancelpolicy();
+       /**
+       * Cancel Policies
+       */
+       $cancelpolicyAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $cancelpolicyId);
+       /**
+       * Check weather cancel policy
+       */
+       foreach ($cancelpolicyAttribute->getSource()->getAllOptions() as $cancelpolicyOption) {
+       		$cancelpolicyValue = $cancelpolicyOption['value'];
+	       /**
+	       * Check weather cancel policy
+	       */
+	       if($cancelpolicyValue !='') {
+		       	if(($cancelpolicyOption['value'] == $cancelpolicy)){
+		        	/**
+		            * cancel policy Value
+		            */
+		            $cancelpolicy_select .= "<option selected  value='".$cancelpolicyOption['value']."'>". $cancelpolicyOption['label']."</option>";
+		         } else{
+		         /**
+		         * Cancel Policy Value for not selected Value
+		         */
+		         $cancelpolicy_select .= "<option value='".$cancelpolicyOption['value']."'>". $cancelpolicyOption['label']."</option>";
+		         }
+	        }
+        }
+        /**
+         * Get the AmenityID
+         */
+        $amenityId =  Mage::helper('airhotels/product')->getamenity();
+        /**
+         * Amenity Attribute Value
+         */
+        $amenityAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $amenityId);
+
+        /**
+        * Get the Privacy Value
+        */
+        $privacy = $_product->getPrivacy();
+        /**
+        * Privacy select
+        */
+        $privacySelect = '<option value="">'.$this->__('Select Privacy Type').'</option>';
+        /**
+        * Get the privacy Id
+        */
+        $privacyId= Mage::helper('airhotels/product')->getprivacy();
+        /**
+        * Privacy Attribute Value
+        */
+        $privacyAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $privacyId);
+        /**
+        * looping the privacy attribute
+        */
+        foreach ($privacyAttribute->getSource()->getAllOptions() as $privacyOption) {
+        	$privacyValue = $privacyOption['value'];
+            /**
+            * Check the privacy option has been enabled
+            */
+            if($privacyValue !='') {
+            	if(($privacyOption['value'] == $privacy)){
+                	/**
+                	* Privacy Select Values
+                	*/
+                	$privacySelect .= "<option selected  value='".$privacyOption['value']."'>". $privacyOption['label']."</option>";
+                } else {
+                	/**
+                	* Privacy for not selected Values
+                	*/
+                	$privacySelect .= "<option value='".$privacyOption['value']."'>". $privacyOption['label']."</option>";
+                }
+            }
+        }
+        $getamenity= explode(',' , $_product->getAmenity());
+        $getSecurity = array();
+        $all_options = $_product->getOptions();
+        if($all_options){
+        	foreach ($all_options as  $option){
+        		/**
+        		 * loop through each values of option
+        		 */
+        		foreach ($option->getValues() as  $value){
+        			$getSecurity[]=$value['title'];
+        		}
+        	}
+        }
+        /**
+         * Get the Amenity Value
+         */
+		$attributeCode 	= "property_type";
+        $attributeDetails 	= Mage::getSingleton("eav/config")->getAttribute("catalog_product", $attributeCode);
+		$options 			= $attributeDetails->getSource()->getAllOptions(false);
+		$increment = 0;
+        Foreach($options as $option){ ?>
+        	<input type="hidden" class="required property_type"
+				class="property_type" name="property_type"
+				value="<?php echo $option["value"]; ?>" onchange="contentChanges();">
+        <?php $increment++; break;} ?>
+        <div class="mode_highlight">
+				<div class="property_time" <?php if($hourlyEnabledOrNot == 1){
+                    	echo 'style="display:none"';
+                    } ?>>
+                    <label class="required left lable_inner property_mode_label"><?php echo $this->__('Property Mode') ?> </label>
+                        <?php
+                        if (count($propertyAttribute) >= 1) {
+                            foreach ($propertyAttribute->getSource()->getAllOptions() as $propertyTimeOption) {
+								/**
+								 * Property TIme Value
+								 */
+                                $propertyTimeValue = $propertyTimeOption['value'];
+                                $propertyTimeEdit = $_product->getPropertyTime();
+                                $propertyText = $_product->getAttributeText('property_time');
+								/**
+								 * PropertyTImeLabel Value
+								 */
+                                $propertyTimeLabel = "'".$propertyTimeOption['label']."'";
+								/**
+								 * Property Selected
+								 */
+                                $propertyTimeSelected = '';
+								/**
+								 * check weather the Value has equal for hourly
+								 */
+                                if(($propertyTimeEdit)){
+                                  if($propertyTimeOption['label'] == 'Hourly' && $propertyText == 'Hourly'){
+                                    $propertyTimeSelected = 'checked="checked"';
+                                   }
+                                   /**
+                                    * check weather the Value has equal for Daily
+                                    */
+                                   if($propertyTimeOption['label'] == 'Daily' && $propertyText == 'Daily'){
+                                    $propertyTimeSelected = 'checked="checked"';
+                                   }
+                                }else{
+                                   if($propertyTimeOption['label'] == 'Hourly'){
+                                    $propertyTimeSelected = 'checked="checked"';
+                                   }
+                                   /**
+                                    * check weather the Value has equal for Daily
+                                    */
+                                   if($propertyTimeOption['label'] == 'Daily'){
+                                    $propertyTimeSelected = 'checked="checked"';
+                                   }
+                                }
+								/**
+								 * check the propertyTimeValue not empty
+								 */
+                                if (!empty($propertyTimeValue)) {
+                                    echo '<input class="required" type="radio" id="property_time_' . $propertyTimeValue . '" name="property_time" value="' . $propertyTimeValue . '"onchange="contentChanges();" onclick="propertyTimeChange('.$propertyTimeLabel.')" '.$propertyTimeSelected.' />';
+                                    echo '<label for="property_time_' . $propertyTimeValue . '">' . $this->__($propertyTimeOption['label']) . '</label>';
+                                }
+                            }
+                            $hourlySelected = 1;
+                            if($_product->getAttributeText('property_time') == "Daily" || $hourlyEnabledOrNot == 1){
+                                $hourlySelected = 0;
+                            }
+                            echo "<input type='hidden' id='hourly_selected' value='$hourlySelected'/>";
+                        }
+                        ?>
+
+                    <div class="property_time_hourly" id="property_time_hourly"
+                    <?php if($hourlyEnabledOrNot == 1){ echo 'style="display:none"'; } ?>>
+                    <div class="input-box_inner">
+                    <label for="property_overnight_fee" class="lable_inner left">
+                    <?php echo $this->__('Overnight Fee'); ?>
+                    </label>
+                    <div class="floatleft">
+                    <input id="property_overnight_fee" type="text" class="input-text"
+                    name="property_overnight_fee" value="<?php if(isset($propertyOvernightFeeData)){
+                        	echo round($propertyOvernightFeeData,2);
+                        } ?>"
+                    onblur="return validatePrice(this.value,'overnightfee');"
+                    title="<?php echo $this->__('Overnight Fee') ?>" onchange="contentChanges();"/> <span> <?php echo $currencySymbol . '(' . $this->__('Enter price in') .' '. $currencyCountry . ')'; ?></span>
+                    </div>
+                    <div id="overnightFeeErr" style="color: red; margin-left: 165px"></div>
+                    </div>
+
+                    <div class="servicetime_property">
+                    <label class="lable_inner left"><?php echo $this->__('Service Hours'); ?></label>
+                    <select id="property_service_from" name="property_service_from" onChange="checkValue()">
+                        <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                        <option value="<?php echo $inc; ?>"
+                        <?php if(!empty($propertyServiceFromData)){
+                        	if($propertyServiceFromData == $inc){
+									echo 'selected="selected";';
+                                }
+                             } ?>><?php echo $inc; ?></option>
+                        <?php } ?>
+
+                    </select> <select
+                    id="property_service_from_period"
+                    name="property_service_from_period" class="select select input-text required-entry input-text_pro" onChange="checkValue()">
+                    <option value="AM" <?php if(!empty($propertyServiceFromPeriodData )){
+                            	if($propertyServiceFromPeriodData  == 'AM'){
+									echo 'selected="selected";';
+								 }
+                            } ?>><?php echo $this->__('AM'); ?></option>
+                    <option value="PM" <?php if(!empty($propertyServiceFromPeriodData )){
+                            	if($propertyServiceFromPeriodData  == 'PM'){
+                                     echo 'selected="selected";';
+                                 }
+                            } ?>><?php echo $this->__('PM'); ?></option>
+                    </select> - <select id="property_service_to"
+                    name="property_service_to" onChange="checkValue()">
+                            <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                                <option value="<?php echo $inc; ?>" <?php if(!empty($propertyServiceToData)){if($propertyServiceToData == $inc){ echo 'selected="selected";';}} ?>><?php echo $inc; ?></option>
+                            <?php } ?>
+                                            </select> <select
+                    id="property_service_to_period" name="property_service_to_period" onChange="checkValue()">
+                    <option value="AM" <?php if(!empty($propertyServiceToPeriodData )){if($propertyServiceToPeriodData  == 'AM'){ echo 'selected="selected";';}} ?>><?php echo $this->__('AM'); ?></option>
+                            <option value="PM" <?php if(!empty($propertyServiceToPeriodData )){if($propertyServiceToPeriodData  == 'PM'){ echo 'selected="selected";';}} ?>><?php echo $this->__('PM'); ?></option>
+                    </select>
+                    </div>
+                    </div>
+				</div>
+				<script>
+				function getHttp(){
+				    var xmlhttp;
+				    if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+				        xmlhttp=new XMLHttpRequest();
+				    } else{// code for IE6, IE5
+				        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				    }
+				    return xmlhttp;
+				}
+				function subscriptionValue(val,id){
+					var billing_cycle_id = "billing_cycle_"+id;
+				    if( val != 0 ) {
+				      var xmlhttp = getHttp();
+				      xmlhttp.onreadystatechange=function()
+				      {
+				          if (xmlhttp.readyState==4 && xmlhttp.status==200)
+				          {                                            
+				              document.getElementById(billing_cycle_id).innerHTML=xmlhttp.responseText;
+				          }
+				      }
+				       var url = "<?php echo Mage::getBaseUrl() . 'airhotels/product/subscription/' ?>";
+				       url=url+"?subscriptionid="+val;
+				       xmlhttp.open("GET",url,true);
+				       xmlhttp.send();
+				    } 
+				}
+				</script>
+				<?php
+                    /**
+                     * Subscription Collection
+                     */
+                    $subscriptionCollection = $this-> getSubscriptionTypeModel();?>
+
+                    <!-- Displaying All options list -->
+                    <?php if($isSubscriptionEnabled == 0){ ?>
+                    <div id="add_subscripition_option_list" <?php if($hourlyEnabledOrNot == 0){ echo 'style="display:none"'; } ?>>
+                   <?php
+                    if(!$data) {
+                    $data = array(001);
+                    }
+                    $collectionCount = 0;
+
+                    foreach ($data as $value ) {
+                    ?>
+                    <!-- Div for removing custom option -->
+                    <div id="wrapper_subscription_option_<?php echo $collectionCount; ?>"
+                    class="dont-remove option-box apptha_subscription_div">
+                    <table id="subscription_option_<?php echo $collectionCount; ?>"
+                    class="form-list border subscription_option apptha_product_subscription_table bordertable"
+                    cellpadding="0" cellspacing="0">
+                    <tbody>
+                    <tr>
+                    <td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); if($collectionCount > 0){ ?><em> * </em><?php } ?></label></td>
+                    <td class="value"><select
+                    id="subscription_type_<?php echo $collectionCount; ?>"
+                    class="select select <?php if($collectionCount > 0){ echo "required-entry"; }?> input-text input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+                    name="subscription_type[]"
+                    onchange="changeSubscriptionOption(<?php echo $collectionCount; ?>),contentChanges();">
+                    <option value=""><?php echo Mage::helper('airhotels')->__('No Subscription'); ?></option>
+                    <?php
+                    $selected = $value ['subscription_type'];
+                    foreach ( $subscriptionCollection as $subscription ) {
+                    ?>
+                    <option value="<?php echo $subscription->getId();?>"
+					<?php if($selected == $subscription->getId()){echo "selected='selected'";}?>><?php echo $subscription->getTitle();?></option>
+                    <?php } ?>
+                    </select><div id="billing_cycle_<?php echo $collectionCount; ?>"></div></td>
+                    <?php if($selected){ ?><script>subscriptionValue(<?php echo $selected?>,<?php echo $collectionCount; ?>);</script><?php } ?>
+                    </tr>
+                    <tr id="price_per_iteration" <?php if(empty($selected)){ ?> style="display:none;" <?php } ?> >
+                    <td class="label"><label for="price_per_iteration"><?php echo Mage::helper('airhotels')->__(' Price Per Iteration'); ?><em> * </em></label></td>
+                    <td class="value"><input
+                    id="price_per_iteration_<?php echo $collectionCount; ?>"
+                    class="input-text required-entry validate-number"  type="text"
+                    value="<?php echo $value['price_per_iteration']?>" name="price_per_iteration[]" onchange="contentChanges();"/></td>
+                    </tr>
+                    <tr>
+                    <td class="editable_buttons">
+                    <button
+                    id="delete_product_subscription_option_<?php echo $collectionCount; ?>"
+                    title="<?php echo 'Remove'; ?>" type="button"
+                    class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+                    onclick="removeOption(this)" style="">
+                    <span><span><?php echo 'Remove'; ?></span></span>
+                    </button>
+                    <button
+                    class="button scalable add add-product-subscription_option "
+                    type="button"
+                    onclick="addOption('wrapper_subscription_option_<?php echo $collectionCount; ?>');">
+                    <span><span> <?php echo 'Add'; ?></span></span>
+                    </button>
+
+                    </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    </div>
+                    <?php
+                    $collectionCount = $collectionCount + 1;
+                    }
+                    ?>
+                    <input type="hidden" id="iteration_count" name="iteration_count" value="<?php if($collectionCount > 0 ){ echo $collectionCount; }?>">
+                    </div>
+                    <?php } ?>
+				<span id="property_warn" style="display:none;color: red;"><?php echo $this->__('Change the time periods'); ?></span>
+				<div class="field input-box input-box_inner">
+					<label for="property_minimum" class="lable_inner left">
+	                   <?php
+	                   /**
+	                    * check hourly enabled or not
+	                    */
+	                   if($hourlyEnabledOrNot == 0){
+	                   		echo $this->__('Minimum hours for rent');
+	                   }else{
+	                   		echo $this->__('Minimum days for rent');
+	                   }
+	                   ?>
+	                   <em> *</em>
+					</label>
+					<div class="floatleft">
+						<input type="text" name="property_minimum"
+							class="input-text required-entry"
+							value="<?php if(isset($propertyMinimumData)){
+		                   echo $propertyMinimumData;
+		                   } ?>"
+							title="<?php echo $this->__('Minimum days/hours for rent') ?>" id="minimum_time_value" onchange="contentChanges();"/>
+					</div>
+				</div>
+				<div class="field input-box input-box_inner">
+					<label for="property_maximum" class="lable_inner left">
+	                   <?php
+	                   /**
+	                    * check hourly enabled or not
+	                    */
+                        if($hourlyEnabledOrNot == 0){
+                        echo $this->__('Maximum hours for rent');
+                        }else{
+                        echo $this->__('Maximum days for rent');
+                        }  ?>
+	                   <em> *</em>
+					</label>
+					<div class="floatleft">
+						<input type="text" name="property_maximum"
+							class="input-text required-entry"
+							value="<?php if(isset($propertyMaximumData)){
+		                   echo $propertyMaximumData;
+		                   } ?>"
+							title="<?php echo $this->__('Maximum days/hours for rent') ?>" id="maximum_time_value" onchange="contentChanges();"/>
+					</div>
+					<span id="time_error" class="time_error_rent" style="display:none;color: red;"><?php echo $this->__(' Minimum hours/days should be less than the maximum hours/days.'); ?></span>
+				</div>
+
+				<div class="basicprice clearfix">
+					<!-- Price -->
+					<label for="price"> <?php echo $this->__('Pricing') ?><i
+						class="fa fa-star mandatory_star"></i></label>
+					<p class="price_bar">
+						<span class="basic_price_currency basic_price_symbol"><?php echo $currencySymbol; ?></span>
+						<input class="required-entry validate-number validate-greater-than-zero" id="price"
+							value="<?php if($experiencePrice){ echo number_format((float)$experiencePrice, 2, '.', '');}else { echo "50.00"; } ?>"
+							name="price" number="true" size="30"
+							style="width: 60px; margin: 0; padding: 8px; border: 0;"
+							type="text" placeholder="50.00" onchange="contentChanges();"
+							onblur="checkIsEmpty(this.value,this)"> <span
+							class="basic_price_currency basic_price_symbol"><?php echo $currencyCode; ?></span>
+					</p>
+				</div>
+			</div>
+
+				<?php if($getSecurityEnabledOrNot == 0){ ?>
+				<div class="field basiccategory">
+				<div class="selectproperty">
+					<label for="property_type" class="left lable_inner"> <?php echo $this->__('Deposit Fee') ?> </label>
+					<div class="floatleft">
+
+				<?php
+				$securityId = Mage::helper('airhotels')->getSecurityFee();
+				$securityAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $securityId);
+                $totalSecurity = count($securityAttribute->getSource()->getAllOptions());
+                $productSecurityAttributes = array();
+                  echo "<ul id='amenities_panel'> ";
+                  $r=0;
+                 foreach ($securityAttribute->getSource()->getAllOptions() as $key=>$security) {
+
+                       $value = $security['value'];
+                       if($value !='') {
+						   $productSecurityAttributes [$r] = $security['label'];
+                           $BookingType[$value] = $security['label'];
+                             ?>
+             			 	<li class="checkbox lable_inner checkbox_inner"
+							style="margin-bottom: 8px;"><script type="text/javascript">
+                var colorlabel = "<?php echo $security['label']; ?>";
+               </script>
+                           <?php if(in_array($security['label'],$getSecurity)){ ?>
+                            <input type="checkbox" name="security[]"
+							id="security_<?php echo $key; ?>" class='test'
+							value="<?php echo $key ?>" checked="checked"> <label
+							for="security_<?php echo $value; ?>"> <?php echo $security['label']; ?></label>
+                           <?php
+                           } else {
+                           ?>
+                         <input type="checkbox" name="security[]"
+							id="security_<?php echo $key; ?>" class='test'
+							value="<?php echo $key ?>" /> <label
+							for="security_<?php echo $value; ?>"><?php echo $security['label']; ?></label>
+                        <?php }?>
+                   		 </li>
+                 <?php
+                  }   $r++;
+                 }
+                 echo "</ul>";
+                 ?>
+						</div>
+				</div>
+			</div>
+			<?php } ?>
+
+		<div class="fieldset marketplace-custom-option">
+				<h2 class="legend"><?php //echo $this->__('Security Deposit'); ?></h2>
+				<!-- Custom option add button -->
+
+				<div class="clear"></div>
+				<!-- Displaying All options list -->
+				<!-- Marketplace custom option container -->
+				<div id="marketplace_custom_option_list">
+
+  			  <?php
+  			  $option_count = 1;
+  			  $child_option_count = 1;
+  			  $select_sub_option_count = 0;
+  			  $product_options = $_product->getOptions();
+  			  if (!(empty($product_options)) ) {
+  			  	foreach ($product_options as $o) {
+  			  		if ($o->getIsDelete() != 1) {
+  			  			$optionTitle = $optionType  = $optionSortOrder = '';
+  			  			$optionTitle = $o->getTitle();
+  			  			 $optionType = $o->getType();
+  			  			 $values = $o->getValues();
+  			  			 $count = count($values);
+  			  			$optionSortOrder = $o->getSortOrder();
+
+
+   if ($optionType == 'drop_down' || $optionType == 'radio' || $optionType == 'checkbox' || $optionType == 'multiple') {
+  	$count = $count+1;  ?>
+					<table class="customtable border data-table form-list market_place_dropdown_row" cellpadding="0" cellspacing="0">
+						<input type="hidden" class="required-option-select-type-rows" name="<?php $option_count_value = $option_count; echo 'validation_' . $option_count_value . '_result'; ?>" value="">
+						<input type="hidden" value="0" name="product[options][1][is_require]" id="product_option_1_is_require" class="select" title="" />
+						<input type="hidden" class="required-entry input-text" id="product_option_1_title" name="product[options][1][title]" value="Security Deposit">
+						<input type="hidden" name="product[options][1][type]" id="product_option_1_type" value="drop_down" />
+						<input type="hidden" class="validate-zero-or-greater input-text" name="product[options][1][sort_order]" value="" style="margin-right: 0;">
+						<?php if($getSecurityEnabledOrNot == 0){?>
+						<thead>
+							<tr class="headings">
+								<th class="type-title"><label class="required"> <?php echo $this->__('List of Deposits'); ?> <em>*</em> </label></th>
+								<th class="type-price"><label><?php echo $this->__('Price'); ?></label></th>
+								<th class="type-butt last">&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody id="<?php $option_count_value = $option_count; echo 'select_option_type_row_' . $option_count_value;?>">
+                                                           <?php
+                                                           foreach ($values as $k => $v) {
+                                                               $optionSubTitle = $optionPrice = $optionPrice = $optionPriceType = $optionSku = $optionSortOrder = '';
+                                                               $optionSubTitle = $v->getTitle();
+                                                               $optionPrice = $v->getPrice();
+                                                               $optionPriceType = $v->getPriceType();
+                                                               $optionSku = $v->getSku();
+                                                               $optionSortOrder = $v->getSortOrder();
+                                                               $quantity = $v->getQuantity();
+                                                               $max = $v->getMax();
+                                                               $weight = $v->getWeight();
+                                                               $shipping = $v->getShip();
+                                                               ?>
+                          <tr id="<?php $option_count_value = $option_count;$idVal = array_search ($optionSubTitle, $productSecurityAttributes); echo 'product_option_' . $option_count_value . '_select_' . $idVal;?>">
+								<td>
+									<input type="hidden" name="<?php $option_count_value = $option_count; echo 'product[options][' . $option_count_value . '][values][' . $select_sub_option_count . '][option_type_id]';?>" value="-1">
+									<input type="hidden" id="<?php echo 'product_option_'.$option_count_value.'_select_'.$select_sub_option_count.'_is_delete' ?>" name=" <?php echo 'product[options]['.$option_count_value.'][values]['.$select_sub_option_count.'][is_delete]' ?>" value="">
+									<input type="text" class="required-entry input-text select-type-title" id="<?php $option_count_value = $option_count; echo 'product_option_' . $option_count_value . '_select_' . $select_sub_option_count . '_title';?>" name="<?php $option_count_value = $option_count; echo 'product[options][' . $option_count_value . '][values][' . $select_sub_option_count . '][title]'; ?>" value="<?php echo $optionSubTitle; ?>" readonly>
+								</td>
+								<td>
+								<input type="text" class="input-text required-entry validate-number product-option-price" id="<?php $option_count_value = $option_count; echo 'product_option_' . $option_count_value . '_select_' . $select_sub_option_count . '_price';?>" name="<?php $option_count_value = $option_count; echo 'product[options][' . $option_count_value . '][values][' . $select_sub_option_count . '][price]'; ?>" value="<?php echo round(Mage::helper('directory')->currencyConvert($optionPrice, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2); ?>">
+								</td>
+								<td style="display: none;">
+								<select name="<?php $option_count_value = $option_count; echo 'product[options][' . $option_count_value . '][values][' . $select_sub_option_count . '][price_type]';?>" id="<?php $option_count_value = $option_count; echo 'product_option_' . $option_count_value . '_select_' . $select_sub_option_count . '_price_type';?>"
+									class="select product-option-price-type" title="">
+										<option value="fixed"
+											<?php if (isset($optionPriceType)) {
+                                               	if ($optionPriceType == 'fixed') {
+                                                          echo 'selected';
+                                                   }
+                                               }?>>
+                   <?php echo $this->__('Fixed'); ?></option>
+										<option value="percent"
+											<?php if (isset($optionPriceType)) {
+                                       			 if ($optionPriceType == 'percent') {
+                                            		echo 'selected';
+                                       			 }
+                                    		}?>>
+                   <?php echo $this->__('Percent'); ?></option>
+								</select>
+							</td>
+							<td>
+							<input type="hidden" style="width:100px;" class="input-text validate-number product-option-sortorder" id=" <?php echo 'product_option_'.$option_count_value.'_select_'.$select_sub_option_count.'_sortorder' ?>" name="<?php echo 'product[options]['.$option_count_value.'][values]['.$select_sub_option_count.'][sort_order]'?>" value="<?php echo $select_sub_option_count; ?>">
+							</td>
+
+								<td class="last" style="display: none;">
+									<span title="Delete row">
+										<button id="delete_select_row_button" title="Delete Row"
+											type="button"
+											class="button scalable delete delete-select-row icon-btn"
+											onclick="removeMarketPlaceChildSelectOption(this)" style="">
+											<span> <span><?php echo $this->__('Delete Row'); ?></span></span>
+										</button>
+								</span>
+							</td>
+							</tr>
+                               <?php  $select_sub_option_count = $select_sub_option_count + 1;
+								}
+							?>
+                                 </tbody> <?php } ?>
+							</table>
+                         <?php
+									$child_option_count = $child_option_count + 1;
+									}
+								}
+							}
+					} else {
+				?>
+             <div class="custom_option_view">
+						<table class="customtable" style="display: none">
+							<thead>
+								<input type="hidden" value="0" name="product[options][1][is_require]" id="product_option_1_is_require" class="select" title="" />
+								<input type="hidden" class="required-entry input-text" id="product_option_1_title" name="product[options][1][title]" value="Security Deposit">
+								<input type="hidden" name="product[options][1][type]" id="product_option_1_type" value="drop_down" />
+								<input type="hidden" class="validate-zero-or-greater input-text" name="product[options][1][sort_order]" value="" style="margin-right: 0;">
+								<tr class="headings">
+									<th class="type-title"><label class="required">
+										<?php echo $this->__('List of Deposits'); ?> </label>
+									</th>
+									<th class="type-price"><label class="required">
+										<?php echo $this->__('Price'); ?> </label>
+									</th>
+									<th class="type-type" style="display: none;"> <label class="required">
+										 <?php echo $this->__('Price Type'); ?> </label>
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					<script type="text/javascript">
+
+    var i = 0;
+    jQ('.test').on('click',function(){
+        var label = jQ(this).parent().find('label').html();
+        var val = jQ(this).val();
+        var count = jQ("#amenities_panel [type='checkbox']:checked").length;
+        if(jQ(this).is(':checked')){
+        var htmlcnt =  ' </thead>  '+
+        '<tbody>' +
+        '<tr id="product_option_1_select_'+val+'">'+
+    '<td>'+
+        '<input type="hidden" name="product[options][1][values]['+i+'][option_type_id]" value="-1">'+
+        '<input type="hidden" id="product_option_1_select_'+i+'_is_delete" name="product[options][1][values]['+i+'][is_delete]" value="">'+
+        '<input type="text" readonly style="width:200px;" class="required-entry input-text select-type-title" id="product_option_1_select_'+i+'_title" name="product[options][1][values]['+i+'][title]" value="'+label+'">'+
+    '</td>'+
+    '<td>'+
+        '<input type="text" style="width:100px;" class="input-text required-entry validate-number product-option-price" id="product_option_1_select_'+i+'_price" name="product[options][1][values]['+i+'][price]" value="">'+
+    '</td>'+
+    '<td style="display:none;">'+
+        '<select name="product[options][1][values]['+i+'][price_type]" id="product_option_1_select_'+i+'_price_type" class="select product-option-price-type" title="">'+
+            '<option value="fixed">Fixed</option>'+
+            '<option value="percent">Percent</option>'+
+        '</select>'+
+    '</td>'+
+
+     '<td>'+
+     '<input type="hidden" style="width:100px;" class="input-text validate-number product-option-sortorder" id="product_option_1_select_'+i+'_sortorder" name="product[options][1][values]['+i+'][sort_order]" value="'+i+'">'+
+     '</td>'+
+'</tr>'+
+'<tbody>';
+        }else{
+            if(count == 0){
+               jQ(".customtable .headings").hide();
+            }
+            jQ('.customtable #product_option_1_select_'+val).remove();
+        }
+    jQ('.customtable').show();
+        jQ('.customtable').append(htmlcnt);
+        i++;
+    })
+
+</script>
+         <?php } ?>
+         </div>
+			</div>
+			<div class="field">
+				<div class="selectprivacy">
+					<label for="privacy" class="required left lable_inner"> <?php echo $this->__('Tax Class') ?> <em>*</em></label>
+					<div class="floatleft">
+						<select id="tax_class_id" name="tax_class_id" class=" required-entry required-entry select">
+							<?php 
+								$attr = Mage::getResourceModel('eav/entity_attribute_collection')->setCodeFilter('tax_class_id')->getData()[0];
+								$attributeModel = Mage::getModel('eav/entity_attribute')->load($attr['attribute_id']);
+								$taxClassOption =  $attributeModel->getSource()->getAllOptions();
+								$optionTaxClass = '<option value="">' . $this->__(' -- Please Select --') . '</option>';
+								foreach ($taxClassOption as $key => $value){
+									if($taxClassOption[$key]['label'] != 'Shipping'){
+										if($experienceTax == $taxClassOption[$key]['value']){
+											$selectedOption = 'selected';
+										}else{
+											$selectedOption = '';
+										}
+										
+										if($taxClassOption[$key]['label'] == 'Taxable Goods'){
+											$taxClassOption[$key]['label'] = 'Tax';
+										}
+											$optionTaxClass .= "<option value='" . $taxClassOption[$key]['value'] . "' ".$selectedOption.">" . $taxClassOption[$key]['label'] . "</option>";
+									}
+								}
+								
+								echo $optionTaxClass;
+							?>
+						</select>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<div class="field">
+				<div class="selectprivacy">
+					<label for="privacy" class="required left lable_inner"> <?php echo $this->__('Room Type') ?> <em>*</em></label>
+					<div class="floatleft">
+						<select id="privacy" name="privacy"
+							class="select select input-text required-entry input-text_room" onchange="contentChanges()">
+		                <?php echo $privacySelect; ?>
+		                </select>
+					</div>
+					<div class="clear"></div>
+				</div>
+				<input name="id" id="id" title="<?php echo $this->__('id') ?>"
+					value="<?php echo $currentExperienceId ;?>" type="hidden" />
+			</div>
+			<?php 
+			/**
+			 * Get the Bed Room Value
+			 */
+			$bedRooms = $_product->getBedRooms();
+			/**
+			 * Bed Room select
+			 */
+			$bedRoomSelect = '<option value="">'.$this->__('-- Please Select --').'</option>';
+			/**
+			 * Get the Bed Room Id
+			 */
+			$bedRoomId= Mage::helper('airhotels/product')->getBedRoom();
+			/**
+			 * Bed Room Attribute Value
+			 */
+			$bedRoomAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $bedRoomId);
+			/**
+			 * looping the Bed Room attribute
+			 */
+			foreach ($bedRoomAttribute->getSource()->getAllOptions() as $bedRoomOption) {
+				$bedRoomValue = $bedRoomOption['value'];
+				/**
+				 * Check the Bed Room option has been enabled
+				 */
+				if($bedRoomValue !='') {
+					if(($bedRoomOption['value'] == $bedRooms)){
+						/**
+						 * Bed Room Select Values
+						 */
+						$bedRoomSelect .= "<option selected  value='".$bedRoomOption['value']."'>". $bedRoomOption['label']."</option>";
+					} else {
+						/**
+						 * Bed Room for not selected Values
+						 */
+						$bedRoomSelect .= "<option value='".$bedRoomOption['value']."'>". $bedRoomOption['label']."</option>";
+					}
+				}
+			}
+			?>
+			<div class="field">
+				<div class="selectprivacy">
+					<label for="bed_rooms" class="required left lable_inner"> <?php echo $this->__('Bed Room(s)') ?> <em>*</em></label>
+					<div class="floatleft">
+						<select id="bed_rooms" name="bed_rooms"
+							class="select select input-text required-entry input-text_room">
+		                <?php echo $bedRoomSelect; ?>
+		                </select>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<?php 
+			/**
+			 * Get the Bed Type Value
+			 */
+			$bedType = $_product->getBedType();
+			/**
+			 * Bed Type select
+			 */
+			$bedTypeSelect = '<option value="">'.$this->__('-- Please Select --').'</option>';
+			/**
+			 * Get the Bed Type Id
+			 */
+			$bedTypeId= Mage::helper('airhotels/product')->getBedType();
+			/**
+			 * Bed Type Attribute Value
+			 */
+			$bedTypeAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $bedTypeId);
+			/**
+			 * looping the Bed Type attribute
+			 */
+			foreach ($bedTypeAttribute->getSource()->getAllOptions() as $bedTypeOption) {
+				$bedTypeValue = $bedTypeOption['value'];
+				/**
+				 * Check the Bed Type option has been enabled
+				 */
+				if($bedTypeValue !='') {
+					if(($bedTypeOption['value'] == $bedType)){
+						/**
+						 * Bed Type Select Values
+						 */
+						$bedTypeSelect .= "<option selected  value='".$bedTypeOption['value']."'>". $bedTypeOption['label']."</option>";
+					} else {
+						/**
+						 * Bed Type for not selected Values
+						 */
+						$bedTypeSelect .= "<option value='".$bedTypeOption['value']."'>". $bedTypeOption['label']."</option>";
+					}
+				}
+			}
+			?>
+			<div class="field">
+				<div class="selectprivacy">
+					<label for="bed_type" class="required left lable_inner"> <?php echo $this->__('Bed Type') ?> <em>*</em></label>
+					<div class="floatleft">
+						<select id="bed_type" name="bed_type"
+							class="select select input-text required-entry input-text_room">
+		                <?php echo $bedTypeSelect; ?>
+		                </select>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<!-- For Property Type	-->
+			<div class="field basiccategory">
+				<div class="selectproperty">
+					<label for="property_type" class="required-entry left lable_inner"> <?php echo $this->__('Property Type') ?> <i
+						class="fa fa-star mandatory_star"></i></label>
+					<div class="floatleft">
+						<select id="property_type" name="property_type"
+							class="required-entry select" onchange='contentChanges();'><?php echo $selectPropertyType; ?> </select>
+					</div>
+				</div>
+			</div>
+
+			<!-- For Specifications	-->
+			<div class="field basiccategory">
+				<div class="selectproperty">
+					<label for="property_type" class="required-entry left lable_inner"> <?php echo $this->__('Specifications') ?> </label>
+					<div class="floatleft">
+							<?php
+               	 $totalAmenity = count($amenityAttribute->getSource()->getAllOptions());
+                 echo "<ul id='amenities_panel'> ";
+                 foreach ($amenityAttribute->getSource()->getAllOptions() as $amenity) {
+				/**
+ 				 * Itearting the amenityAttributeArray
+				 */
+                       $value = $amenity['value'];
+
+                       /**
+                        * THe value is not null
+                        */
+                       if($value !='') {
+                           $PropertyType[$value] = $amenity['label'];
+                             ?>
+              			<li class="checkbox lable_inner checkbox_inner"
+							style="margin-bottom: 8px;">
+                           <?php if(in_array($amenity['value'],$getamenity)){ ?>
+                            <input type="checkbox" name="amenity[]"
+							id="amenity_<?php echo $value; ?>"
+							value="<?php echo $amenity['value']; ?>" checked="checked" onchange="contentChanges();"> <label
+							for="amenity_<?php echo $value; ?>">
+                            <?php echo $amenity['label']; ?></label>
+                           <?php
+                           } else {
+                           ?>
+                         <input type="checkbox" name="amenity[]"
+							id="amenity_<?php echo $value; ?>"
+							value="<?php echo $amenity['value']; ?>" onchange="contentChanges();"/> <label
+							for="amenity_<?php echo $value; ?>">
+                         <?php echo $amenity['label']; ?></label>
+                        <?php }?>
+                   </li>
+                 <?php
+                  }
+                 }
+                 echo "</ul>";
+                 ?>
+						</div>
+				</div>
+			</div>
+			
+			<?php
+			$manage_attribute_enable = Mage::getStoreConfig('airhotels/custom_group/custom_attribute');
+			if($manage_attribute_enable == 0){
+            $attributeGroupCollection = Mage::getResourceModel('eav/entity_attribute_group_collection')->setSortOrder()->load();
+            $attributeCodes = array();
+            echo '<div class="field additional-attribute"><li>';
+            foreach ($attributeGroupCollection as $group) {
+            $groupName  = $group->getAttributeGroupName();
+            if($groupName == "Property Information"){
+            	$groupId  = $group->getAttributeGroupId();
+                $attributes = Mage::getResourceModel('catalog/product_attribute_collection')
+                	->setAttributeGroupFilter($group->getId())->addVisibleFilter()->checkConfigurableProducts()->load();
+                if ($attributes->getSize() > 0) {
+                    foreach ($attributes->getItems() as $attribute) {
+                    	/**
+                         *  @var $child Mage_Eav_Model_Entity_Attribute
+                         */
+                         $attributeCodes[] = $attribute->getAttributeCode();
+                         $attributeCode = $attribute->getAttributeCode();
+                         $isRequired = $attribute->getIsRequired();
+                         $attributeName = $attribute->getFrontendLabel();
+                         $attributeType = $attribute->getFrontendInput();
+                         if(!in_array($attributeCode, $ignoreArray)) {
+                         	$attribute_value = $_product->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($_product);
+                            switch($attributeType){
+                            case "text":
+                            	echo '<div class="field input-box input-box_inner">
+                                <label for="'.$attributeCode.'"';
+                                if($isRequired != 0 ) {
+                                	echo 'class="required-entry left lable_inner"><em>*</em><span>';
+                                }
+                                else {
+                                	echo 'class="left lable_inner "><span>';
+                                } ?> <?php if($attributeName == ""){
+                                echo $this->__("Name Missing"); }
+                                else {
+                                	echo $this->__(ucfirst($attributeName)); }
+                                    echo ' </span></label><div class="floatleft"><input id="'.$attributeCode.'" name="property['.$attributeCode.']"  value="'.$attribute_value.'"';?>
+                                    <?php if($isRequired != 0 ) {
+                                    		echo 'class="input-text required-entry"'; }
+                                        else {
+                                        	echo 'class="input-text"' ;}
+                                            	echo'  type="text" /></div></div>';
+                                         break;
+                                         case "boolean":
+                                         $getAttributeIdArray = Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product', $attributeCode);
+                                         $attributeOptions = Mage::getModel('eav/config')->getAttribute('catalog_product', $getAttributeIdArray );
+                                            echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'"';
+                                            if($isRequired != 0 ) {
+                                                echo 'class="required-entry left lable_inner"><em>*</em><span>'; }
+                                            else {
+                                                echo 'class="left lable_inner"><span>'; } ?>
+                                                <?php if($attributeName == "") {
+                                                      echo $this->__("Name Missing"); }
+                                                      else {
+                                                        echo $this->__(ucfirst($attributeName)); }
+                                                        echo' </span></label><div class="floatleft"><select id="'.$attributeCode.'" name="property['.$attributeCode.']">'; ?>
+                                                        
+                                                        <?php 
+                                                        echo $selectPropertyOption;
+                                                        foreach ($attributeOptions->getSource()->getAllOptions() as $attributeOption) {
+                                                        	if(!empty($attributeOption["label"])){
+                                                        		if($attribute_value == trim($attributeOption["label"])){
+                                                        			$selected_boolean_option = 'selected';
+                                                        		}else{
+                                                        			$selected_boolean_option = '';
+                                                        		}
+                                                        echo '<option '.$selected_boolean_option.' value="'.$attributeOption["value"].'"> '.$attributeOption["label"].'</option>';
+                                                      }
+                                                     }
+                                                echo '</select></div></div>';
+                                        break;
+                                        case "select":
+                                        $getAttributesIdArray = Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product', $attributeCode);
+                                        $attributeOptions = Mage::getModel('eav/config')->getAttribute('catalog_product', $getAttributesIdArray );
+                                        echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'"';
+                                            if($isRequired != 0 ) {
+                                                echo 'class="required-entry left lable_inner"><em>*</em><span>'; }
+                                            else {
+                                                echo 'class="left lable_inner"><span>'; } ?>
+                                                <?php if($attributeName == "") {
+                                                        echo $this->__("Name Missing"); }
+                                                    else {
+                                                        echo $this->__(ucfirst($attributeName));
+                                                    }
+                                                        echo ' </span></label><div class="input-box"><select id="'.$attributeCode.'" name="property['.$attributeCode.']" '; ?>
+                                                        <?php if($isRequired != 0 ) {
+                                                                    echo 'class="select select input-text required-entry "';
+                                                              }
+                                                              else {
+                                                                    echo 'class="select select input-text "' ;}
+                                                                    echo '>';?>
+                                                                    <?php 
+                                                                    echo $selectPropertyOption;
+                                                                    foreach ($attributeOptions->getSource()->getAllOptions() as $attributeOption) {
+                                                                    	if(!empty($attributeOption["label"])){
+	                                                                    	if($attribute_value == $attributeOption["label"]){
+	                                                                    		$selected_option = 'selected';
+	                                                                    	}else{
+	                                                                    		$selected_option = '';
+	                                                                    	}
+	                                                                         echo '<option '.$selected_option.' value="'.$attributeOption["value"].'"> '.$attributeOption["label"].'</option>';
+                                                                    	}
+                                                                }
+                                                        echo '</select></div></div>';
+                                          break;
+                                          case "multiselect":
+                                          $getAttributeIdArray = Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product', $attributeCode);
+                                          $attributeOptions = Mage::getModel('eav/config')->getAttribute('catalog_product', $getAttributeIdArray );
+                                          if(!empty($attribute_value)){
+                                          	$selected_mutiple_option = explode(',',$attribute_value);
+                                          }
+                                          echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'"';
+                                               if($isRequired != 0 ) {
+                                                    echo 'class="required lable_inner left"><em>*</em><span>'; }
+                                                    else {
+                                                    echo 'class="lable_inner left"><span>'; } ?>
+                                                    <?php if($attributeName == "") {
+                                                            echo $this->__("Name Missing"); }
+                                                        else {
+                                                            echo $this->__(ucfirst($attributeName));
+                                                         }
+                                                             echo ' </span></label><div class="input-box"><select multiple="multiple" id="'.$attributeCode.'" name="property['.$attributeCode.'][]" '; ?>
+                                                             <?php if($isRequired != 0 ) { echo 'class="additional-multiselect multiselect required-entry"'; }
+                                                             else { echo 'class="additional-multiselect multiselect"' ;}'>';?>
+                                                             <?php foreach ($attributeOptions->getSource()->getAllOptions() as $attributeOption) {
+                                                             	foreach($selected_mutiple_option as $values){
+                                                             		if($attributeOption["label"] == trim($values)){
+                                                             			$mutiple_selected = 'selected';
+                                                             			break;
+                                                             		}else{
+                                                             			$mutiple_selected = '';
+                                                             		}
+                                                             	}
+                                                                        echo '<option '.$mutiple_selected.' value="'.$attributeOption["value"].'"> '.$attributeOption["label"].'</option>';
+                                                         }
+                                                         echo '</select></div></div>';
+                                          break;
+                                          case "textarea":
+                                              echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'"';
+                                              if($isRequired != 0 ) {
+                                                    echo 'class="required lable_inner left"><em>*</em><span>';
+                                                    }
+                                                    else {
+                                                         echo 'class="lable_inner left"><span>'; } ?>
+                                                             <?php if($attributeName == ""){
+                                                                    echo $this->__("Name Missing"); }
+                                                                   else {
+                                                                    echo $this->__(ucfirst($attributeName)); }
+                                                                    echo ' </span> </label><div class="input-box"><textarea id="'.$attributeCode.'" name="property['.$attributeCode.']" '; ?>
+                                                                     <?php if($isRequired != 0 ) {
+                                                                                echo 'class="required-entry textarea"'; }
+                                                                            else {
+                                                                                echo 'class="textarea"' ;
+                                                                            }
+                                                                            echo ' rows="7" cols="0" style="width: 43%;">';?><?php
+                                                  echo $attribute_value.'</textarea></div></div>';
+                                          break;
+                                          case "price":
+                                          echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'"';
+                                          if($isRequired != 0 ) { echo 'class="required lable_inner left"><em>*</em><span>'; }
+                                          else {
+                                            echo 'class="lable_inner left"><span>'; }   ?>
+                                            <?php if($attributeName == ""){ echo $this->__("Name Missing"); }
+                                            else {  echo $this->__(ucfirst($attributeName)); }
+                                                    echo '  </span></label><div class="input-box" style="width: auto;"> <input id="'.$attributeCode.'" name="property['.$attributeCode.']" value="'.$attribute_value.'"'; ?>
+                                            <?php if($isRequired != 0 ) {
+                                                echo 'class="required-entry validate-zero-or-greater input-text"'; }
+                                                else { echo 'class="validate-zero-or-greater input-text"' ;}
+                                                echo' type="text" '; ?>
+                                                <?php echo '><strong> ['; ?>
+                                                <?php echo Mage::app()->getLocale()->currency(Mage::app()->getStore()->getBaseCurrencyCode())->getShortName();
+                                                 echo ']null</strong></div></div> ';
+                                            break;
+                                            case "date":
+                                            $dateIsSet = "set";
+                                            echo '<div class="field input-box input-box_inner"><label for="'.$attributeCode.'">'; ?>
+                                            <?php if($attributeName == "") {
+                                                    echo $this->__("Name Missing"); }
+                                                else {
+                                                     echo $this->__(ucfirst($attributeName)); }
+                                                     echo '</label><div class="input-box" style="width: auto;"><input name="property['.$attributeCode.']"  id="'.$attributeCode.'"  value="'.$attribute_value.'"'; ?>
+                                                            <?php echo 'class="validate-date validate-date-range date-range-date-from" type="text"'; ?>
+                                                            <?php echo '/> <img src="'; ?>
+                                                            <?php echo $this->getSkinUrl("images/calendar.gif");
+                                                             echo '" alt="" class="v-middle" id="';?>
+                                                             <?php echo $attributeCode.'_trig" title="'; ?>
+                                                             <?php echo $this->__('Select Date');
+                                                             echo '" style="" /></div></div>';
+                                             break;
+                                    }
+                                }
+                        }
+             }
+            }
+            }
+            echo "</li></div>"; 
+            
+         }?><div class="field">
+				<div class="selectcancelpolicy">
+					<label for="cancelpolicy" class="required lable_inner left"> <?php echo $this->__('Cancellation Policy') ?> <em>*</em></label>
+					<div class="floatleft">
+						<select id="cancelpolicy" name="cancelpolicy"
+							class="select select input-text required-entry input-text_policy" onchange="contentChanges()">
+							<option value=""><?php echo $this->__('Select Cancellation Policy') ;?></option>
+			                <?php echo $cancelpolicy_select; ?>
+			                </select>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+	</div>
+<?php
+/**
+ * End if for custom attributes section
+ */
+?>
+	<div class="form_next_button_section">
+		<button type="submit" class="profile_submit form_next_button"
+			id="basic_submit" value="Next">
+			<span class="form_next_btn_style">Next >></span>
+		</button>
+	</div>
+</form>
+<input type="hidden" id="currentLocationLatitude" value="" />
+<input type="hidden" id="currentLocationLongitude" value="" />
+<input type="hidden" id="currentLocationName" value="" />
+<!-- Div for removing custom option -->
+<div style="display:none;">
+<div id="wrapper_subscription_option_YYY"
+class="dont-remove option-box apptha_subscription_div">
+<table id="subscription_option_YYY"
+class="form-list border subscription_option apptha_product_subscription_table bordertable"
+cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); ?><em> * </em> </label></td>
+<td class="value"><select id="subscription_type_YYY"
+class="select select input-text required-entrycc input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+onchange="changeSubscriptionOption(YYY)"
+name="subscription_type[]">
+<option value="">
+<?php echo Mage::helper('airhotels')->__('No Subscription'); ?>
+</option>
+<?php
+$selected = $value ['subscription_type'];
+foreach ( $subscriptionCollection as $subscription ) {
+?>
+<option value="<?php echo $subscription->getId()?>"><?php echo $subscription->getTitle()?></option>
+<?php } ?>
+</select>
+<div id="billing_cycle_YYY"></div>
+</td>
+</tr>
+
+
+
+<tr>
+<td class="label"><label for="price_per_iteration"><?php echo Mage::helper('airhotels')->__(' Price Per Iteration'); ?>  <em> * </em> </label></td>
+<td class="value"><input id="price_per_iteration_YYY"
+class="input-text required-entrycc validate-number" type="text"
+value="" name="price_per_iteration[]" /></td>
+</tr>
+
+<tr>
+<td class="editable_buttons">
+<button id="delete_product_subscription_option_YYY"
+title="<?php echo 'Remove'; ?>" type="button"
+class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+onclick="removeOption(this)">
+<span><span><?php echo Mage::helper('airhotels')->__('Remove'); ?></span></span>
+</button>
+<button
+class="button scalable add add-product-subscription_option "
+type="button"
+onclick="addOption('wrapper_subscription_option_YYY');">
+<span><span><?php echo Mage::helper('airhotels')->__('Add'); ?></span></span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<script>
+var jQ = jQ.noConflict();
+var map_marker_icon = '<?php echo Mage::getBaseUrl('skin').'frontend/default/stylish/images/orange-dot.png';?>';
+jQ(function(){
+	var experienceLocation='<?php echo $experienceLocation;?>';	
+	if (navigator.geolocation) {		
+	       navigator.geolocation.getCurrentPosition(function(showPosition) {             
+           }, function(error) {               
+               console.log('Error occurred. Error code: ' + error.message);         
+           },{timeout:5000});
+	} else {
+	       alert("Geolocation is not supported by this browser.");
+	}
+});
+function showPosition(position) {
+  	 var latitude = position.coords.latitude;
+  	 var longitude = position.coords.longitude;
+	jQ("#currentLocationLatitude").val(latitude);
+	jQ("#currentLocationLongitude").val(longitude);
+	initialize();
+}
+jQ(window).resize(function(){
+	if (jQ(window).width() <= 480){	//Change the placeholder for accommodate maximum and minimum fields based on window width.
+		jQ("#accommodate_minimum").attr("placeholder", "Minimum");
+		jQ("#accommodate_minimum").attr("placeholder", "Maximum");
+	}
+});
+function checkIsEmpty(value,thisInput)
+{
+	var inputId=thisInput.id;
+	if(value=="")
+	{
+		if(inputId=="price")
+		{
+			document.getElementById(inputId).value="50.00";//This default value for price of the experience field
+		}
+		if(inputId=="accommodate_minimum")
+		{
+			document.getElementById(inputId).value="1";//This default value for People minimum stay in this experience
+		}
+		if(inputId=="accommodate_maximum")
+		{
+			document.getElementById(inputId).value="4";//This default value for People maximum stay in this experience
+		}
+		if(inputId=="duration")
+		{
+			document.getElementById(inputId).value="2";//This default value for Duration of experience
+		}
+	}
+	else
+	{
+		if(inputId=="price") {
+			var newValue = value.replace(/[^\d\.]/g,"");
+			document.getElementById(inputId).value = newValue;
+		}
+		else if(inputId=="accommodate_minimum")	{
+			var accommodate_maximum = document.getElementById("accommodate_maximum").value;
+			if((parseInt(value) > 9) || (parseInt(accommodate_maximum) < parseInt(value))) {
+				document.getElementById(inputId).value="1";//Minimum 1 people can stay in this experience
+			}
+		}
+		else if(inputId=="accommodate_maximum") {
+			var accommodate_minimum = document.getElementById("accommodate_minimum").value;
+			if((parseInt(value) > 10) || (parseInt(accommodate_minimum) > parseInt(value))) {
+				document.getElementById(inputId).value="10";//Maximum 10 peoples can stay in this experience
+			}
+		}
+		else {
+			var newValue = value.replace(/\D/g,'');
+			document.getElementById(inputId).value = newValue;
+		}
+	}
+}
+</script>
+<script>
+jQ(document).ready(function() {
+	jQ("#property_warn").hide();
+	jQ("#time_error").hide();
+	jQ("input:text, textarea, select, input:password").focus(function(){
+		jQ(this).css('border', '1px solid #5aaee5');
+		jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    });
+	jQ("input:text, textarea, select, input:password").blur(function(){
+		jQ(this).css('border', '1px solid #b1b3b3');
+		jQ(this).css('box-shadow', 'none');
+    });
+});
+// Accordion for hourly based
+function propertyTimeChange(value){
+	var propertyMode = <?php echo $hourlyEnabledOrNot; ?>;
+	if(value == 'Hourly' && propertyMode == 0){
+		 jQ( "#property_time_hourly" ).slideDown();
+		 jQ( "#add_subscripition_option_list" ).slideUp();
+		 jQ( "#property_minimum" ).show();jQ("#hourly_selected").val(1);
+		 jQ("label[for = property_minimum]").html('Minimum hours for rent<em> *</em>');
+		 jQ("label[for = property_maximum]").html('Maximum hours for rent<em> *</em>');
+		 jQ( "#property_maximum" ).show();
+		 jQ( "#payment_failure" ).hide();
+	}else{
+		<?php if($isSubscriptionEnabled == 0){?>
+		 jQ( "#property_time_hourly" ).slideUp();
+		 jQ("#property_warn").hide();
+		 jQ("#hourly_selected").val(0);
+		 jQ( "#add_subscripition_option_list" ).slideDown();
+		 jQ("label[for = property_minimum]").html('Minimum days for rent<em> *</em>');
+		 jQ("label[for = property_maximum]").html('Maximum days for rent<em> *</em>');
+		 jQ( "#property_minimum" ).hide();
+		 jQ( "#property_maximum" ).hide();
+		 <?php }else{?>
+		 jQ( "#property_time_hourly" ).slideUp();
+		 jQ("#property_warn").hide();
+		 jQ("#hourly_selected").val(0);
+		 jQ( "#property_minimum" ).show();
+		 jQ("label[for = property_minimum]").html('Minimum days for rent<em> *</em>');
+		 jQ("label[for = property_maximum]").html('Maximum days for rent<em> *</em>');
+		 jQ( "#property_maximum" ).show();
+		 jQ( "#add_subscripition_option_list" ).slideDown();
+		 <?php } ?>
+	}
+}
+function checkValue() {
+   var fromPeriod =  jQ('#property_service_from_period :selected').text();
+   var toPeriod =  jQ('#property_service_to_period :selected').text();
+   var fromTime = parseInt(jQ('#property_service_from :selected').text());
+   var toTime   = parseInt(jQ('#property_service_to :selected').text());
+   var hourlyOptionSelected = jQ("#hourly_selected").val();  
+   if(fromPeriod == 'PM' && toPeriod == 'AM' && hourlyOptionSelected == 1){
+	   jQ("#property_warn").show();
+	   return false;
+   }
+   else if(fromTime == toTime && fromPeriod == toPeriod && hourlyOptionSelected == 1){
+	   jQ("#property_warn").show();
+	   return false;
+   }
+   else if(fromTime > toTime && fromPeriod == toPeriod && hourlyOptionSelected == 1){
+	   jQ("#property_warn").show();
+	   return false;
+   }
+   else{
+	   jQ("#property_warn").hide();
+	   var minimum_time_value = parseInt(jQ('#minimum_time_value').val());
+	   var maximum_time_value = parseInt(jQ('#maximum_time_value').val());
+	   jQ("#time_error").hide();
+	   if(minimum_time_value > maximum_time_value){
+		   jQ("#time_error").show();
+		   return false;
+	   }	 
+   }   
+}
+</script>
+<?php if(!$currentExperienceId) {?>
+<script type="text/javascript">
+    var customOptionCount = 1;
+    var totalSubscriptionTypeCount = <?php echo count($subscriptionCollection); ?>;
+    var iteration_count = document.getElementById("iteration_count").value;
+    function addOption(value) {
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");
+    classElementCount = classElementArray.length;
+     if(classElementCount <= totalSubscriptionTypeCount){
+    var html = $("wrapper_subscription_option_YYY").up("div").innerHTML.replace(/YYY/g, customOptionCount);
+    var replacedDiv = html.replace(/required-entrycc/g, 'required-entry');
+    iteration_count++;
+    document.getElementById("iteration_count").value = iteration_count;
+    $(value).up('div').insert(replacedDiv);
+    changeSubscriptionOption(customOptionCount);
+    customOptionCount = customOptionCount + 1;
+    }
+    else{
+    alert('There are no more subscription types to be subscribed by this product.');
+    }
+    updateSelectionBoxOption();
+    }
+
+    function removeOption(value) {
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");
+    classElementCount = classElementArray.length;
+
+    iteration_count--;
+    document.getElementById("iteration_count").value = iteration_count;
+
+    if(classElementCount <= '2')
+    {
+    alert('You cannot remove this.The product should be subscribed to atleast one subscription type.');
+    
+
+       }
+    else {
+    value.up('div').remove();
+    }
+    updateSelectionBoxOption();
+
+    }
+
+function getClassNameCount(className)
+    {
+    var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
+    var allElements = document.getElementsByTagName("*");
+    var results = [];
+    var element;
+    for (var i = 1; (element = allElements[i]) != null; i++) {
+    var elementClass = element.className;
+    if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass))
+    results.push(element);
+    }
+    return results;
+    }
+
+	function changeSubscriptionOption(id){
+		var selectedValue = $('subscription_type_'+id).getValue();
+		if(selectedValue == "" && id == 0){
+	    	if(iteration_count > 1){
+	    		alert("please remove below subscription plan.");
+	    	}else{
+	    		document.getElementById("price_per_iteration").hide();
+	        }
+	    }else{
+	    	document.getElementById("price_per_iteration").show();
+	    }
+	
+		updateSelectionBoxOption();
+		if(selectedValue > 0 ){
+			subscriptionValue(selectedValue,id);
+		}else{
+			 document.getElementById('billing_cycle_'+id).innerHTML='';
+		}
+	}
+
+    Event.observe(window, "load", function(e){
+    if($('subscription_type_0')){
+    changeSubscriptionOption(0);
+
+    }
+
+    });
+
+    function updateSelectionBoxOption() {
+    d=document;
+    subscriptionSelectedArray = [];
+    for (h=0;h<customOptionCount;h++) {
+    if(d.getElementById('subscription_type_'+h)){
+    subscriptionSelectedArray[h] = d.getElementById('subscription_type_'+h).value;
+    }
+    }
+    for (a=0;a<customOptionCount;a++) {
+    for (b=1;b<totalSubscriptionTypeCount+1;b++) {
+    if(d.getElementById('subscription_type_'+a)){
+    d.getElementById('subscription_type_'+a).options[b].show();
+    for (c=0;c<customOptionCount;c++) {
+    if(d.getElementById('subscription_type_'+a).options[b].value == subscriptionSelectedArray[c]) {
+         d.getElementById('subscription_type_'+a).options[b].hide();
+    }
+    }
+    }
+    }
+    }
+    }
+
+</script>
+<?php } else {?>
+<script type="text/javascript">    
+    var customOptionCount = 1;
+    var totalSubscriptionTypeCount = <?php echo count($subscriptionCollection); ?>;
+    var classCount = getClassNameCount("apptha_subscription_type").length-1;
+    var iteration_count = document.getElementById("iteration_count").value;
+    function addOption(value) {
+    	var classElementArray = getClassNameCount("apptha_product_subscription_table");
+        classElementCount = classElementArray.length;
+        if(classElementCount <= totalSubscriptionTypeCount){
+        var html = $("wrapper_subscription_option_YYY").up("div").innerHTML.replace(/YYY/g, classCount);
+        var replacedDiv = html.replace(/required-entrycc/g, 'required-entry');
+        iteration_count++;
+        document.getElementById("iteration_count").value = iteration_count;
+        $(value).up('div').insert(replacedDiv);
+        changeSubscriptionOption(classCount);
+        classCount = classCount + 1;
+        customOptionCount = customOptionCount + 1;
+        }
+        else{
+        	alert('There are no more subscription types to be subscribed by this product.');
+        }
+        updateSelectionBoxOption();
+
+        }
+    function removeOption(value) {
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");
+    classElementCount = classElementArray.length;
+
+    iteration_count--;
+    document.getElementById("iteration_count").value = iteration_count;
+    
+    if(classElementCount <= '2')
+    {
+    alert('You cannot remove this.The product should be subscribed to atleast one subscription type.');
+    $("apptha_product_subscription_table").setAttribute('disabled',true);
+    }
+    else {
+    value.up('div').remove();
+    }
+    updateSelectionBoxOption();
+    }
+
+	function getClassNameCount(className)
+    {
+    var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
+    var allElements = document.getElementsByTagName("*");
+    var results = [];
+	var element;
+	for (var i = 1; (element = allElements[i]) != null; i++) {
+    var elementClass = element.className;
+    if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass))
+    results.push(element);
+    }
+    return results;
+    }
+	function changeSubscriptionOption(id){
+		var selectedValue = $('subscription_type_'+id).getValue();
+		if(selectedValue == "" && id == 0){
+	    	if(iteration_count > 1){
+	    		alert("please remove below subscription plan.");
+	    	}else{
+	    		document.getElementById("price_per_iteration").hide();
+	        }
+	    }else{
+	    	document.getElementById("price_per_iteration").show();
+	    }
+	
+		updateSelectionBoxOption();
+		if(selectedValue > 0 ){	
+			subscriptionValue(selectedValue,id);
+		}else{
+			 document.getElementById('billing_cycle_'+id).innerHTML='';
+		}
+	}
+    Event.observe(window, "load", function(e){
+    var input = <?php echo json_encode($subscriptionId);?>;
+    subscriptionOptionChange(input);
+
+    });
+    function subscriptionOptionChange(id){
+
+    	for(var i=0;i<id.length;i++){
+            var selectedValue = [];
+    	selectedValue[i] = $('subscription_type_'+i).getValue();
+        }
+    	updateSelectionBoxOption();
+
+    }
+    function updateSelectionBoxOption() {
+    d=document;
+    subscriptionSelectedArray = [];
+    var selectClassElementArray = getClassNameCount("apptha_product_subscription_type_select");
+    for (h=0;h<classCount;h++) {
+    if(d.getElementById('subscription_type_'+h)){
+    subscriptionSelectedArray[h] = d.getElementById('subscription_type_'+h).value;
+    }
+    }
+    for (a=0;a<classCount;a++) {
+    for (b=1;b<totalSubscriptionTypeCount+1;b++) {
+    if(d.getElementById('subscription_type_'+a)){
+    d.getElementById('subscription_type_'+a).options[b].show();
+    for (c=0;c<classCount;c++) {
+    if(d.getElementById('subscription_type_'+a).options[b].value == subscriptionSelectedArray[c]) {
+    d.getElementById('subscription_type_'+a).options[b].hide();
+    }
+    }
+    }
+    }
+    }
+    }
+    jQ(document).ready(function() {       
+    	propertyTimeChange('<?php echo $_product->getAttributeText('property_time')?>');
+    });
+    /*set store id*/
+    function setStoreId(value) {
+        document.body.innerHTML += '<form id="storeSet" action="'+window.location+'" method="post"><input type="hidden" name="storeId" value="'+value+'"></form>';
+        document.getElementById("storeSet").submit();
+    }
+</script>
+<?php }?>
+<script type="text/javascript">
+jQ(document).ready(function() {	
+	initializeAutocomplete();
+});
+</script>

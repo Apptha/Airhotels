@@ -1,0 +1,95 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php 
+$apikey = Mage::getStoreConfig('onestepcheckout/general/Apply_apptha_licensekey');
+$onestepapikey = $this->helper('onestepcheckout')->onestepApiKey();
+$shippingmethod = Mage::getStoreConfig('onestepcheckout/general/default_shipping_method');
+$_shippingRateGroups = $this->getShippingRates();
+?>
+<!---Title  of the page -->
+<!---Start of Shipping Methods -->
+ <?php if (!($_shippingRateGroups)): ?>
+    <strong><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></strong>
+<?php else: ?>
+<dl class="shipment-methods">
+        <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
+                    <dd><?php echo $this->getCarrierName($code) ?></dd>
+                <?php foreach ($_rates as $_rate): ?>
+                    <dt  >
+
+                       <?php if ($_rate->getErrorMessage()): ?>
+                        <ul class="messages"><li class="error-msg"><ul><li><?php echo $_rate->getErrorMessage() ?></li></ul></li></ul>
+                       <?php else: ?>
+                            <input name="shipping_method" type="radio" class="validate-one-required-by-name" value="<?php echo $_rate->getCode() ?>" id="s_method_<?php echo $_rate->getCode() ?>"<?php if($_rate->getCode()===$shippingmethod) echo ' checked="checked"' ?>')" />
+                            <label for="s_method_<?php echo $_rate->getCode() ?>"><!--<b><?php echo $this->getCarrierName($code) ?>:</b>--> <?php echo $_rate->getMethodTitle() ?>
+                            <strong>
+                            <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                            <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+
+                            <?php echo $_excl; ?>
+                            <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                                (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+                            <?php endif; ?>
+                            </strong>
+                            </label>
+                       <?php endif ?>
+                    </dt>
+                <?php endforeach; ?>
+        <?php endforeach; ?>
+    </dl>
+
+<?php endif; ?> 
+ <!---End of Shipping Methods -->
+           <script type="text/javascript" >
+           <?php if($apikey != $onestepapikey)
+           {
+           ?>           
+           $('title-text').identify();
+           <?php }?>
+           $$('dl.shipment-methods input').invoke('observe', 'click', function() {
+            shipping.reloadReviewBlock();
+            var payment_methods = $('ajax-payment-methods');
+            payment_methods.update('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+            payment.reloadPaymentBlock();
+            //payment.switchMethod(paymentMethod);
+        });
+       
+           </script>
+ <!---Start of Gift Message  -->
+  <div id="onepage-checkout-shipping-method-additional-load">
+       <?php if (!$this->getQuote()->isVirtual()): ?>
+
+    <?php echo $this->helper('giftmessage/message')->getInline('onepage_checkout', $this->getQuote(), $this->getDontDisplayContainer()) ?>
+<?php endif; ?>
+    </div>
+  <!---End of Gift Message  -->
+ 
+  <!---End of Gift Message  -->

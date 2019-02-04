@@ -1,0 +1,65 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+    <?php foreach ($this->getTotals() as $_code => $_total): ?>
+        <?php if ($_total->getBlockName()): ?>
+            <?php echo $this->getChildHtml($_total->getBlockName(), false); ?>
+                <?php else:
+    /**
+     * Get the session value to check sales order email.
+     * 
+     */
+    $salesEmail = 0;
+    $salesEmail = Mage::getSingleton('core/session')->getorderEmailStatus();?>
+                    <tr class="<?php echo $_code?>">
+						<td colspan="<?php if(!empty($this->getRequest()->getParam('invoice_id'))){ echo '4';}elseif($salesEmail == 1){echo '3';}else{ echo '4';}?>" <?php echo $this->getLabelProperties()?>>
+				            <?php if ($_total->getStrong()):?>
+				            <strong><?php echo $this->escapeHtml($_total->getLabel());?></strong>
+				            <?php else:?>
+				            <?php echo $this->escapeHtml($_total->getLabel());?>
+				            <?php endif?>
+				        </td>
+				        <td <?php echo $this->getValueProperties()?> colspan="2">
+				            <?php if ($_total->getStrong()):?>
+				            <strong><?php echo $this->formatValue($_total) ?></strong>
+				            <?php else:?>
+				            <?php echo $this->formatValue($_total) ?>
+				            <?php endif?>
+				        </td>
+                    </tr>
+                    <?php endif?>
+                        <?php endforeach?>
+                            <?php 
+/** 
+ * unset session values for the sales order email.
+ */
+if($salesEmail == 1 ){
+    	Mage::getSingleton('core/session')->unsorderEmailStatus();
+}?>

@@ -1,0 +1,52 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<h3 class="product-name"><a href="<?php echo $this->getProductUrl() ?>">
+<?php echo $this->htmlEscape($this->getProductName()) ?></a></h3>
+<?php if ($_options = $this->getOptionList()):?>
+<dl class="item-options">
+    <?php foreach ($_options as $_option) : ?>
+    <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
+    <dt><?php echo $this->htmlEscape($_option['label']) ?></dt>
+    <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif; ?>>
+    <?php echo $_formatedOptionValue['value'] ?>
+        <?php if (isset($_formatedOptionValue['full_view'])): ?>
+        <div class="truncated_full_value"><dl class="item-options">
+                <dt><?php echo $this->htmlEscape($_option['label']) ?>
+                </dt>
+                <dd><?php echo $_formatedOptionValue['full_view'] ?>
+                </dd>
+            </dl>
+        </div>
+        <?php endif; ?>
+    </dd>
+    <?php endforeach; ?>
+</dl>
+<?php endif; ?>

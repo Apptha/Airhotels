@@ -1,0 +1,145 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+$sessionCustomer 	= Mage::getSingleton("customer/session");
+$productIds 		= $friendIds = array();
+$currencySymbol 	= Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+$propertyTimeData 	= $propertyTimeId = Mage::helper('airhotels')->getPropertyTimeLabelByOptionId();
+?>
+<div>
+	<?php
+	/**
+	 * Checking whether the customer logged in or not
+	 */ 
+	if($sessionCustomer->isLoggedIn()) {
+		$friendsCollection = Mage::helper('airhotels')->getFriendsCollection($sessionCustomer->getId()); ?>
+		<div>
+			<?php 
+			foreach($friendsCollection as $friends){
+				$friendIds[] = $friends; 
+			}		
+			/**
+			 * Getting friends product ids
+			 */
+			$productIds = $this->getFirendsWishlist($friendIds);		
+			?>
+			<ul>
+				<?php 
+				$productIds 		= array_unique($productIds);
+				$pageResultCount 	= 10;
+				$pageValue 			= Mage::app()->getRequest()->getParam('p');
+				if(empty($pageValue)){
+					$pageValue = 1;	
+				}
+				$productCollectionCount = $this->getpropertycollectionCount($productIds);
+				$pageLink = ceil($productCollectionCount / $pageResultCount);				
+				if(empty($pageLink)){
+					$pageLink = 1;	
+				}				
+				$productCollection = $this->getpropertycollection($productIds,$pageValue,$pageResultCount);
+				$countFrist = 1;
+				foreach($productCollection as $product){
+					$customerIds = $this->getCustomerDetails($product->getId(),$friendIds);
+				?>
+		     	<li class="home-small-dealbox <?php if($countFrist == 1){ echo 'friends_dealbox_first_block'; } ?>">
+					<a href="<?php echo Mage::getBaseUrl() . $product->getUrlPath(); ?>" class="matte-media-box" >
+		            	<img src="<?php if ($product->getImage() != 'no_selection') {
+		                	echo Mage::getBaseUrl('media') . 'catalog/product/' . $product->getImage();
+		                } else {
+		                	echo $product->getImageUrl();
+						}
+						?>" height="285" width="448" title="<?php echo Mage::helper('airhotels/property')->getPropertyName($product->getName()); ?>"/>
+		            </a> 
+					<?php foreach($customerIds as $customerId){ $customerInfo = Mage::helper('airhotels')->getCustomerNameAndPlace($customerId); ?>         
+						<div class="popular_product_details friends_dealbox_container f-left"><?php
+				    		$customerProfileData = Mage::getModel('airhotels/airhotels')->getCustomerPictureById($customerId);
+				    		if (!empty($customerProfileData[0]["imagename"])){ ?> 
+					    		<a href="<?php echo Mage::helper('airhotels')->getprofilepage().'id/'.$cutomerdata->getId(); ?>" >  
+							    <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/thumbs/" . $customerProfileData[0]["imagename"] ?>" class="search_user_profile_img f-left clear" width="60" height="60"alt="" title=""/>
+						    <?php }else{ ?> 
+						    	<img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>" class="search_user_profile_img f-left clear" width="60" height="60" alt="" title=""/> 
+						    <?php } ?>
+						    </a>
+		                   <p class="popular_product_name"> <?php if(isset($customerInfo['name'])){ echo $customerInfo['name']; } ?> </p>
+		                   <p class="popular_product_state"><?php if(isset($customerInfo['place'])){ echo $customerInfo['place']; } ?></p>
+	                  	</div> 
+					<?php } ?>                     
+					<div class="popular_product_values f-right">
+			        	<span class="popular_product_currency"><?php echo $currencySymbol; ?></span>
+			            <span class="price-tag-price">
+			            	<?php echo round(Mage::helper('directory')->currencyConvert($product->getPrice(), Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>
+						</span><?php
+						$propertyTime = $product->getPropertyTime();                                   
+			            $hourlyEnabledOrNot = Mage::helper('airhotels')->getHourlyEnabledOrNot();  
+			            if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+							<span class="price-tag-price-pernight"><?php echo $this->__('Per Hour'); ?></span>                           
+			            <?php }else{ ?>
+			            	<span class="price-tag-price-pernight"><?php echo $this->__('Per Night'); ?></span>
+			            <?php } ?>
+			        </div>  
+				</li>
+				<?php
+				$countFrist = $countFrist + 1;
+				}
+				?>
+			</ul>
+			<!-- Start pagination for friends wishlist -->
+			<?php if($pageLink >= 2){ ?>
+				<div class="pagination">
+					<ul>
+						<?php 
+						for($i=1;$i<=$pageLink;$i++){ ?>
+							<li <?php if($pageValue == $i){ echo 'class="active"'; } ?>>
+							<a href="<?php if($pageValue != $i){ echo Mage::helper('airhotels')->getAllFriendsUrl().'p/'.$i; }else{ echo '#'; } ?>"><?php echo $i; ?></a>
+							</li>
+							<?php 	
+						}
+						?>
+					</ul>
+				</div>
+			<?php } ?>
+			<!-- End pagination for friends wishlist -->
+		</div>
+		<?php 
+		if(count($productIds) <= 0){ ?>
+			<div class="invite_friends_now">
+				<h2><?php echo Mage::helper('airhotels')->__('Looks like none of your friends have signed up for').' '.Mage::getStoreConfig('airhotels/custom_group/airhotels_title'); ?></h2>
+				<a href="<?php echo Mage::helper('airhotels')->getInviteFriendsUrl(); ?>"><?php echo Mage::helper('airhotels')->__('INVITE THEM NOW!'); ?></a>
+			</div>
+		<?php } ?>
+		<?php 
+	}else{ ?>
+		<div class="static_friends_wishlist_images">
+			<h3><?php echo Mage::helper('airhotels')->__('See what your friends are saving to on their wishlists').' '.Mage::helper('airhotels')->getSiteTitle(); ?></h3>
+			<a href="javascript:void(0)" onclick="fblogin();"><img src="<?php echo $this->getSkinUrl('images/connect_facebook.png', array('_secure'=>true)); ?>" alt="<?php echo Mage::helper('airhotels')->__('Connect with facebook'); ?>" src=""></a>
+		</div>
+	<?php } ?>
+</div>

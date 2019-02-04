@@ -1,0 +1,54 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Language switcher template
+ *
+ * @see Mage_Page_Block_Switch
+ */
+?>
+
+<script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS).'airhotels/jquery.jqtransform.js'; ?>"></script>
+<?php if(count($this->getStores())>1): ?>
+<div class="">
+    <label for="select-language"><?php // echo $this->__('Language:') ?></label>
+    <div class="sort_grid">
+    <select id="select-language" class="language_grid" title="<?php echo $this->__('Language') ?>" onchange="window.location.href=this.value">
+    <?php foreach ($this->getStores() as $_lang): ?>
+        <?php $_selected = ($_lang->getId() == $this->getCurrentStoreId()) ? ' selected="selected"' : '' ?>
+        <option value="<?php echo $_lang->getCurrentUrl() ?>"
+        <?php echo $_selected ?>>
+        <?php echo $this->htmlEscape($_lang->getName()) ?></option>
+    <?php endforeach; ?>
+    </select>
+        </div>
+</div>
+<?php endif; ?>

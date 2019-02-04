@@ -1,0 +1,460 @@
+
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * Initilizing experience data
+ */
+$smsEnabledOrNot    = Mage::helper('airhotels/smsconfig')->getSmsEnabledOrNot();
+$currencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+$currencySymbol =  Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+$helper = Mage::helper('airhotels');
+$currentUrl = Mage::helper('core/url')->getCurrentUrl();
+$request = $this->getRequest();
+$action = $request->getActionName();
+/**
+ * get the Country code by IP
+ */
+if($smsEnabledOrNot == 0){
+ $country = '';
+ $ipCountry = 'IN';
+ $countryIsdCode = '';
+ $IP = $_SERVER['REMOTE_ADDR'];
+ if (!empty($IP)) {
+    $country = unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip='.$IP));
+ }
+ $ipCountry = $country['geoplugin_countryCode'];
+ $getISDCode = $this->getIsdCode();
+ $isdCode = explode(";",$getISDCode);
+ $count = count($isdCode);
+ for($i=0;$i<$count;$i++) {
+
+    $getCountryCode = explode("=",$isdCode[$i]);
+
+    if("countryCodeList['$country']" == $getCountryCode[0]) {
+    $countryIsdCode = $getCountryCode[0];
+    }else{
+    $countryIsdCode = '+91';
+ 	}
+ }
+}
+$baseUrl = $this->getBaseUrl();
+$skinUrl = $this->getSkinUrl();
+$ie9 = (preg_match("/MSIE 9/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+$ie8 = (preg_match("/MSIE 8/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+?>
+
+            <form id="profile_form" class="list_an_experience_forms wizard clearfix" name="profile_form" method="post" action="<?php echo Mage::getBaseUrl() . 'property/multistep/profilesave/' ?>" enctype="multipart/form-data">
+			 <div class="content clearfix"><?php
+			/**
+			 * Profile tab
+			 */
+			 $customerId = Mage::getSingleton('customer/session')->getId();
+			 /**
+			  * Get logged in customer data
+			 */
+			 $host = Mage::getModel ( 'customer/customer' )->load ($customerId );
+			 $hostName = $host->getName ();
+			 $hostEmail = $host->getEmail ();
+			 /**
+			  * Get customer profile picture
+			 */
+			 $customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($customerId);
+			 	$imageName="";
+				$imageName = $customerData[0]['imagename'];
+				$phoneNumberVerify=$customerData[0]['mobile_verified_profile'];
+			  echo "<h3 class='title current'>"; echo $this->__('Profile'); ?></h3>
+			<fieldset class="body current contentcontainer">
+				<div class="my_profile">
+					<div class="become_a_companion">
+						<h3>BECOME A LOCAL COMPANION</h3>
+						<p>Share what you love with the world.</p>
+					</div>
+               <!-- Name -->
+                <div class="property_owner_name">
+						<div class="profile_name">
+							<label for="host_name"><?php echo $this->__('Name') ?> <i class="fa fa-star mandatory_star"></i></label>
+							<input type="text" id="host_name" title="tooltip" name="host_name" class="input_width required-entry" readonly="true" value="<?php if($hostName){ echo $hostName; } ?>" />
+						</div><div class="profile_picture_upload profile_mobile_only">
+                 <?php
+             if(!empty($imageName)){
+             	$imageresized = Mage::getBaseDir("media") . "/catalog/customer/" .$imageName;
+             	if (file_exists($imageresized)) {
+             		$imageurl = Mage::getBaseUrl('media') . "catalog/customer/" . $imageName;
+             	}
+             	echo "<p id='profile_image' class='profile_image'><img src='$imageurl' /></p> ";
+             	}
+             	  else { ?>
+             	  <p id="profile_image" class="profile_image" style="float:none !important;">
+             	  <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" alt="" class="no_user" style="float:none !important;" /></p>
+             <?php }  ?>
+					</div>
+           <!-- Email  -->
+             <div class="profile_email">
+				<label class="label_align"><?php echo $this->__('Email') ?><i class="fa fa-star mandatory_star"></i></label>
+				<input type="text" id="email" name="email" class="required-entry email input_width" readonly="true" value="<?php if($hostEmail){ echo $hostEmail; } ?>" />
+			</div>
+				<?php
+				if($smsEnabledOrNot == 0){
+     				if($phoneNumberVerify=="verified") { ?>
+     				<div class="verifiedtextclass">
+     					<p class="verify_box">
+     						<p class="phonenumber_section"><span class="phone_number_verified"><?php echo $this->__("Phone Number Verified");?></span></p>
+     					<span style="display:block;color:#A5A4A4;font-size:13px;margin:10px 0 0 0;">Your Phone Number has been verified successfully</span>
+     					</p>
+     				</div>
+     				<?php } else { ?>
+     				<div class="verifynowprocess">
+     					<p class="verify_box" id="verify_box_content">
+     						<input type="button" id="btnShowModal" class="" value="<?php echo ucfirst("Verify Phone Number"); ?>"/>
+     							<span style="display:block;color:#A5A4A4;font-size:13px;">To get texts for notifications we need to verify your contact number. It only takes a minute.</span>
+     					</p>
+     				</div>
+     				<?php }
+     		    }?>
+			</div>
+			<div class="profile_picture_upload desktop_only_profile">
+             <?php
+             if(!empty($imageName)){
+             	$image_resized = Mage::getBaseDir("media") . "/catalog/customer/" .$imageName;
+
+             	if (file_exists($image_resized)) {
+             		$image_url = Mage::getBaseUrl('media') . "catalog/customer/" . $imageName;
+             	}
+             	echo "<p id='profile_image' class='profile_image'><img src='$image_url' /></p> ";
+             	}
+             	  else { ?>
+             	  <p id="profile_image" class="profile_image" style="float:none !important;">
+             	  <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" alt="" class="no_user" style="float:none !important;" /></p>
+             <?php }
+             ?>
+            <div class="profile_picture_right">
+              <?php
+              $ie9 = (preg_match("/MSIE 9/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+              $ie8 = (preg_match("/MSIE 8/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+              if (!$ie9 && !$ie8 && !Mage::helper('airhotels/mobile')->isMobile()){
+              ?>
+              <input id="sample_image" type="hidden" name="crop[image]" class="btn-primary">
+              <span>Note : Select the file and crop the image it will display after save this form.</span>
+            <?php } ?>
+            </div>
+					</div>
+					<!-- Profile Video -->
+					<div class="profile_video clearfix">
+						<div class="profile_label">
+							<label class="label_align profile_identify"><?php echo $this->__('Profile Video') ?></label>
+						</div>
+						<div class="profile_content">
+							<p class="content-summary"><?php echo $this->__('To ensure trust, safety, and a high level of quality, each
+								Insider is asked to create a profile video to tell your
+								potential travelers a little more about your experience. Keep it
+								simple! Let us know:'); ?></p>
+							<ul class="profile_ul">
+								<li><?php echo $this->__('Who you are'); ?></li>
+								<li><?php echo $this->__('About your experience(s)'); ?></li>
+								<li><?php echo $this->__('What makes you a (fun!) local expert'); ?></li>
+							</ul>
+							<div class="record_video">
+								<h4><?php echo $this->__('Choose a method below to submit your video'); ?></h4>
+								<div class="clearfix record_video_upload" style="list-style: none !important;">
+									<p> <input type="file" class="profile_image_class" name="profilevideo" id="profile_video" accept="video/*" onchange="contentChanges();"/><span class="upload_mp4">Upload a video as MP4, MOV, MPEG4, AVI, WMV, MPEGPS, FLV and 3GPP.</span></p>
+								</div>
+							</div>
+							<div class="linkto_a_video">
+								<h5 style="color:#6e6e6e"><?php echo $this->__('Or link to a video'); ?></h5>
+								<input style="margin: 0 0 0 2px;" type="text" id="video_link"name="video_link" class="input_width"	value="<?php if(isset($customerData[0]['video_url'])){ echo $customerData[0]['video_url']; } ?>" onchange="contentChanges();"/>
+							</div>
+						</div>
+					</div>
+					<div class="clearfix">
+					<!--  Private Notes - Can enter the story about user and experience.-->
+                 <div class="profile_private_notes">
+					<label for="moreabouthost" class="label_align"> <?php echo $this->__('Describe Yourself') ?><i class="fa fa-star mandatory_star"></i></label>
+					<textarea cols="5" rows="5" name="moreabouthost" id="moreabouthost" class="moreabouthost required-entry" onchange="contentChanges();"><?php if(isset($customerData[0]['more_host'])){ echo $customerData[0]['more_host']; } ?></textarea>
+				</div>
+             <!-- City -->
+               <div class="ownercity">
+					<label class="label_align"><?php echo $this->__('City') ?></label>
+					<input type="text" id="host_city" name="host_city" class="input_width" value="<?php if(isset($customerData[0]['city'])){ echo $customerData[0]['city']; } ?>" onchange="contentChanges();"/>
+				</div>
+               <!--  Country/Location -->
+                <div class="ownercountry">
+						<label class="label_align"><?php echo $this->__('Location/Country') ?></label>
+                    <?php
+                    $_countries = Mage::getResourceModel('directory/country_collection')
+                            ->loadData()
+                            ->toOptionArray(false);
+                    	if (count($_countries) > 0) { ?>
+                        <select name="host_country" id="host_country" class="input_width" onchange="contentChanges();">
+								<option value="">-- Please Select --</option>
+                            <?php foreach ($_countries as $_country) { ?>
+                                <option value="<?php echo $_country['value']; ?>" <?php echo $customerData[0]['country'] == $_country['value'] ? ' selected="selected"' : ''; ?>>
+                            <?php echo $_country['label'] ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    <?php } ?>
+                    </div>
+				<!-- Time zone - This field for user's time zone user can select time zone.-->
+	            <div id="profile_timezone" class="profiletimezone">
+               	<label class="label_align"><?php echo $this->__('Time Zone') ?></label>
+            	<select id="time_zone" name="time_zone" class="input_width" onchange="contentChanges();">
+            		<?php echo $this->getTimezone();?>
+        		</select>
+       			 </div>
+               		<input type="hidden" name="selected_tab" id="selected_tab" value=""/>
+                  <!-- Profile Preview -->
+                   <div class="owner_profile">                   
+						<label style="color:#f8f8f8;"> <?php echo $this->__('Profile Preview') ?></label>
+						<div class="profile_picture_preview" id="profile_picture_preview" style="display:none;">
+						<div id='profile_image' class='profile_image'>
+            			<?php
+            				if(!empty($imageName)){
+             					$imageResized = Mage::getBaseDir("media") . "/catalog/customer/" .$imageName;
+             					if (file_exists($imageResized)) {
+             					$imageUrl = Mage::getBaseUrl('media') . "catalog/customer/" . $imageName;
+             					}
+             				echo "<img src='$imageUrl' /> ";
+             				}
+             	 			 else { ?>
+             	  			    <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" alt="" class="no_user" style="float:none !important;" />
+             				<?php }
+             				$hostCountryName="";
+             				if(isset($customerData[0]['country'])){
+								$hostCountryName=Mage::app()->getLocale()->getCountryTranslation($customerData[0]['country']);
+								}
+             				?>
+             				<p><span class="profile_name" id="profile_name" style="display:block;min-height:0px;margin:0 0 10px;"><?php if($hostName){echo ucfirst($hostName);}?></span>
+             				<span class="profile_country" id="profile_country" style="display:block;margin:10px 0 0"><?php if(!empty($customerData[0]['city'])){ echo ucfirst($customerData[0]['city']).", ";}echo ucfirst($hostCountryName);?></span></p>
+             				</div>
+            			</div>
+
+						</div>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+		<div class="form_next_button_section">
+		<button type="button" class="profile_submit form_next_button" onclick="return select_tab('photos');"><span class="form_next_btn_style"><< Previous</span></button><button type="submit" class="profile_submit form_next_button" id="profile_submit" value="Next"><span class="form_next_btn_style">Next >></span></button></div>
+		</form>
+		<script type="text/javascript">
+		$jQ = jQuery.noConflict();
+		$jQ(document).ready(function () {
+  		$jQ("#btnShowSimple").click(function (e) {
+  			ShowDialog(false); e.preventDefault();
+  		});
+		$jQ("#btnShowModal").click(function (e)	{
+  			ShowDialog(true); e.preventDefault();
+  		});
+  		$jQ("#btnClose").click(function (e)	{
+  			HideDialog(); e.preventDefault();
+  		});
+  		$jQ(".bfh-selectbox-options li a").on('click', function() {
+  			var countryCode = $jQ(this).data('option');
+  			changeCountry(countryCode);
+  		});
+		});
+  		function ShowDialog(modal) {
+  		$jQ("#overlay").show().attr('style','display: table');
+  		$jQ("#dialog").fadeIn(300);
+  			if (modal){
+  			  	$jQ("#overlay").unbind("click");
+  			}
+  			else{
+  			   	$jQ("#overlay").click(function (e){
+  			   		HideDialog();
+  			    });
+  			}
+   	   	}
+  		function HideDialog() {
+  				$jQ('.phone_container').show();
+				$jQ('.confirmation-code').hide();
+				$jQ("#overlay").hide().attr('style','');$jQ("#dialog").fadeOut(300);
+  		  	}
+  var countryCodeList = new Array();
+  <?php echo $getISDCode; ?>
+  function changeCountry(CountryCode) {
+    if ( CountryCode != "" ) {
+    	CountryCode=CountryCode.toUpperCase();
+      var Country=countryCodeList[CountryCode];
+      $jQ("#isdcode").val(Country);
+      $jQ("#phoneCountryCode").val(CountryCode);
+    }
+    else {
+    	$jQ("#isdcode").val("");
+        return false;
+    }
+  }
+  function sendcode(){
+	  $jQ("#country_verify_error").hide();
+	  var Phonenumber = $jQ("#phonenumber").val();
+	  var Countrycode = $jQ("#isdcode").val();
+	  var PhoneCountrycode = $jQ("#phoneCountryCode").val();
+	  if(PhoneCountrycode == ""){
+		  $jQ("#country_verify_error").html("Please Select country").show();
+		  return false;
+	  }
+	  if(Phonenumber=="" || Countrycode==""){
+			$jQ("#form_verify_error").html("ISD code and Phone number is required").show();
+			return false;
+		  }
+	  else{
+		  	var Intsonly = /^\d+$/;
+			if(!Intsonly.test(Phonenumber)) {
+				$jQ("#form_verify_error").html("Please enter valid phone number").show();
+				return false;
+			}
+	  }
+	  $jQ("#form_verify_error").hide();
+	  $jQ("#country_verify_error").hide();
+	  $jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/sendcode/phonenumber/'?>"+Phonenumber+'/countrycode/'+Countrycode+"/PhoneCountrycode/"+PhoneCountrycode,
+          type: "POST",
+          beforeSend: function(data)
+          {
+        	  $jQ("#verify_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+        	  $jQ("#verify_form_submit").hide();
+           },
+          success: function(data)
+          {
+			if(data=="success"){
+              $jQ("#verify_form_submit").show();
+              $jQ("#verify_form_loader").html("");
+              var currentIsdCode = $jQ('#isdcode').val();
+        	  var currentPhoneNumber = $jQ('#phonenumber').val();
+        	  $jQ("#current_phone_number").html("We send verification code to "+currentIsdCode+" "+currentPhoneNumber);
+        	  $jQ('.phone_container').hide();
+              $jQ('.confirmation-code').show();
+			}
+			else{
+				$jQ("#verify_form_loader").html("");
+				 $jQ("#verify_form_submit").show();
+				$jQ("#form_verify_error").html(data).show();
+			}
+          }
+      });
+  }
+
+  function codeverification(){
+	  var codeVal = $jQ("#code").val();
+	  if(codeVal == ""){
+			$jQ("#code_verify_error").html("Confirm code is required").show(); return false;
+		  }
+	  $jQ.ajax({ // ajax call starts
+          url: "<?php echo Mage::getBaseUrl() . 'property/multistep/codeverification/code/'?>"+codeVal,
+          type: "POST",
+          beforeSend: function(data){
+        		$jQ("#confirm_alert").hide();
+        	  	$jQ("#confirm_form_loader").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+        	  	$jQ("#confirm_form_submit").hide();
+          },
+          success: function(data){
+             if(data == 1){
+            	 $jQ("#confirm_form_loader").html("");$jQ("#confirm_form_submit").show(); HideDialog();
+            	 $jQ("#verify_box_content").html('<p class="success_verified_text"><i class="fa fa-check verified_icon"></i><span>Verified successfully</span></p><span style="display:block;color:#A5A4A4;font-size:13px;margin:10px 0 0 0">Your phone number has been verifield successfully</span>');
+               }else{
+                	$jQ("#confirm_form_loader").html("");$jQ("#confirm_form_submit").show();
+            	  	$jQ("#confirm_alert").html('<span>Sorry that code could not be verified.</span>');
+            	  	$jQ("#confirm_alert").show();
+              }
+          }
+      });
+  }
+  </script>
+	<div id="output">
+	</div>
+	<div id="overlay" class="web_dialog_overlay"> <div style="display: table-cell;vertical-align:middle;">  <div id="dialog" class="web_dialog">
+	<div class="phone_verify_close" id="popupclosesection"><span class="btnClose closebutton" id="btnClose">
+	<i class="airhotel-sprite close close_icon_btn" style="right:-6px">
+	</i>
+	</span>
+	</div>
+		<div class="phonenumber-error"></div>
+		<div class="phone_container">
+			<h3 style="margin-bottom:10px;" class="verify_phone_number_title">Verify Phone Number</h3>
+			<div class="choose_country">
+			<span class="choose_country_flag">Choose Country</span>
+			<div class="bfh-selectbox bfh-countries country_select_for_phone" data-country="<?php if(isset($ipCountry)){ echo $ipCountry;}else{  } ?>" data-flags="true"></div>
+			<span class="form_verify_error" id="country_verify_error" style="display:none;"></span>
+			</div>
+    		<form class="form-verify phone_number_verify" role="form" method="POST" action="">
+    			<div class="clearfix choose_number">
+    			<span for="phonenumber" class="label_phonenumber">Add a phone number</span>
+    			<input name="isdcode" type="tel" id="isdcode" class="form-control country_extension" placeholder="" value=<?php echo $countryIsdCode;?> disabled required>
+       			<input name="number" type="tel" class="form-control user_phone_number" id="phonenumber" placeholder="Phone number" required autofocus>
+       			<input name="phoneCountryCode" type="hidden" id="phoneCountryCode">
+       			<span class="form_verify_error" id="form_verify_error" style="display:none;"></span>
+       			</div>
+       			<span id="verify_form_loader" class="verify_form_loader"></span>
+       			<div class="popup_verify_button"><button style="width: 100%	;height: auto;box-sizing: border-box;font-size: 18PX;font-family: 'Droid Sans', 'Belgrano', sans-serif;border-radius: 3px;float: none;text-align: center;" class="btn btn-lg btn-primary btn-block" type="button" id="verify_form_submit" onclick="sendcode();">Verify</button></div>
+    		</form>
+		</div> <!-- /container -->
+		<div class="confirmation-code" style="display:none;">
+  			<h3 class="form-verify-heading">Confirm Your Code</h3>
+			<span class="" id="current_phone_number" style="display:block;margin:0 0 20px;"></span>
+  			<input style="box-sizing: border-box;margin-bottom: 28px;" name="code" id="code" type="text" class="form-control" placeholder="Confirm code" required autofocus>
+  			<span class="form_verify_error" id="code_verify_error" style="display:none;"></span>
+  			<span id="confirm_form_loader" class="confirm_form_loader"></span>
+  			<button class="btn btn-lg btn-primary btn-block" id="confirm_form_submit" type="button" onclick="codeverification();">Confirm</button>
+      		<div class="alert alert-info" id="confirm_alert" role="alert" style="display:none";>
+     	 	</div>
+		</div>
+	</div>
+	</div>
+</div>
+	<div class="phonenumber-verified"></div>
+          <!-- previewProfile - User while click by the "Click here to preview profile" it will show the profile image  -->
+          <script type="text/javascript">
+         	var $jq = jQuery.noConflict();
+			function previewProfile(){ document.getElementById("profile_picture_preview").style.display = "block";
+				document.getElementById("preview").style.display="none"; }
+          </script>
+          	<script>
+          	$jq(document).ready(function() {
+          		$jq("input:text, textarea, select, input:password").focus(function(){
+          			$jq(this).css('border', '1px solid #5aaee5');  $jq(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    			});
+          		$jq("input:text, textarea, select, input:password").blur(function(){
+          			$jq(this).css('border', '1px solid #b1b3b3');  $jq(this).css('box-shadow', 'none');  });
+				});
+</script>
+          	<?php
+if (!$ie9 && !$ie8 && !Mage::helper('airhotels/mobile')->isMobile()){
+?>
+<script>
+$jQ = jQuery.noConflict();
+$jQ(document).ready(function () {
+    $jQ('#sample_image').awesomeCropper(
+    { width: 200, height: 200, debug: true }
+    );
+});
+<?php } ?>
+</script>

@@ -1,0 +1,63 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<div class="multiple-checkout">
+    <div class="page-title">
+        <h1><?php echo $this->__('Order Success') ?></h1>
+    </div>
+    <h2 class="sub-title"><?php echo $this->__('Thank you for booking the room!') ?></h2>
+    <p><?php echo $this->__('We are processing your order and you will soon receive an email with details of the order. Once the order has shipped you will receive another email with a link to track its progress.') ?></p>
+    <?php if($_orderIds = $this->getOrderIds()): ?>
+    <p>
+        <?php $flag = false ?>
+        <?php echo $this->__('Your order number is ') ?>
+        <?php 
+        /**
+         * Iterating loop
+         */
+        
+        
+        foreach ($_orderIds as $orderId=>$incrementId): ?>
+            <?php if ($flag): ?>
+                <?php echo ', ' ?>
+            <?php endif; ?>
+            <?php $flag = true ?>
+            <a href="<?php echo $this->getViewOrderUrl($orderId) ?>">
+            <?php echo $incrementId ?></a>
+        <?php endforeach; ?>
+    </p>
+    <?php endif; ?>
+    <?php echo $this->getChildHtml() ?>
+    <div class="buttons-set">
+        <button type="button" title="<?php echo $this->__('Continue Shopping') ?>" class="button" 
+        onclick="setLocation('<?php echo $this->getContinueUrl() ?>')">
+        <span><span><?php echo $this->__('Continue Shopping') ?></span></span></button>
+    </div>
+</div>

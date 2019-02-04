@@ -1,0 +1,137 @@
+
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+$customerId = Mage::getSingleton('customer/session')->getId();
+/**
+ * Get logged in customer data
+ * Get customer profile picture
+ */
+$customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($customerId);
+?>
+
+<div class="my-account">
+<div class="profilepic_upload_container">
+<form role="form"  action="<?php echo Mage::getBaseUrl(); ?>/property/property/uploadphoto" method="post" id="form-validate-profile" enctype="multipart/form-data">
+    <h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__('Profile Picture') ?></h1>
+    <div class="profile_picture_image_section" style="padding:10px;">
+        <div class="clear"></div>
+        <div class="form-list profile_image_only clearfix">
+            <div class="fields">
+                <div id="profile_img">
+                <?php
+                if(!empty($customerData[0]["imagename"])) {
+                    $imageUrl = Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"];
+                    echo "<img src='$imageUrl' id='cropbox' /> ";
+                }
+                else{?>
+                    <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>"  alt="" class="no_user"/>
+                <?php } ?>
+                </div>
+                <div class="profile_picture_right"><p><?php echo $this->__("Clear frontal face photos are an important way for hosts and guest to learn about each other. It's not much fun to host a landscape! Please upload a photo that clearly shows your face.");?></p>
+                <?php
+                $ie9 = (preg_match("/MSIE 9/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+                $ie8 = (preg_match("/MSIE 8/", $_SERVER["HTTP_USER_AGENT"])) ? true : false;
+                if (!$ie9 && !$ie8 && !Mage::helper('airhotels/mobile')->isMobile()){
+                ?>
+            <div class="profile_picture_delete_button">
+            <?php if(!empty($customerData[0]["imagename"])) { ?>
+            <button id='deletePhoto' type='submit' name='deleteimage' value="1" title='"<?php echo $this->__('Delete'); ?>"' ><?php echo $this->__('Delete'); ?></button>
+            <?php } ?>
+           <input id="sample_image" type="hidden" name="crop[image]" class="btn-primary">
+            </div>
+            <?php } ?>
+            </div>
+            <button style="display:none !important;" type="submit" title="<?php echo $this->__('Update profile image') ?>" id="update_image" class="button right des_button"><?php //echo $this->__('Update profile image') ?></button>
+          </div>
+        </div>
+    </div>
+</form>
+<div  style="margin:30px 0 0 0;">
+<form action="<?php echo Mage::getBaseUrl()."property/invitefriends/profilevideosave" ?>" name="form" method="post" id="form-validate" enctype="multipart/form-data" onsubmit="return required()">
+     <h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__("Profile Video");?></h1>
+   <div class="profile_video_section clearfix" style="padding:10px;">
+    <ul class="clearfix id_document_tags" style="margin:0">
+    <li style="margin:0"><div class="profilevideoplace">
+    <?php $videoUrl = $customerData[0]['video_url'];
+         if($videoUrl) { ?>
+            <video class="video" controls>
+            <source src="<?php echo $customerData[0]["video_url"];?>" type="video/mp4" codecs="avc1.42E01E, mp4a.40.2"/>
+      		</video>
+      		<?php } ?></div></li>
+      <li class="update_button_container" style="margin:10px 0 0">
+          <input type="hidden" name="video" id="video" value="video">
+          <div class="clearfix record_video_upload form-space" style="list-style: none !important;text-align:left">
+			 <p> <input type="file" class="profile_image_class" name="profileVideo" id="profile_video" accept="video/*"/></p>
+			 <p class="profile_hint_text"><?php echo $this->__('Upload a video as MP4, MOV, MPEG4, AVI, WMV, MPEGPS, FLV, 3GPP and WebM.') ?></p>
+		  </div>
+          <div style="text-align:right"></div><button style="float:right;" type="submit" title="<?php echo $this->__('Upload Video') ?>" class="import_button"><?php echo $this->__('Upload Video') ?></button>
+      </li>
+    </ul>
+    </div>
+</form></div>
+</div>
+</div>
+<script type="text/javascript">
+   //<![CDATA[
+       var dataForm = new VarienForm('form-validate');
+   //]]>
+</script>
+<?php
+if (!$ie9 && !$ie8 && !Mage::helper('airhotels/mobile')->isMobile()){
+?>
+<script>
+function required(){
+var empt = document.forms["form"]["profileVideo"].value;
+if (empt == ""){
+alert("Please select a Video file.");
+return false;
+}
+}
+jQ = jQuery.noConflict();
+jQ(document).ready(function () {
+    jQ('#sample_image').awesomeCropper(
+    { width: 200, height: 200, debug: true }
+    );
+    jQ(".btn-primary").click(function(){
+        jQ("#update_image").trigger("click");
+        jQ('.awesome-cropper img').hide();
+    });
+    jQ("#deletePhoto").click(function(){
+        if(confirm('<?php echo $this->__('Are you sure want to remove?'); ?>')){
+                return true;
+        }
+        return false;
+    });
+});
+<?php } ?>
+</script>

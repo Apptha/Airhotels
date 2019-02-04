@@ -1,0 +1,218 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */ 
+?>
+
+<div class="my-account"><div class="page-title" style="margin:0;"><h1 class="dashboard_leftside_heading"><?php echo $this->__('Inbox');?></h1></div>
+<?php
+/** 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+$inboxDetails = Mage::getModel('airhotels/product')->getInboxDetails();
+if(count($inboxDetails)){
+    ?>
+	    <div id="inboxSpace">                
+	       <p class="inbox_action_buttons">
+		     <button onclick="confirmDelete()" class="inbox_delete_checkall"> <?php echo $this->__('Delete'); ?></button>
+			<?php if(!Mage::helper('airhotels/mobile')->isMobile()) { ?> <button class="inbox_delete_checkall" type="button" id="check_all_buttons" value="<?php echo Mage::helper('airhotels')->__('Check All'); ?>" onClick="this.value=checkUncheckAll()"/>Check All</button><?php } ?>
+		    </p>
+		   <form name="mailform" action="" method="post" id="mailin">
+	       <div class="profile_inbox_table">
+	        <table class="inboxTable" id="outboxList">
+	         <tr>
+	         <td></td>
+                    <td class="table_head_label">From</td>
+                    <td class="table_head_label">Message</td>
+                    <td class="table_head_label">Date</td>
+                    </tr>
+	            <?php for($i=0;$i<count($inboxDetails);$i++ ){ 
+                    $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+                    $receiverId = $inboxDetails[$i]["receiver_id"]; 
+                    if ($customerId == $receiverId) {
+			            if ($inboxDetails[$i]["receiver_read"] == '1') {
+			                $readClass = "class='read'";
+			                $unRead = 0;
+			            } else {
+			                $readClass = "class='unread' ";
+			                $unRead = 1;
+			            }
+			        } else {
+			            if ($inboxDetails[$i]["sender_read"] == '1') {
+			                $readClass = "class='read'";
+			                $unRead = 0;
+			            } else {
+			                $readClass = "class='unread' ";
+			                $unRead = 1;
+			            }
+			        }
+                    ?>                   
+                    <tr style="cursor: pointer" <?php echo $readClass; ?>  onclick="this.className ='read' ">
+	                <td class="select_message_box checkbox_design">
+	                <input type="checkbox" style="margin-left: 5px" name="messageid[]" value="<?php echo $inboxDetails[$i]["message_id"]; ?>" id="checkinbox" onchange="checkboxAction();"/><i class="sprimg"></i></td>
+	                <td onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>','<?php echo $unRead; ?>')">
+	                    <?php echo $this->__('From'); ?> : <?php  $customer = Mage::getModel('customer/customer')->load($inboxDetails[$i]["sender_id"]); echo ucfirst($customer->getName());
+							$replycount = Mage::getModel('airhotels/airhotels')->getReplyCount($inboxDetails[$i]["message_id"]);                           
+                            if(isset($replycount["count"])){
+                                echo " ".$this->__("Re").":"."(".$replycount["count"].")";
+                            } ?>
+	                </td>
+	                <td onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>','<?php echo $unRead; ?>')">
+	                    <?php echo (strlen($inboxDetails[$i]["message"])>30)? substr($inboxDetails[$i]["message"],0,30) : $inboxDetails[$i]["message"]."..";   ?>
+	                </td>
+	                <td onclick="openMessage(1,'<?php echo $inboxDetails[$i]["message_id"]; ?>','<?php echo $unRead; ?>')">
+	                    <?php echo date("d/m/Y",strtotime ($inboxDetails[$i]["created_date"]) );  ?>
+	                </td>
+	            </tr>
+	            <?php  } ?>
+	        </table>
+	        </div>
+	    </div>
+    </form>
+    <div id="mailSpace" style="display: none"></div><?php
+}
+else{ ?>
+    <h1 class="no_mails">
+    <?php echo $this->__('No mail received'); ?>
+    </h1>
+    <?php
+}
+?>
+<div class="clear"></div>
+</div>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();
+        function openMessage(flag,messageId,readStatus){
+            if(flag==1){
+                document.getElementById("inboxSpace").style.display = "none";
+                document.getElementById("mailSpace").style.display = "block"; getMessageDetails(messageId); 
+
+                if(readStatus == 0){
+                    var countMessage = <?php echo Mage::getSingleton('core/session')->getMessageCount();?>;
+                    countMessage = countMessage - 1;
+
+                    if(countMessage == 0){
+                    	document.getElementById("mailcount").innerHTML = countMessage;
+                    }else{
+                		document.getElementById("mailcount").innerHTML = countMessage;
+                    }
+                }        
+            }
+            else{
+                document.getElementById("inboxSpace").style.display = "block";
+                document.getElementById("ReplyMail").style.display = "none"; document.getElementById("mailSpace").style.display = "none";
+            }
+        }
+       
+        function getMessageDetails(messageId){
+            var xmlhttp = getHttp();
+            document.getElementById("mailSpace").innerHTML="<div class='loadingWrapper'><div class='content three-bounce'><div class='one'></div><div class='two'></div><div class='three'></div></div></div>";
+            xmlhttp.onreadystatechange=function() {
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                { document.getElementById("mailSpace").innerHTML=xmlhttp.responseText;
+                }
+            }
+            var url = "<?php echo Mage::getBaseUrl() . 'property/property/showmessage/' ?>";
+            url=url+"id/"+messageId+"/show/in"; xmlhttp.open("GET",url,true);
+            xmlhttp.send();
+            new Ajax.Request("<?php echo Mage::getBaseUrl(); ?>airhotels/payout/updataMailIcon/", {
+                method: "get", onSuccess: successFunc
+            });
+        }
+        function successFunc(response) {    	
+            var content = response.responseText;
+            //document.getElementById("mailcount").innerHTML = content;
+        }
+        function getHttp(){
+            var xmlhttp;
+            if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp=new XMLHttpRequest();
+            } else {// code for IE6, IE5
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            return xmlhttp;
+        }
+        function confirmDelete(){  
+            if(jQ("input:checked").length != ""){
+            if(confirm("<?php echo $this->__('Are you sure want to delete'); ?>")){
+                document.mailform.submit();
+                return true;
+            }
+           }
+            else{
+                confirm("<?php echo $this->__('Please select the checkbox to delete'); ?>");
+                return false;
+            }
+        }
+      function validateReply(){
+        var MailSubject = document.getElementById("replyMessage").value;
+        if(MailSubject != ''){
+        var reHttp 			= /(ftp|http|https):\/\//i;
+        var reWww 			= /www\.\w+/i;
+        var reDomainExt 	= /\w+\.(com|net|org|biz|ws|name)/i;
+        var rePhoneNumber 	= /([0-9]{3,9}[\- ]?){3,9}/;
+        var rePhoneWord 	= /((zero|one|two|three|four|five|six|seven|eight|nine)\W+){6,100}/i;
+        var reEmail 		= /\w+(\.\w+){0,1}(@)[\w|\-]+(\.|\W{1,3}dot\W{1,3})\w+/;
+        var reEmailDomain 	= /( aol|gmail|hotmail|msn|yahoo)(\.com){0,1}/i;
+        var isWebsite 		= (reHttp.test(MailSubject) || reWww.test(MailSubject) || reDomainExt.test(MailSubject));
+        var isPhone 		= (rePhoneNumber.test(MailSubject) || rePhoneWord.test(MailSubject));
+        var isEmail 		= (reEmail.test(MailSubject) || reEmailDomain.test(MailSubject));
+        if (isWebsite || isPhone || isEmail) {
+            alert("<?php echo $this->__('Warning: It looks like you may be trying to send contact information.'); ?>");
+            return false;
+        }
+        }        
+        if(jQ.trim(document.getElementById("replyMessage").value).length==0){
+        	alert("<?php echo $this->__('Please fill message'); ?>");
+                return false;
+		}else{                
+            document.getElementById("replyMessageSubmitButton").disabled=true;
+            return true;
+            }
+        }
+      var checkAllInboxCheckboxes = 0;
+      function checkUncheckAll() {
+	      if(checkAllInboxCheckboxes == 0){   	
+		      jQ('#inboxSpace input:checkbox').attr('checked', 'true');
+		      checkAllInboxCheckboxes = 1;
+		      return "<?php echo Mage::helper('airhotels')->__('Uncheck All'); ?>";
+		  }else{  
+		      jQ('#inboxSpace input:checkbox').removeAttr('checked', 'true');
+		      checkAllInboxCheckboxes = 0;
+		      return "<?php echo Mage::helper('airhotels')->__('Check All'); ?>";
+	      }
+      }
+      function checkboxAction() {
+    	 jQ('#inboxSpace input:checkbox:not(:checked)').each(function(){
+			jQ("#check_all_buttons").val("<?php echo Mage::helper('airhotels')->__('Check All'); ?>");
+			checkAllInboxCheckboxes=0;
+			return;
+        });
+      }
+</script>

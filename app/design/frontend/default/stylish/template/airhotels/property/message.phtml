@@ -1,0 +1,247 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */ ?>
+
+    <?php
+/**
+ * Get the param ID Value.
+ */
+$pid = $this->getRequest()->getParam('id');
+/**
+ * Get the Show Value.
+ */
+$show = $this->getRequest()->getParam('show');
+/**
+ * Get the Model Value.
+ */
+$model = Mage::getModel('airhotels/airhotels');
+/**
+ * Get the Inbox Details
+ */
+$inboxDetails = Mage::getModel('airhotels/calendar')->markAsRead($pid);
+/**
+ * Inbox Details with param ID
+ */
+$inboxDetails = Mage::getModel('airhotels/product')->getinboxMessageDetails($pid);
+/**
+ * Reply Mesage Value.
+ */
+$replyMessage = Mage::getModel('airhotels/product')->getReplyMessages($pid);
+if($show=="in"){  ?>
+        <div class="innerpage_btn left" style="line-height: 26px;margin-left: 10px; " onclick="openMessage(0)">
+            <?php echo $this->__('Back to Inbox'); ?>
+        </div>
+        <?php } else { ?>
+            <div class="innerpage_btn left" style="line-height: 26px;margin-left: 10px; " onclick="openMessage(0)">
+                <?php echo $this->__('Back to Sent Items'); ?>
+            </div>
+            <?php } 
+/**
+ * Check the $inboxDetails value.
+ */
+if(count($inboxDetails)){
+    ?>
+                <table class="inboxTable left">
+                    <tr style="cursor: pointer">
+                        <td>
+
+                            <h1 style="float: left;color:#63C163;font-family: 'abel';font-size: 20px;">
+                        <?php if($show=="in"){
+                        /**
+ 						 * Customer Value date
+                         */
+                            $customer = Mage::getModel('customer/customer')->load($inboxDetails[0]["sender_id"]);
+                        echo $this->__('From').' : ';
+                          echo '<a href="'.Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$customer->getId().'">'.ucfirst($customer->getName()).'</a>';
+                         }else {
+						 /**
+						  * load the customer details
+						  */
+                        $customer = Mage::getModel('customer/customer')->load($inboxDetails[0]["receiver_id"]);
+                        echo $this->__('To').' : ';
+                      	echo '<a href="'.Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$customer->getId().'">'.ucfirst($customer->getName()).'</a>';
+                         }?>
+                    </h1>
+                            <div style="float: right;width: 71px">
+                                <?php echo date("d/m/Y",strtotime ($inboxDetails[0]["created_date"]));  ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="msg_box">
+                            <?php if(isset($inboxDetails[0]["product_id"])){ ?>
+                                <p style="font-family: 'abel';font-size: 20px;color:#222;">
+                                    <?php echo $this->__('Property Name');  ?>:
+                                        <?php 
+                    echo  Mage::getModel('catalog/product')->load($inboxDetails[0]["product_id"])->getName(); 
+                    ?>
+                                </p>
+                                <?php } ?>
+                                    <p style="font-family: 'abel';font-size: 18px;color:#2671B9;">
+                                        <?php echo $this->__('Message');  ?>:</p>
+                                    <p>
+                                        <?php echo nl2br($inboxDetails[0]["message"]); ?>
+                                    </p>
+
+                                    <p style="margin-top:20px;">
+                                        <?php echo $this->__('No of Accomodate(s) : ').$inboxDetails[0]["guest"]; ?>
+                                    </p>
+                                    <p>
+                                    	<?php 
+                                    	$serviceFrom = '';
+                                    	if($inboxDetails[0]["property_service_from"] != null){ 
+                                    		$serviceFrom = $inboxDetails[0]["property_service_from"].' '.$inboxDetails[0]["property_service_from_period"];
+                                    	}?>
+                                        <?php echo $this->__('Check In: ').date("d/m/Y",strtotime ($inboxDetails[0]["checkin"])).' - '.$serviceFrom; ?>
+                                    </p>
+                                    <p>
+                                    	<?php 
+                                    	$serviceTo = '';
+                                    	if($inboxDetails[0]["property_service_to"] != null){ 
+                                    		$serviceTo = $inboxDetails[0]["property_service_to"].' '.$inboxDetails[0]["property_service_to_period"];
+                                    	}?>
+                                        <?php echo $this->__('Check Out: ').date("d/m/Y",strtotime ($inboxDetails[0]["checkout"])).' - '.$serviceTo; ?>
+                                    </p>
+
+                                    <p <?php /** * check phone no is enabled. */ $phoneNoEnable=(int) Mage::getStoreConfig( 'airhotels/custom_email/enable_contactme'); /** * check phone no value is not zero. */ if($phoneNoEnable !=0 ){ echo 'style="display:none"'; } ?>>
+                                        <?php
+	/**
+	 * Check the timezone Value.
+	 */
+    if(isset($inboxDetails[0]["timezone"])){
+	/**
+	 * Check the mobile_no Value.
+	 */
+    if(isset($inboxDetails[0]["mobile_no"])){
+	/**
+	 * Check the mobile_no Value.
+	 */
+	if(!empty($inboxDetails[0]["mobile_no"])){
+	/**
+	 * Check the timezone Value.
+	 */
+    if(!empty($inboxDetails[0]["timezone"])){
+    echo $this->__('Timezone to call: ').$inboxDetails[0]["timezone"];
+       }
+    }
+  }
+}    
+?>
+                                    </p>
+                                    <?php 
+     /**
+  	 * Check phone Enable Value.
+     */
+    $phoneNoEnable =(int) Mage::getStoreConfig('airhotels/custom_email/enable_contactme');  
+    /**
+     * Phoneenale Vlaue set to zero.
+     */
+    if($phoneNoEnable == 0){ 
+		/**
+		 * Set Value to zero.
+		 */
+	    if(isset($inboxDetails[0]["mobile_no"])){
+			/**
+			 * Set value to 'mobile_no'
+			 */
+		    if(!empty($inboxDetails[0]["mobile_no"])){
+		    ?>
+                                        <p>
+                                            <?php echo $this->__('Telephone Number: ').$inboxDetails[0]["mobile_no"]; ?>
+                                        </p>
+                                        <?php }
+	    }
+	} ?>
+                                            <?php if($show=="in"){
+                        if(count($replyMessage)==0 ): ?>
+                                                <p class="innerpage_btn right" style="padding-top: 5px;height: 22px;margin-left: 10px;" onclick="document.getElementById('ReplyMail').style.display='block';">
+                                                    <?php echo $this->__('Reply'); ?>
+                                                </p>
+                                                <?php endif; 
+                } ?>
+                        </td>
+                    </tr>
+                </table>
+                <?php
+}
+/**
+ * Count $replyMessage Value.
+ */
+if(count($replyMessage)){
+    for($i=0;$i<count($replyMessage);$i++){
+/**
+ * Customer Data Value.
+ */
+       $cutomerdata= Mage::getModel('customer/customer')->load($replyMessage[$i]["customer_id"])
+                ?>
+                    <table class="inboxTable left">
+                        <tr style="cursor: pointer">
+                            <td>
+                                <h1 style="float: left;color:#63C163;font-family: 'abel';font-size: 20px;">
+                          <?php echo $this->__('Reply'); ?> : <?php echo '<a href="'.Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$cutomerdata->getId().'">'.ucfirst($cutomerdata->getName()).'</a>'; ?>
+                        </h1>
+                                <div style="float: right;width: 71px">
+                                    <?php echo date("d/m/Y",strtotime ($replyMessage[$i]["created_date"]));  ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="">
+                                <p style="font-family: 'abel';font-size: 20px;color:#2671B9;">
+                                    <?php echo $this->__('Message');  ?>:</p>
+                                <p>
+                                    <?php echo $replyMessage[$i]["message"];  ?>
+                                </p>
+                                <?php if($i ==count($replyMessage)-1): ?>
+                                    <?php if($show=="in"){ ?>
+                                        <p class="innerpage_btn right" style="padding-top: 5px;height: 22px;margin-left: 10px;" onclick="document.getElementById('ReplyMail').style.display='block';">
+                                            <?php echo $this->__('Reply'); ?>
+                                        </p>
+                                        <?php } ?>
+                                            <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                    <?php
+    }
+}
+?>
+                        <div class="clear"></div>
+                        <div id="ReplyMail" class="left" style="margin-left: 10px;display: none;padding: 10px 19px;margin: 11px; border: 1px dashed #666 !important;">
+                            <form action="<?php echo Mage::getBaseUrl() . 'property/property/reply/' ?>" name="reply" method="post" onsubmit="return validateReply();">
+                                <h1 style="float: left;color:#63C163;font-family: 'abel';font-size: 20px;margin-right: 10px"><?php echo $this->__("Reply"); ?></h1>
+                                <textarea cols="5" rows="5" id="replyMessage" style="width:625px" name="message"></textarea>
+                                <input type="hidden" id="messageid" name="message_id" value="<?php echo $inboxDetails[0]["message_id"] ?>" />
+                                <input type="hidden" id="customer_id" name="customer_id" value="<?php echo $inboxDetails[0]["sender_id"] ?>" />
+                                <div class="clear"></div>
+                                <?php if($show=="in"){ ?>
+                                    <input type="submit" class="innerpage_btn right" style="padding-top: 5px;height: 22px;margin-left: 10px; margin-top: 10px;" id="replyMessageSubmitButton" value="<?php echo $this->__(" Send Reply ") ?>"/>
+                                    <?php } ?>
+                            </form>
+                        </div>

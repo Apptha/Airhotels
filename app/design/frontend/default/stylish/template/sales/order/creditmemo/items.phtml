@@ -1,0 +1,134 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+Getting order details
+ */
+
+$_order = $this->getOrder();
+   /**
+    * For whether checking hourly based or not
+    */     
+/**
+Getting increment Id
+ */ 
+   $incrementId = $_order->getIncrementId();
+   /**
+        Load by increment id
+    */
+   $orderData = Mage::getModel('sales/order')->loadByIncrementId($incrementId);
+   $hourlyFlag = 0;
+   $items = $orderData->getAllItems();
+   /**
+    * Iterating loop
+    */
+   foreach($items as $item){
+   $_options = $item->getProductOptions(); 
+   break;
+   }   
+   /**
+    * Iterating loop
+    */
+   foreach ($_options as $_option){
+if(!empty($_option)){
+$hourlyFlag = 1;    
+   }
+   break;    
+   }
+
+?>
+<p class="order-links"><a href="<?php echo $this->getPrintAllCreditmemosUrl($_order) ?>" onclick="this.target='_blank'" class="link-print">
+<?php echo $this->__('Print All Refunds') ?></a></p>
+<?php 
+/**
+ * Iterating loop
+ */
+
+foreach ($_order->getCreditmemosCollection() as $_creditmemo): ?>
+<h2 class="sub-title"><?php echo $this->__('Refund #') ?>
+<?php echo $_creditmemo->getIncrementId(); ?> <span class="separator">|</span> 
+<a  onclick="this.target='_blank'" href="<?php echo $this->getPrintCreditmemoUrl($_creditmemo) ?>" class="link-print">
+<?php echo $this->__('Print Refund') ?>
+</a>
+</h2>
+<h3 class="table-caption">
+<?php echo $this->__('Property Refunded') ?>
+</h3>
+<!-- Creditmemo starts -->
+<table id="my-refund-table-<?php 
+
+/**
+ * Getting creditmemo id
+ */
+echo $_creditmemo->getId(); ?>" class="data-table" >
+    <col />
+    <col width="1" /><col width="1" /><col width="1" /><col width="1" /><col width="1" /><col width="1" />
+    <thead>
+        <tr>
+             <!-- printing the Property Name, Price  -->
+            <th width="30%"><?php echo $this->__('Property Name') ?></th>
+            <th><?php echo $this->__('SKU') ?></th>
+            <th class="a-right"><?php echo $this->__('Price') ?></th>
+            <?php if($hourlyFlag == 0){ ?>
+            <th class="a-center"><?php echo $this->__('No. of day(s)') ?></th>
+            <?php }else{ ?>
+            <th class="a-center"><?php echo $this->__('No. of hour(s)') ?></th>
+            <?php } ?>
+<!--            <th class="a-center"><?php echo $this->__('Qty') ?></th>-->
+            <!-- printing the subtotal, DiscountAmount, Row Totals  -->
+            <th class="a-right"><?php echo $this->__('Subtotal') ?></th>
+            <th class="a-center wrap"><?php echo $this->__('Discount Amount') ?></th>
+            <th class="a-right wrap"><?php echo $this->__('Row Total') ?></th>
+        </tr>
+    </thead>
+    <tfoot>
+ <!-- get total Html Value  -->   
+<?php echo $this->getTotalsHtml($_creditmemo);?></tfoot>
+<?php $_items = $_creditmemo->getAllItems(); 
+      $_count = count($_items) ;
+      /**
+       * Iterating loop
+       */
+      foreach ($_items as $_item): 
+      /**
+       * Getting Parent item
+       */
+    if ($_item->getOrderItem()->getParentItem()){
+    continue; 
+    }?>
+    <tbody><?php echo $this->getItemHtml($_item) ?>
+    </tbody>
+    <?php endforeach; ?>
+</table>
+<!-- Creditmemo ends -->
+<script type="text/javascript">decorateTable('my-refund-table-<?php echo $_creditmemo->getId(); ?>', {'tbody tr' : ['first', 'last'],'tbody' : ['odd', 'even']})</script>
+<?php echo $this->getCommentsHtml($_creditmemo)?>
+<?php endforeach; ?>

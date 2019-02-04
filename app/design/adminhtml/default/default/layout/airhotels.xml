@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+	<airhotels_adminhtml_airhotels_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Orders</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_airhotels" name="airhotels"/>
+		</reference>
+	</airhotels_adminhtml_airhotels_index>
+        
+  <!-- sales order view -->
+	<adminhtml_sales_order_view>
+		<reference name="order_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_view>
+	<!-- new sales order invoice-->
+	<adminhtml_sales_order_invoice_new>
+		<reference name="order_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_invoice_new>
+	<!-- Update in invoice order -->
+	<adminhtml_sales_order_invoice_updateqty>
+		<reference name="order_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_invoice_updateqty>
+	<!-- invoice order view -->
+	<adminhtml_sales_order_invoice_view>
+		<reference name="invoice_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_invoice_view>
+	<!-- New creditmemo invoice -->
+	<adminhtml_sales_order_creditmemo_new>
+		<reference name="order_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_creditmemo_new>
+   <!-- update creditmemo order -->
+	<adminhtml_sales_order_creditmemo_updateqty>
+		<reference name="order_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_creditmemo_updateqty>
+ <!-- creditmemo order view -->
+	<adminhtml_sales_order_creditmemo_view>
+		<reference name="creditmemo_items">
+			<action method="addColumnRender">
+				<column>name</column>
+				<block>airhotels/adminhtml_sales_items_column_name</block>
+				<template>airhotels/sales/items/column/name.phtml</template>
+				<type>property</type>
+			</action>
+		</reference>
+	</adminhtml_sales_order_creditmemo_view>
+	<!-- Layout to upload image for state and country-->
+	<airhotels_adminhtml_city_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Add City With Image</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_city" name="city"/>
+		</reference>
+	</airhotels_adminhtml_city_index>
+	<!-- Layout to upload video for home page banner-->
+	<airhotels_adminhtml_uploadvideo_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Upload Video</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_uploadvideo" name="uploadvideo"/>
+		</reference>
+	</airhotels_adminhtml_uploadvideo_index>
+	<airhotels_adminhtml_products_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Manage Property</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_products" name="products" />
+		</reference>
+	</airhotels_adminhtml_products_index>
+	<airhotels_adminhtml_managebankdetails_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Manage Bank Details</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_managebankdetails" name="managebankdetails"/>
+		</reference>
+	</airhotels_adminhtml_managebankdetails_index>
+	<airhotels_adminhtml_managebankdetails_edit>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Manage Bank Details</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_managebankdetails_edit" name="managebankdetails_edit"/>
+		</reference>
+	</airhotels_adminhtml_managebankdetails_edit>
+	<airhotels_adminhtml_verifyhost_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Host Verification</title>
+			</action>			
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_verifyhost" name="verifyhost"/>
+		</reference>
+	</airhotels_adminhtml_verifyhost_index>
+	<airhotels_adminhtml_hostpayoutdetails_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Host Payout Details</title>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_hostpayoutdetails" name="hostpayoutdetails"/>
+		</reference>
+	</airhotels_adminhtml_hostpayoutdetails_index>
+	
+		<!-- Layout for verification tags -->
+	<airhotels_adminhtml_verification_index>
+		<reference name="head">
+			<action method="setTitle" translate="title">
+				<title>Verification Tags</title>
+			</action>			
+		</reference>
+		<reference name="content">
+			<block type="airhotels/adminhtml_verification" name="verification"/>
+		</reference>
+	</airhotels_adminhtml_verification_index>
+	<airhotels_adminhtml_verification_edit>
+		<reference name="content">
+			<block type="airhotels/adminhtml_verification_edit" name="verification_edit"/>
+		</reference>
+	</airhotels_adminhtml_verification_edit>
+	<airhotels_adminhtml_recurringpayments_index>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringpayments"
+				name="recurringpayments" />
+		</reference>
+	</airhotels_adminhtml_recurringpayments_index>
+
+	<airhotels_adminhtml_subscriptiontype_index>
+		<reference name="content">
+			<block type="airhotels/adminhtml_subscriptiontype"
+				name="subscriptiontype" />
+		</reference>
+	</airhotels_adminhtml_subscriptiontype_index>
+	<airhotels_adminhtml_recurringprofiles_index>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringprofiles"
+				name="recurringprofiles" />
+		</reference>
+	</airhotels_adminhtml_recurringprofiles_index>
+	<airhotels_adminhtml_recurringprofiles_active>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringprofiles"
+				name="active" />
+		</reference>
+	</airhotels_adminhtml_recurringprofiles_active>
+	<airhotels_adminhtml_recurringprofiles_suspended>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringprofiles"
+				name="suspended" />
+		</reference>
+	</airhotels_adminhtml_recurringprofiles_suspended>
+	<airhotels_adminhtml_recurringprofiles_canceled>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringprofiles"
+				name="canceled" />
+		</reference>
+	</airhotels_adminhtml_recurringprofiles_canceled>
+	<airhotels_adminhtml_recurringprofiles_pending>
+		<reference name="content">
+			<block type="airhotels/adminhtml_recurringprofiles"
+				name="pending" />
+		</reference>
+	</airhotels_adminhtml_recurringprofiles_pending>
+	<airhotels_adminhtml_managesubscriptions_index>
+		<reference name="content">
+			<block type="airhotels/adminhtml_managesubscriptions"
+				name="managesubscriptions" />
+		</reference>
+	</airhotels_adminhtml_managesubscriptions_index>
+		<default>
+        <reference name="head">
+            <action method="setCanLoadExtJs">
+                <flag>1</flag>
+            </action>
+            <action method="addJs">
+                <script>lib/flex.js</script>
+            </action>
+            <action method="addJs">
+                <script>lib/FABridge.js</script>
+            </action>
+            <action method="addJs">
+                <script>mage/adminhtml/flexuploader.js</script>
+            </action>
+        </reference>
+    </default>
+</layout>

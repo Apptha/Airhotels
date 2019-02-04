@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<config>
+    <acl>
+        <resources>
+            <all>
+                <title>Allow Everything</title>
+            </all>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <paypaladaptive translate="title" module="paypaladaptive">
+                                        <title>Apptha Paypal Adaptive</title>
+                                    </paypaladaptive>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                    <sales>
+                        <children>
+                            <paypaladaptive module="paypaladaptive">
+                                <title>Apptha Paypal Adaptive</title>               
+                                <children>
+                                    <paymentdetails module="paypaladaptive">
+                                        <title>Payment Details</title>                       
+                                    </paymentdetails>
+                                    <refunddetails module="paypaladaptive">
+                                        <title>Refund Details</title>                       
+                                    </refunddetails>     
+                                    <preapprovaldetails module="paypaladaptive">
+                                    <title>Pending Payment (Preapproval Chained Method)</title>                       
+                                    </preapprovaldetails>                                          
+                                </children>
+                            </paypaladaptive>
+                        </children>
+                    </sales>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

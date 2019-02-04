@@ -1,0 +1,166 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+?>
+<?php
+/**
+ * Host Property list page 
+ * 
+ *  @see Apptha_airhotels_Block_Property_Yourlist
+ */
+?>
+<div class="my-account" style="padding:0">                                  
+                       <ul id="main_content_sub_nav" class="review_list clearfix">
+                          <li id="manageListing"
+                              onclick="select_tab(&#39;main&#39;, &#39;order_completed&#39;, jQuery(this));"
+                              class="main_link selected"><a href="#"><?php echo $this->__('Completed Transactions'); ?></a></li>
+                          <li id="content_flag"></li>
+                      </ul>
+                        <?php
+                        $currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();?>
+                        
+                        <div id="order_completed" class="main_content" style="display: block;">
+                        <?php 
+                        $collection = $this->getCompletedPropertyHistory();
+                        if (count($collection) != 0) {//Productcollection Start
+                            ?>
+                            <div class="property_history_responsivetable">                            
+                                <table cellspacing="2" cellpadding="2" border="1" id="property_history_table" class="transactional_history"> <!-- property_property -->
+                                    <thead><tr>
+                                        <th style="width: 20%;"><?php echo $this->__('Order Id'); ?></th>
+                                        <th style="width: 18%;"><?php echo $this->__('Earned Amount'); ?></th>
+                                        <th style="width: 18%;"><?php echo $this->__('Admin Commission'); ?></th>
+                                        <th style="width: 20%;"><?php echo $this->__('Paid Status'); ?></th>
+                                    </tr></thead>
+                                    <?php                                    
+                                    echo "<pre>";                                    
+                                    $i = 1;
+                                    $config = Mage::getStoreConfig('airhotels/custom_group'); 
+                                    $configPaymentRequest = Mage::getStoreConfig('airhotels/custom_group/payment_request');
+                                    foreach ($collection as $arr_row) {            
+                                            $dateArr=explode("-",$arr_row["todate"]);
+                                            $payment_status = $arr_row["status"];
+                                            $todate=date('Y-m-d', mktime(0, 0, 0, $dateArr[1], $dateArr[2], $dateArr[0]));
+                                            echo '<tr>';
+                                            echo '<td style="width: 20%;">' . $arr_row["order_id"] . '</td>';
+                                            echo '<td style="width: 18%;">' . $currencySymbol . $arr_row["grand_total"] . '</td>';    
+                                            echo '<td style="width: 18%;">' . $currencySymbol . ( $arr_row["host_fee"] + $arr_row["service_fee"]) . '</td>';
+                                            if($payment_status == 0 && $arr_row['payment_request_status'] == 0 && $configPaymentRequest == 1){
+                                            echo '<td style="width: 20%;">' . '<a href="'.Mage::getBaseUrl().'airhotels/payout/request/order_id/'.$arr_row["order_id"].'">Payment Request</a>' . '</td>';
+                                            }else{
+                                            	if($payment_status == 1 ){
+                                            		$PaiedTo = 'Paid To Hoster';
+                                            	}elseif($payment_status == 0 && $arr_row['payment_request_status'] == 1){
+                                            		$PaiedTo = 'Request sent to admin';
+                                            	}elseif($payment_status == 2){
+                                            		$PaiedTo = 'Refund To Guest';
+                                            	}else{
+                                            		$PaiedTo = 'Not Paid';
+                                            	}
+                                            	echo '<td style="width: 20%;">' . $PaiedTo. '</td>';
+                                            }
+                                            echo '</tr>';
+                                            $i++;                                      
+									} 
+                                ?>
+                            </table></div>  
+                            <?php echo $this->getPagerHtml('completedpager'); ?>                                                     
+                            <?php                            
+                          }else {                         
+                                echo "<p class='no_transaction_records'>" . $this->__('No Transaction records found') . "</p>";
+                        }
+                        ?>
+                        
+                        </div>
+                        <div id="order_pending" class="main_content" <?php
+                        if (!$this->getRequest()->getParam('from')){
+                            echo " style='display:none' "; 
+                        }else{
+                        echo " style='display:block' class='main_link selected' ";
+                        }  ?>>
+                        <?php 
+                        $collection = $this->getCancelPropertyHistory();
+                        if (count($collection) != 0) {//Productcollection Start
+                            ?>
+                            <div class="property_history_responsivetable">                            
+                                <table cellspacing="2" cellpadding="2" border="1" id="property_cancel_table"> <!-- property_property -->
+                                    <thead><tr>
+                                        <th style="width: 10%;"><?php echo $this->__('S.No'); ?></th>
+                                        <th style="width: 40%;"><?php echo $this->__('Property'); ?></th>
+                                        <th style="width: 10%;"><?php echo $this->__('Price'); ?></th>                                        
+                                        <th style="width: 13%;"><?php echo $this->__('Start on'); ?></th>
+                                        <th style="width: 13%;"><?php echo $this->__('End on'); ?></th>
+                                        <th style="width: 14%;"><?php echo $this->__('Status'); ?></th>
+                                    </tr></thead>
+                                    <?php
+                                    $i = 1;
+                                    $config = Mage::getStoreConfig('airhotels/custom_group');                                    
+                                         foreach ($collection as $arr_row) {
+                                      
+                                            $arr_row["subtotal"] = Mage::helper('directory')->currencyConvert($arr_row["subtotal"], Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode());
+
+                                            $arr_row["host_fee"] = Mage::helper('directory')->currencyConvert($arr_row["host_fee"], Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode());
+
+                                            $arr_row["service_fee"] = Mage::helper('directory')->currencyConvert($arr_row["service_fee"], Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode());
+                                            $dateArr=explode("-",$arr_row["todate"]);
+                                            $todate=date('Y-m-d', mktime(0, 0, 0, $dateArr[1], $dateArr[2] + 1, $dateArr[0]));
+                                            $status = 'cancelled';                                            
+                                            echo '<tr>';
+                                            echo '<td style="width: 10%;">' . $i . '</td>';
+                                            echo '<td style="width: 40%;">' . $arr_row->getName() . '</td>';
+                                            echo '<td style="width: 10%;">' . $currencySymbol . $arr_row["subtotal"] . '</td>';                                           
+                                            echo '<td style="width: 13%;">' . date("d, M Y", strtotime($arr_row["fromdate"])) . '</td>';
+                                            echo '<td style="width: 13%;">' . date("d, M Y", strtotime($todate)) . '</td>';
+                                            echo '<td style="width: 14%;">' . $status . '</td>';
+                                            echo '</tr>';
+                                            $i++;                                       
+                                   }     							                       
+                                ?>
+                            </table></div>   
+                            <?php echo $this->getPagerHtml('calcelpager'); ?>                                           
+                            <?php
+                          }else {                            
+                                echo "<p class='no_transaction_records'>" . $this->__('No Transaction records found') . "</p>";
+                        }
+                        ?>   
+                                               
+                        </div>                   
+                 </div>                 
+
+<script>
+jQuery(document).ready(function() {
+	jQuery(".socialpopup-input-box input").focus(function(){ 		
+		jQuery(this).css({backgroundColor: '#bee4fd'});
+    });
+	jQuery(".socialpopup-input-box input").blur(function(){ 
+		jQuery(this).css({backgroundColor: '#f8f8f8'});
+    });
+});
+
+</script>                 

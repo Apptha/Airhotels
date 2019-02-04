@@ -1,0 +1,104 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$customerDetails 	= Mage::getSingleton('customer/session')->getCustomer();
+$customerID 		= $customerDetails->getId();
+$request 			= $this->getRequest('');
+$customer = $address = Mage::getModel('customer/customer')->load($customerID);
+$profilePhoto 		= Mage::getModel('airhotels/product')->getCustomerPictureById($customerID);
+$customerName 		= $customer->getName();
+$smsEnabledOrNot    = Mage::helper('airhotels/smsconfig')->getSmsEnabledOrNot();
+$controllerAction 	= $request->getActionName();
+$id = $this->getRequest()->getParam('id');
+
+/**
+ * To Display the customer profile image in myaccount
+ *  Display customer profile information.
+ */
+?>
+<div class="left_block">
+	<div class="user_profile_img">
+		<div class="userimgonly">
+        	<?php if(!empty($profilePhoto[0]["imagename"])){
+				$imageUrl = Mage::getBaseUrl('media') . "catalog/customer/" . $profilePhoto[0]["imagename"];
+             	echo "<img class='profilephoto' src='" . $imageUrl . "' /> ";
+			}else{
+                echo "<img class='profilephoto' src='".$this->getSkinUrl('images/no_user.jpg')."' /> ";
+            }
+             ?>
+			<div>
+			  	<h3><?php echo $customerName;?></h3>
+			  	<a style="color:#fff;" target="_blank" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$customer->getId();?>"><p class="view_profile_btn_dashboard"><span><?php echo $this->__('View Profile'); ?></span></p></a>
+			  	<a style="color:#fff;" href="<?php echo Mage::getBaseUrl().'airhotels/index/profile/id/'.$customer->getId();?>"><p class="verify_profile_no view_profile_btn_dashboard"><span><?php echo $this->__('Edit Profile'); ?></span></p></a>
+		  	</div>
+      </div>
+  </div>
+</div>
+<div class="content_block">
+	<div style="position: relative;"><h1 class="dashboard_leftside_heading"><?php echo $this->__('Verification'); ?></h1>
+  		<i class="question-circle airhotel-sprite dashnotify" data-content='Verifications help build trust between guests and hosts and can make booking easier.' data-placement="bottom" <?php if(!Mage::helper('airhotels/mobile')->isMobile()) { ?>rel="popover"<?php } ?> title="Verifications help build trust between guests and hosts and can make booking easier."></i>
+  	</div>
+  	<div class="dashboard_leftside_heading_contents">
+	  	<ul>
+	  		<li><i class='sprimg dashverified_icon'></i><span class='dashverified_label'><?php echo $this->__('Email Address Verified');?></span></li>
+	  		<?php
+		  		$verifiedTags   = Mage::getModel ( 'airhotels/verifyhost' )->getCollection ()
+		  						->addFieldToFilter('host_id',array('eq'=>$customerID))
+		  						->addFieldToFilter('host_tags',array('eq'=>1));
+     			foreach($verifiedTags as $verifiedTag) {
+     				if($verifiedTag->getHostTags() == 1) {
+     					echo "<li><i class='sprimg dashverified_icon'></i><span class='dashverified_label'>".ucfirst($verifiedTag->getTagId()).$this->__(' Verified')."</span></li>";
+     				} else {
+     					echo "<li><i class='sprimg dash_notverified_icon'></i> <span class='dashverified_label'>".ucfirst($verifiedTag->getTagId()).$this->__(' Not Verified Yet')."</span></li>";
+     				}
+     			}
+     		if($smsEnabledOrNot == 0){
+                $mobileVerification = $profilePhoto[0]['mobile_verified_profile'];
+     			if($mobileVerification == "verified") { ?>
+     	    		<li><i class='sprimg dashverified_icon'></i><span class="dashverified_label"><?php echo $this->__("Phone Number Verified"); ?></span></li>
+     	    	<?php } else { ?>
+     	    		<li><i class='sprimg dash_notverified_icon'></i><span class="dashverified_label"><?php echo $this->__("Phone Not Verified Yet");?></span></li>
+     	    	<?php }
+     	    }?>
+	  	</ul>
+  	</div>
+</div>
+<div class="content_block">
+	<div style="position: relative;"><h1 class="dashboard_leftside_heading"><?php echo $this->__('Quick Links'); ?></h1>
+		<i class="airhotel-sprite external-link dashnotify" title="Quick Links"></i>
+	</div>
+	<div class="dashboard_quiklinks">
+		<ul class="quicklinks_only">
+		    <li><a href="<?php echo Mage::getBaseUrl().'property/general/yourtrip'; ?>" <?php if($controllerAction == 'yourtrip'){?>class="selected"<?php }?>><?php echo $this->__('Upcoming Trips'); ?></a></li>
+		    <li><a href="<?php echo Mage::getBaseUrl().'sales/order/history'; ?>" <?php if($controllerAction == 'history'){?>class="selected"<?php }?>><?php echo $this->__('My Bookings'); ?></a></li>
+		    <li><a href="<?php echo Mage::getBaseUrl().'newsletter/manage/index/id/newsletter'; ?>" <?php if($id == 'newsletter'){?>class="selected"<?php }?>><?php echo $this->__('Newsletter Subscription'); ?></a></li>
+		    <li><a href="<?php echo Mage::getBaseUrl().'customer/address/index/id/addressbook'; ?>" <?php if($id == 'addressbook'){?>class="selected"<?php }?>><?php echo $this->__('Address Book'); ?></a></li>
+	  	</ul>
+  	</div>
+</div>

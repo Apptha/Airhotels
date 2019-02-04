@@ -1,0 +1,118 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php echo $this->getChildHtml('items_before'); 
+$productId = Mage::getSingleton('core/session')->getHourlyProductId(); 
+$productCollection = Mage::getModel('catalog/product')->load($productId); 
+$experienceImg = $this->helper('catalog/image')->init($productCollection, 'image') ->constrainOnly(TRUE) ->keepAspectRatio(TRUE) ->keepFrame(FALSE) ->resize(392, null);
+$quote = Mage::getSingleton('checkout/cart')->getQuote();
+$cartItems = $quote->getItemByProduct($productCollection);
+$options = Mage::getModel('sales/quote_item_option')->load($cartItems->getId(),'item_id');
+$experienceDetails = unserialize($options->getValue());
+$productModel = Mage::getModel('catalog/product');
+$attr = $productModel->getResource()->getAttribute("propertytype");
+if ($attr->usesSource()) {
+  $label = $attr->getSource()->getOptionText($productCollection->getPropertytype());
+}
+  $timeLabel = $productCollection->getAttributeText('property_time');
+  $totalBookingDetails = '';
+  if(strtolower($timeLabel) == 'hourly'){
+    $timeLabel = ' Hour(s)';
+    $totalBookingDetails = $experienceDetails['overall_total_hours'];
+  }else{
+    $timeLabel = ' Day(s)';
+    $totalBookingDetails = $experienceDetails['qty'];
+  }
+
+?>
+<div id="checkout-review-table-wrapper" style="overflow: hidden">
+<div class="checkout_image">
+<?php if($productCollection->getSmallImage() != ''){ ?>
+    <img src="<?php echo $experienceImg; ?>" />    
+    <?php }else{ ?>    
+    <img src="<?php echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_SKIN ).'frontend/default/stylish/images/np_product_main.jpg'; ?>" />    
+    <?php } ?></div>
+    <div class="onestepcheckout-review-table">
+    <table  class="onestepcheckout-summary" id="checkout-review-table">
+        <?php if ($this->helper('tax')->displayCartBothPrices()): $colspan = 4; $rowspan = 1; else: $colspan = 4; $rowspan = 1; endif; ?>
+        <col />
+        <col width="1" />
+        <col width="1" />
+        <col width="1" />
+        <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
+        <col width="1" />
+        <col width="1" />
+        <?php endif; ?>
+        <tbody>            
+            <tr>
+              
+              <td rowspan="<?php echo $rowspan ?>" colspan="10" class="name order_review_second_label property-name"><?php echo $productCollection->getName(); ?><span><?php echo ucwords($productCollection->getPropertyadd()); ?></span></td>
+            </tr>
+            <tr>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_label"><?php echo $this->__('Start on') ?></td>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_second_label"><?php echo str_replace('@', '-', $experienceDetails['fromdate']).' '.$experienceDetails['property_service_from'].' '. $experienceDetails['property_service_from_period'] ?></td>
+            </tr>
+            <tr>
+              <td rowspan="<?php echo $rowspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_label"><?php echo $this->__('End on') ?></td>
+              <td rowspan="<?php echo $rowspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_second_label"><?php echo str_replace('@', '-', $experienceDetails['todate']).' '. $experienceDetails['property_service_to'].' '.$experienceDetails['property_service_to_period'] ?></td>
+            </tr>
+            <tr>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_label"><?php echo $this->__('People(s)') ?></td>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_second_label"><?php echo $experienceDetails['accomodate'] ?></td>
+            </tr>      
+             <tr> 
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_label"><?php echo $this->__('Duration') ?></td>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_second_label"><?php echo 'For '.$totalBookingDetails. $timeLabel; ?></td>
+            </tr>  
+            <?php $currencySymbol = Mage::app ()->getLocale ()->currency ( Mage::app ()->getStore ()->getCurrentCurrencyCode () )->getSymbol (); ?>        
+            <tr>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_label"><?php echo $this->__('Price') ?></td>
+              <td colspan="<?php echo $colspan ?>" colspan="<?php echo $colspan ?>" class="name order_review_second_label"><?php echo $currencySymbol.Mage::helper ( 'directory' )->currencyConvert ( number_format((float)$productCollection->getPrice(), 2, '.', ''), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ); ?></td>           
+            </tr>                 
+            <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
+                <tr>
+                    <th class="a-right"><?php echo $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
+                    <th><?php echo $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
+                    <th class="a-right"><?php echo $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
+                    <th><?php echo $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+        <?php echo $this->getChildHtml('totals'); ?>        
+    </table>
+    </div>
+</div>
+<?php echo $this->getChildHtml('items_after'); ?>
+<script type="text/javascript">
+//<![CDATA[
+    decorateTable('checkout-review-table');
+    truncateOptions();
+//]]>
+</script>

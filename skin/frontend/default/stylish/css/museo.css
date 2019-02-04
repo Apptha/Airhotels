@@ -1,0 +1,14 @@
+@font-face {
+	font-family: 'MuseoSlab500';
+	src: url('../../fonts/museo/Museo_Slab_500-webfont.eot?#') format('eot'),
+		url('../../fonts/museo/Museo_Slab_500-webfont.woff') format('woff'),
+		url('../../fonts/museo/Museo_Slab_500-webfont.ttf') format('ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.museo {
+	font-weight: normal;
+	font-style: normal;
+	font-family: 'MuseoSlab500', sans-serif;
+}

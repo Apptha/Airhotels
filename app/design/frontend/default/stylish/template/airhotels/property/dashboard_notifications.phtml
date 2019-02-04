@@ -1,0 +1,103 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$baseUrl 	= $this->getBaseUrl();
+$skinUrl 	= $this->getSkinUrl();
+$hostId 	= Mage::getSingleton('customer/session')->getId();
+$host 		= Mage::getSingleton('customer/session')->getCustomer();
+/**
+ * First Name
+ */
+$hostFirstName = $host->getFirstname();
+$getCollection = Mage::getModel('airhotels/notifications')->getCollection()->addFieldToFilter("user_id",$hostId);
+if(!$getCollection->getData()) {
+	$data = array("user_id"=>$hostId,"inbox"=>"on","recieve_request"=>"on","response_request"=>"on","account_listing"=>"on");
+	$notificationsModel = Mage::getModel('airhotels/notifications')->addData($data);
+	$notificationsModel->save();
+}
+$notifications 		= Mage::getModel('airhotels/notifications')->getCollection()->addFieldToFilter('user_id', array('eq' =>$hostId))->getData();
+$inbox 				= $notifications[0]['inbox'];
+$recieveRequest 	= $notifications[0]['recieve_request'];
+$responseRequest 	= $notifications[0]['response_request'];
+$accountListing 	= $notifications[0]['account_listing'];
+$viewDateTime 		= $notifications[0]['created_at'];
+$dateTime 			= Mage::getModel('core/date')->date('Y-m-d H:i:s');
+$currentNotifications = "no";
+?>
+<div class="dashboard_notify">
+	<div class="personal-info">
+	    <div class="page-title" style="margin:0;position:relative">
+		    <h1 class="dashboard_leftside_heading"><?php echo $this->__('Notifications') ?></h1>
+		    <i class="airhotel-sprite exclamation-circle dashnotify" title="Customer notification have been dispalyed. Which is  account modifications and inbox notifications"></i>
+		</div>
+		<div class="profile_information_body">
+    		<div class="profile_container" style="border-top:none">
+        		<div class="clear"></div>
+        		<?php if($inbox == "on") { ?>
+			        <ul class="form-list profile_info">
+			        	<?php
+			        	$currentNotifications = "yes";
+			        	$newInbox = Mage::getModel('airhotels/product')->getInboxDetails();
+			        	foreach($newInbox as $newInbox) {
+							$receiverId 	= $newInbox["receiver_id"];
+							$recivedDate 	= $newInbox['created_date'];
+							$senderId 		= $newInbox['sender_id'];
+							if ($hostId == $receiverId) {
+								if ($newInbox["receiver_read"] == '0') {
+									$customer = Mage::getModel('customer/customer')->load($senderId);
+									?><li style="padding:10px 0"><a style="color:#6e6e6e;" href="<?php echo $this->getBaseUrl()."property/property/inbox/";?>"><?php echo $this->__("New message recieved from <span style='color:#479BFF;display:inline-block;margin:0px 4px 0 0;'>".ucfirst($customer->getName())."</span>");?><span><?php echo date("M d Y h:i A",strtotime($recivedDate));?></span></a> </li>
+								<?php }
+							} else {
+								if ($newInbox["sender_read"] == '0') {
+									$customer = Mage::getModel('customer/customer')->load($receiverId);
+									?><li style="padding:10px 0"><a style="color:#6e6e6e;" href="<?php echo $this->getBaseUrl()."property/property/inbox/";?>"><?php echo $this->__("New message recieved from <span style='color:#479BFF;display:inline-block;margin:0px 4px 0 0;'>".ucfirst($customer->getName())."</span>");?><span><?php echo date("M d Y h:i A",strtotime($recivedDate));?></span></a> </li>
+							<?php }
+							}
+						} ?>
+			        </ul>
+        		<?php }
+		        if($accountListing == "on") { ?>
+			        <ul class="form-list profile_info">
+			        	<?php
+			        	$currentNotifications = "yes";
+			        	$customerData = Mage::getModel('airhotels/customerphoto')->load($hostId);
+			        	$updated 	= $customerData["created_date"];
+			        	?>
+			        	<li style="padding:10px 0"><?php echo $this->__("You have updated your profile on ".date("M d Y h:i A",strtotime($updated)));?></li>
+			        </ul>
+		        <?php }
+		        if($currentNotifications == "no") { ?>
+			         <ul class="form-list profile_info">
+			         	<li style="padding:10px 0"><p style="text-align: left" class="nocontent_available"><?php echo $this->__("Don't have any notifications");?></p></li>
+			         </ul>
+		        <?php } ?>
+     		</div>
+    	</div>
+    </div>
+</div>

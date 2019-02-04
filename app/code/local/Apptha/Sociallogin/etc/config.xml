@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+
+<!--
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Sociallogin
+ * @version     0.1.8
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ * */
+
+-->
+
+<config>
+    <modules> 
+        <Apptha_Sociallogin>
+            <version>0.1.8</version>
+        </Apptha_Sociallogin>
+    </modules>
+    <frontend> 
+        <routers>
+            <sociallogin> 
+                <use>standard</use>
+                <args> 
+                    <module>Apptha_Sociallogin</module>
+                    <frontName>sociallogin</frontName>
+                </args>
+            </sociallogin>
+            
+        </routers>
+        <layout>
+            <updates>
+                <sociallogin>
+                    <file>sociallogin.xml</file>
+                </sociallogin>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Sociallogin>
+                    <files>
+                        <default>Apptha_Sociallogin.csv</default>
+                    </files>
+                </Apptha_Sociallogin>
+            </modules>
+        </translate>
+        
+    </frontend>
+    
+    <adminhtml>
+
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <Apptha_Sociallogin>
+                            <title>Sociallogin Module</title>
+                            <sort_order>10</sort_order>
+                        </Apptha_Sociallogin>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <layout>
+            <updates>
+                <sociallogin>
+                    <file>sociallogin.xml</file>
+                </sociallogin>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Sociallogin>
+                    <files>
+                        <default>Apptha_Sociallogin.csv</default>
+                    </files>
+                </Apptha_Sociallogin>
+            </modules>
+        </translate>
+    </adminhtml>   
+    <global>
+        <models>
+            <sociallogin>
+                <class>Apptha_Sociallogin_Model</class>
+                <resourceModel>sociallogin_mysql4</resourceModel>
+            </sociallogin>
+        </models>
+        <resources>
+            <sociallogin_setup>
+                <setup>
+                    <module>Apptha_Sociallogin</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </sociallogin_setup>
+            <sociallogin_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </sociallogin_write>
+            <sociallogin_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </sociallogin_read>
+        </resources>
+        <blocks>
+            <sociallogin>
+                <class>Apptha_Sociallogin_Block</class>
+            </sociallogin>
+        </blocks>
+        <helpers>
+            <sociallogin>
+                <class>Apptha_Sociallogin_Helper</class>
+            </sociallogin>
+        </helpers>
+        
+
+        <events>
+            <controller_action_predispatch_routename_controller_method>
+                <observers>
+                    <module>
+                        <class>module/observer</class>
+                        <method>checkCaptcha</method>
+                    </module>
+                </observers>
+            </controller_action_predispatch_routename_controller_method>
+        </events>
+    </global>
+    <default>
+        <sociallogin>
+            <general>
+                <enable_redirect>1</enable_redirect>
+            </general>
+     
+        </sociallogin>
+    </default>
+</config>

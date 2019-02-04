@@ -1,0 +1,275 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$searchTextField = $this->getRequest()->getParam('searchTextField');
+?>
+<div class="header-container <?php if(!$this->getIsHomePage()){ echo 'stripbg'; }?>">
+<div class="header"><?php echo $this->getChildHtml('currency_top'); ?> <?php if ($this->getIsHomePage()):?>
+<div class="logo"><strong><?php echo $this->getLogoAlt() ?></strong><a
+	href="<?php echo $this->getUrl('') ?>"
+	title="<?php echo $this->getLogoAlt() ?>" ><img
+	src="<?php echo $this->getLogoSrc() ?>"
+	alt="<?php echo $this->getLogoAlt() ?>" /></a></div>
+            <?php else:?>
+    <div class="logo"><a href="<?php echo $this->getUrl('') ?>"
+	title="<?php echo $this->getLogoAlt() ?>" ><strong><?php echo $this->getLogoAlt() ?></strong><img
+	src="<?php echo $this->getLogoSrc() ?>"
+	alt="<?php echo $this->getLogoAlt() ?>" /></a> </div><?php endif?>
+
+
+<?php
+$actualLink = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+	if(strpos($actualLink,'advsearch') == true) {
+ ?>
+<script type="text/javascript">
+    function initialize() {
+        var mapOptions = {            
+            zoom: 13,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById('map_canvas_top'),mapOptions);
+        var input = document.getElementById('searchTexttop');
+        var autocomplete = new google.maps.places.SearchBox(input);
+	    google.maps.event.addListener(autocomplete, 'places_changed', function() {
+	    	document.getElementById("searchTexttopForm").submit();
+	    });
+        autocomplete.bindTo('bounds', map);
+        // Autocomplete.
+        function setupClickListener(id, types) {
+            var radioButton = document.getElementById(id);
+            google.maps.event.addDomListener(radioButton, 'click', function() {
+                autocomplete.setTypes(types);
+            });
+        }
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+         <form id="searchTexttopForm"  class="search-bar" action="<?php echo Mage::getBaseUrl() . 'property/property/advsearch/' ?>" >
+          <input type="search" name="searchTextField" id="searchTexttop" value="<?php if(isset($searchTextField)  ){ echo $searchTextField; }else{ echo $place; } ?>" autocomplete="off" class="header-search" >
+          <div id="map_canvas_top"></div>
+         </form>
+       <?php }  ?>
+	<a class="list_btn broswer_header" href="<?php if(!Mage::getSingleton('customer/session')->isLoggedIn()){ echo Mage::getBaseUrl().'customer/account/login/'; } else { echo Mage::getBaseUrl().'property/property/form'; } ?>" >
+		<?php echo Mage::helper('airhotels')->__('List An Experience') ?></a>
+		<?php
+		/**
+		 * Display Mail icon
+		 */?>
+	<?php if (Mage::getSingleton('customer/session')->isLoggedIn()) { ?>
+ 	<a  class="mail_icon broswer_header" href="<?php if(!Mage::getSingleton('customer/session')->isLoggedIn()){ echo Mage::getBaseUrl().'customer/account/login/'; } else { echo Mage::getBaseUrl().'property/property/inbox'; } ?>" >
+		<?php if($this->getIsHomePage()){?>
+		<i class="inboxicon airhotel-sprite"></i><span><?php echo $this->__('Messages'); ?></span>
+	<?php
+		} else { ?>
+		<i class="inboxicon airhotel-sprite"></i><span><?php echo $this->__('Messages'); ?></span>
+		<?php
+		}
+	/**
+	 * Checking condition whether customer loggged or not
+	 */
+	$loggedIn = $this->helper("customer")->isLoggedIn();
+        if ($loggedIn) {
+			/**
+			  * Current logged in customer details
+ 			  */
+			$Customer = Mage::getSingleton('customer/session')->getCustomer();
+			$loggedinId = $Customer->getId();
+			/**
+			 * Unread inbox mail collection
+			 */
+			$TotalCount = 0;
+			$inboxCollection = Mage::getModel('airhotels/customerinbox')->getCollection()->addFieldTofilter('receiver_id',$loggedinId)->addFieldToFilter('receiver_read',0)->addFieldToFilter('is_receiver_delete',0);
+			$replyMessageCollection = Mage::getModel('airhotels/customerinbox')->getCollection()->addFieldTofilter('sender_id',$loggedinId)->addFieldToFilter('sender_read',0)->addFieldToFilter('isdelete',0)->addFieldToFilter('is_reply',1)->addFieldToFilter ( 'is_sender_delete', 0 );;
+			$TotalCount = count($inboxCollection) + count($replyMessageCollection) ;
+			Mage::getSingleton('core/session')->setMessageCount($TotalCount);
+			if($TotalCount>0){ ?>
+			<span id="mailcount">
+				<?php echo $TotalCount; ?>
+			</span>
+		<?php }
+	}?>
+	</a>
+	<?php } ?>
+	<ul class="headermenu broswer_header">
+ <?php if (!Mage::getSingleton('customer/session')->isLoggedIn()) { ?>
+<li><a href="<?php echo Mage::getBaseUrl().'customer/account/create'; ?>"><?php echo Mage::helper('airhotels')->__('Sign Up') ?></a></li>
+<li class="last_child_grid"><a href="<?php echo Mage::helper('customer')->getLoginUrl(); ?>"><?php echo Mage::helper('airhotels')->__('Log In') ?></a></li>
+
+        <?php } else {?>
+	<li id="mouse-hover"><!-- Welcome Username script -->
+            <?php $loggedIn = $this->helper("customer")->isLoggedIn();
+                    if ($loggedIn) {
+						$Customer = Mage::getSingleton('customer/session')->getCustomer();
+						$customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($Customer->getId());
+						$customer = Mage::getModel('customer/customer')->load($Customer->getId());
+
+                        $firstN = Mage::helper('airhotels')->__('Hi').","." ".$Customer->getFirstname(). '!'; ?>
+                        <a target="_blank" class="user-image" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$Customer->getId();?>">
+                     <?php   if (!empty($customerData[0]["imagename"])){ ?>
+                             <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>" height="38" alt="<?php echo $Customer->getFirstname(); ?>" title="">
+                       <?php } else { ?>
+                             <img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>" height="38"  alt="<?php echo $Customer->getFirstname(); ?>" title="">
+
+                 <?php }  ?>
+           <span><?php echo $firstN;?></span> <!-- Welcome Username script End -->
+                </a>
+                <ul id="content-drop-down" class="login-dropdown" style="visibility: hidden;">
+                <li><a href="<?php echo Mage::getUrl('customer/account/'); ?>"><?php echo Mage::helper('airhotels')->__('Dashboard') ?></a></li>
+                 	<li><a href="<?php echo Mage::helper('airhotels/productconfiguration')->getyourlisturl(); ?>"><?php echo Mage::helper('airhotels')->__('My Listings') ?></a></li>
+                 	<li><a href="<?php echo Mage::helper('airhotels/calendar')->getwishlistpage(); ?>"><?php echo Mage::helper('airhotels')->__('My Wishlist') ?></a></li>
+        			<li><a href="<?php echo Mage::helper('airhotels/product')->getyourtripurl(); ?>"><?php echo Mage::helper('airhotels')->__('My Trips') ?></a></li>
+        			<?php if(( int ) Mage::helper ( 'airhotels/invitefriends' )->getInviteFriendsEnabledOrNot () == 0){?>
+        				<li><a href="<?php echo Mage::getBaseUrl().'property/invitefriends/invite';?>"><?php echo Mage::helper('airhotels')->__('Invite Friends') ?></a></li>
+        			<?php } ?>
+        			<li class="last_child_grid"><a href="<?php echo Mage::helper('customer')->getLogoutUrl(); ?>"><?php echo Mage::helper('airhotels')->__('Log Out') ?></a></li>
+                </ul>
+                <?php } ?>
+	</li>
+  <?php }?>
+</ul>
+<div class="quick-access">
+</div>
+<?php echo $this->getChildHtml('topContainer'); ?>
+<div class="clear"></div>
+</div>
+</div>
+
+<script type="text/javascript">
+    function showPopUp(){
+        if(document.getElementById('currencyPopup').style.display == "none"){
+            document.getElementById('currencyPopup').style.display = "block";
+        }
+        else{
+            document.getElementById('currencyPopup').style.display = "none";
+        }
+    }
+    var jQ = jQuery.noConflict();
+    jQ('.show_hide_top_search').click(function(e){
+        e.stopPropagation();
+        jQ('.sliding_top_search').slideToggle();
+    });
+    jQ('.sliding_top_search').click(function(e){        
+        e.stopPropagation();
+    });   
+    jQ(document).ready(function(){
+		jQ('.menuitem').click(function(){    	
+	    	jQ('.sliding_top_search').slideToggle();
+	    });
+    });
+</script>
+<!-- sample data popup -->
+        <?php   $status = (int) Mage::getStoreConfig('airhotels/sampledata/enable_data');
+        if($status == 0)  { ?>
+            <div id="sample-data-popup">
+                <a href="javascript:void(0)" onclick="document.getElementById('sample-data-popup').style.display='none'; document.getElementById('sample-fade').style.display='none';" class="close_link"></a>
+
+                <p><?php echo Mage::helper('airhotels')->__('You want to install sample data on your store !!') ?></p>
+                <div class="yes-no">
+                    <?php $uri = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK).'property/index/add'; ?>
+                    <a href="<?php echo $uri?>" class="button yes-sample">Yes</a>
+                    <a onclick="document.getElementById('sample-data-popup').style.display='none'; document.getElementById('sample-fade').style.display='none';" title="No" class="button no-sample">No</a>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div id="sample-fade" class="black_overlay" style="display: block;"></div>
+        <?php
+            $configModel = Mage::getModel('core/config');
+            $configModel->saveConfig('airhotels/sampledata/enable_data', "1", 'default', 0);
+            Mage::app()->getCacheInstance()->flush();
+            }
+        ?>
+<!--mobile-->
+<div class="glossymenu">
+<a class="menuitem submenuheader sprimg" href="#" ><?php echo $this->__('Categories'); ?></a>
+<div class="clear"></div>
+
+<div class="submenu sliding_top_search" style="display: none;">
+	<ul>
+<?php if (!Mage::getSingleton('customer/session')->isLoggedIn()) { ?>
+        <li><a href="<?php echo $this->getUrl() ?>"><?php echo Mage::helper('airhotels')->__('Home') ?></a></li>
+	<li><a href="<?php echo Mage::helper('customer')->getRegisterUrl(); ?>"><?php echo Mage::helper('airhotels')->__('Sign Up') ?></a></li>
+        <li class="last_child"><a href="<?php echo Mage::helper('customer')->getLoginUrl(); ?>"><?php echo Mage::helper('airhotels')->__('Log In') ?></a></li>
+
+        <?php } else {?>
+	<li><!-- Welcome Username script -->
+             <?php $loggedIn = $this->helper("customer")->isLoggedIn();
+                    if ($loggedIn) {
+                        $Customer = Mage::getSingleton('customer/session')->getCustomer();
+                        $firstN = Mage::helper('airhotels')->__('Hi').","." ".$Customer->getFirstname(). '!';
+                    } ?>
+            <a  style="cursor: default;" href="<?php echo Mage::getBaseUrl().'airhotels/multistep/viewprofile/id/'.$Customer->getId();?>"> <?php echo $firstN;?> <!-- Welcome Username script End -->
+                </a>
+	</li>
+	<li><a
+		href="<?php echo Mage::helper('airhotels/productconfiguration')->getyourlisturl(); ?>"><?php echo Mage::helper('airhotels')->__('My Listings') ?></a></li>
+	<li><a
+		href="<?php echo Mage::helper('airhotels/product')->getyourtripurl(); ?>"><?php echo Mage::helper('airhotels')->__('My Trips') ?></a></li>
+                <li class="last_child_grid"><a href="<?php echo Mage::helper('customer')->getLogoutUrl(); ?>"><?php echo Mage::helper('airhotels')->__('Log Out') ?></a></li>
+	<?php }?>
+</ul>
+    <div class="clear"></div>
+    <a class="space_btn" href="<?php if(!Mage::getSingleton('customer/session')->isLoggedIn()){ echo Mage::getBaseUrl().'customer/account/login/'; } else { echo Mage::getBaseUrl().'property/property/form'; } ?>" >
+        <?php echo  Mage::helper('airhotels')->__('List An Experience') ?>
+    </a>
+</div>
+</div>
+<?php
+/**
+ * Here the property banner are loaded.
+ */
+if(Mage::registry('current_product')) {
+    $productIds      =  Mage::registry('current_product')->getId();
+	/**
+	 * Getting product model
+	 */
+	$model           = Mage::getModel('catalog/product');
+	$_product        = $model->load($productIds);
+	$_sliderGallery  = $_product->getMediaGalleryImages();
+	$property_type	 = $_product->getPropertyType();
+	$baseUrl = $this->getBaseUrl();
+	$skinUrl = $this->getSkinUrl();
+?>
+<div id="gallerypageslider">
+  <a href="javascript:void(0);" style="background-image: url(<?php
+         if ($_product->getImage () != 'no_selection') {
+             echo $this->helper('catalog/image')->init($_product, 'image')->resize(null,null);
+         } else {
+             echo $_product->getImageUrl ();
+         } ?>);" >
+    </a>
+</div>
+<?php } ?><?php echo $this->getChildHtml('airhotels_leftnavigation')?>
+<script>
+var ua = window.navigator.userAgent;
+var msie = ua.indexOf("MSIE ");
+if (parseInt(ua.substring(msie + 5, ua.indexOf(".", msie))) == 8)  // If Internet Explorer, return version number
+{
+    alert('Site is compatible from IE9+');
+}
+</script>

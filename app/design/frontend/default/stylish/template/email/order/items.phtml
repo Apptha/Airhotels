@@ -1,0 +1,127 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php $_order = $this->getOrder();
+$items = $_order->getItemsCollection();
+$hourlyFlag = $hourlyNightFee = 0;
+foreach($items as $item){
+	$orderId =  $item['order_id'];
+	$details = unserialize($item['product_options']);
+     foreach($details as $det){
+	   /**
+ 		* Get the Value of ServiceFee
+ 		*/
+		$securityFee	= $det['securityFee'];
+		$productId		= $det['product'];
+		$serviceFee		= $det['serviceFee'];
+        if(isset($det['property_service_from'])&&isset($det['property_service_from_period'])&&isset($det['property_service_to'])&&isset($det['property_service_to_period'])&&isset($det['overall_total_hours'])&&isset($det['hourly_night_fee'])){
+        $overallTotalHours =  $det['overall_total_hours'];        
+        if (! empty ( $det ['hourly_night_fee'] )) {
+            $hourlyNightFee =  $det['hourly_night_fee'];
+        }
+        if (! empty ( $det ['hourly_product_id'] ) && ! empty ( $det ['property_service_from'] ) && ! empty ( $det ['property_service_from_period'] ) && ! empty ( $det ['property_service_to'] ) && ! empty ( $det ['property_service_to_period'] ) && ! empty ( $det ['overall_total_hours'] )) {
+            $hourlyFlag = 1;
+        }
+        }
+     }
+}
+Mage::getSingleton('core/session')->setorderEmailStatus(1);
+$getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+$product = Mage::getModel ( 'catalog/product' )->load ( $productId );?>
+<?php if ($_order): ?>
+<table cellspacing="0" cellpadding="0" border="0" width="650" style="border:1px solid #EAEAEA;">
+    <thead>
+        <tr>
+            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Item') ?></th>
+            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Sku') ?></th>
+            <th align="center" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php
+            if ($hourlyFlag == 0) {
+				echo $this->__ ( 'No. of day(s)' );
+			} else {
+				echo $this->__ ( 'No. of hour(s)' );
+			}
+			?></th>
+            <th align="right" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?php echo $this->__('Subtotal') ?></th>
+        </tr>
+    </thead>
+
+    <?php $i=0; foreach ($_order->getAllItems() as $_item): ?>
+    <?php if($_item->getParentItem()) continue; else $i++; ?>
+    <tbody<?php echo $i%2 ? ' bgcolor="#F6F6F6"' : '' ?>>
+        <?php echo $this->getItemHtml($_item) ?>
+    </tbody>
+    <?php endforeach; ?>
+<?php
+            $order = Mage::getResourceModel('sales/order_collection') ->addFieldToFilter('entity_id', $orderId);
+         	foreach($order as $orderVal){
+				 $orderCurrencyCode = 	$orderVal['order_currency_code'];
+			}
+             $orderCurrencySymbol = Mage::app()->getLocale()->currency($orderCurrencyCode)->getSymbol();
+$subscriptionOrder = Mage::getResourceModel('paypaladaptive/preapprovaldetails_collection') ->addFieldToFilter('order_id', $orderId)->getData();
+if (($getSecurityEnabledOrNot == 0 || $securityFee == 0) && !$subscriptionOrder) {
+	$allOptions = $product->getOptions ();
+	if ($allOptions) {
+		foreach ( $allOptions as $option ) {
+			foreach ( $option->getValues () as $key => $value ) { ?>
+		<tr class="invoice_<?php echo strtolower($value->getDefaultTitle ()); ?>_fee"><td colspan="3" align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><strong><?php echo $this->__($value->getDefaultTitle ().' Fee'); ?></strong></td><td align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$value->getPrice (), 2, '.', '');?></span></td></tr>
+	<?php 		}
+		}
+  } ?>
+	<tr class="invoice_processing_fee"><td colspan="3" align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><strong>Processing Fee</strong></td><td align="right" style="padding:3px 9px;font-family:Verdana,Arial;font-weight:normal;border-collapse:collapse;vertical-align:top;margin:0"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$serviceFee, 2, '.', '');?></span></td></tr>
+<?php } ?>
+    <tbody>
+        <?php echo $this->getChildHtml('order_totals') ?>
+    </tbody>
+</table>
+<?php if ($this->helper('giftmessage/message')->isMessagesAvailable('order', $_order, $_order->getStore()) && $_order->getGiftMessageId()): ?>
+    <?php $_giftMessage = $this->helper('giftmessage/message')->getGiftMessage($_order->getGiftMessageId()); ?>
+    <?php if ($_giftMessage): ?>
+<br />
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #EAEAEA;">
+    <thead>
+        <tr>
+            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><strong><?php echo $this->__('Gift Message for this Order') ?></strong></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        <tr>
+            <td colspan="3" align="left" style="padding:3px 9px">
+            <strong><?php echo $this->__('From:'); ?></strong> <?php echo $this->escapeHtml($_giftMessage->getSender()) ?>
+            <br /><strong><?php echo $this->__('To:'); ?></strong> <?php echo $this->escapeHtml($_giftMessage->getRecipient()) ?>
+            <br /><strong><?php echo $this->__('Message:'); ?></strong><br /> <?php echo $this->escapeHtml($_giftMessage->getMessage()) ?>
+            </td>
+        </tr>
+    </tbody>
+</table>
+    <?php endif; ?>
+<?php endif; ?>
+<?php endif; ?>

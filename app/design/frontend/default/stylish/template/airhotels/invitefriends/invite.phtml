@@ -1,0 +1,163 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+$helper		= Mage::helper('airhotels');
+$friendsImg = Mage::getStoreConfig('airhotels/google/invite');
+?>
+<div class="invite_friends_bg" style="<?php if($friendsImg != ''){?>background: url(<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'theme/'.$friendsImg; ?>)center;<?php }?>"  >
+	<div class="invite_section_overlay"></div>
+	<div class="invite_header_container">
+		<div class="airhotel_invite_your_friend">
+			<p class="inivte_hint"><?php echo $this->__('Lorem Ipsum is simply dummy text of the printing and typesetting industry.');?></p>			
+			<p class="invite_detection">
+			<?php
+			$currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();			
+			$clientId 		= Mage::getStoreConfig('airhotels/google/google_id');
+			$clientSecret 	= Mage::getStoreConfig('airhotels/google/google_secret');		
+			$redirectUri 	= Mage::getBaseUrl().'property/invitefriends/inviteFriends/';?>			
+			<div class="importcontacts">
+				<h5 class="email_friends"><?php echo Mage::helper('airhotels')->__('Invite Your Email Friends'); ?></h5>
+				<p><a href="https://accounts.google.com/o/oauth2/auth?client_id=<?php echo $clientId;?>&redirect_uri=<?php echo $redirectUri; ?>&#38;scope=https://www.google.com/m8/feeds/&response_type=code"><i class="sprimg emailinvite"></i></a></p>
+			</div>	
+		</div>
+	</div>
+</div>
+<div class="main_invite_section" id="main_invite_section">
+	<div class="main_invite_block">
+		<p class="getstarted"><?php echo Mage::helper('airhotels')->__('Get Started'); ?></p>
+		<div class="sociall_icon_section">			
+			<a class="facebook_social" href="javascript:void(0)" onclick="fbPrivateMessageForInvitee()">
+			<i class="airhotel-sprite facebook"></i>
+			<span class="facebook_label"><?php echo Mage::helper('airhotels')->__('Invite Friends With Facebook'); ?></span></a>
+			<span class="or_label"><?php echo Mage::helper('airhotels')->__('or'); ?></span>			
+			<a class="gmail_social" href="javascript:void(0)" onclick="showInviteMailSection()">
+			<i class="airhotel-sprite envelope"></i>
+			<span class="facebook_label"><?php echo Mage::helper('airhotels')->__('Invite Friends With Email'); ?></span>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="invite_message_section clearfix"  id="invite_message_section" style="display:none;">
+	<p class="invite_message_email_top"></p>
+	<div class="invite_message_email_middle">
+		<form id="invite_friends_form" name="invite_friends_form" action="<?php echo Mage::helper('airhotels/invitefriends')->getInviteMailUrl(); ?>" method="post" onsubmit="return validateInviteForm();">
+			<h3 class="mail_logo">Send Mail To your Friends</h3>
+			<div class="invite_message_email_left">
+				<h5><?php echo Mage::helper('airhotels')->__('To').':'; ?></h5>
+				<ul id="friends_ids">
+					<li>
+						<input type="text" name="friends[]" onfocus="return enableInviteSubmitButton()" class="input-text required-entry validate-email to_input" value="" placeholder="<?php echo Mage::helper('airhotels')->__('friends@example.com'); ?>" />
+					</li>
+				</ul>
+				<a id="add_another_friend" href="javascript:void(0)" onclick="addNewEmailSection()"><?php echo Mage::helper('airhotels')->__('Add Another Friend'); ?></a>
+			</div>
+			<div class="invite_message_email_right">
+				<h5><?php echo Mage::helper('airhotels')->__('Message').':'; ?></h5>
+				<textarea rows="6" cols="8"  onfocus="return enableInviteSubmitButton()" class="input-text required-entry textarea_input" name="message" placeholder="<?php echo Mage::helper('airhotels')->__('I ve been renting out my place on to meet interesting people and earn extra cash. I highly recommend you join me by listing your experiences. Cheers!'); ?> "></textarea>
+				<div class="invite_buttons">
+					<p class="invite_back_option" onclick="showMainInviteSection()"><a><?php echo Mage::helper('airhotels')->__('Back'); ?></a></p>
+					<p class="send_invite_btn"><input type="submit" id="invite_friends_submit_button" class="import_button" name="continue" value="<?php echo Mage::helper('airhotels')->__('Send Invites'); ?>"/></p>
+				</div>			
+			</div>
+		</form>
+	</div>
+	<p class="invite_message_email_bottom"></p>
+</div>
+<div class="share_social_links">
+	<p class="getstarted"><?php echo Mage::helper('airhotels')->__('Share Link'); ?>:</p>
+	<div class="share_section">
+		<input class="share_input" type="input" value="<?php echo Mage::helper('airhotels/invitefriends')->getReferralUrlForCustomer(); ?>" readonly>
+		<a class="share_label" href="javascript:void(0)" onclick="fbShareForInvitee()" ><?php echo $this->__('Share'); ?></a>
+	</div>
+</div>
+<script type="text/javascript">
+    //< ![CDATA[
+        var inviteForm = new VarienForm('invite_friends_form');
+    //]]>
+</script>
+<script type="text/javascript">
+var jQ = jQuery.noConflict();
+// Display message popup
+function showInviteMailSection(){
+	jQ('#invite_message_section').show();
+	jQ('#main_invite_section').hide();
+}
+// Display Invite section
+function showMainInviteSection(){
+	jQ('#main_invite_section').show();
+	jQ('#invite_message_section').hide();
+}
+// New Email section
+function addNewEmailSection(){	
+	jQ("#friends_ids").append('<li><input type="text" onfocus="return enableInviteSubmitButton()" name="friends[]" class="validate-email to_input addmore_input" value="" placeholder="<?php echo Mage::helper('airhotels')->__('friends@example.com'); ?>" /></li>');
+}
+// validate invite friends form
+function validateInviteForm(){
+	jQ('#invite_friends_submit_button').attr('disabled','disabled');
+	return true;	
+}
+// Enable invite friends submit button
+function enableInviteSubmitButton(){
+	jQ('#invite_friends_submit_button').removeAttr('disabled');
+	return true;	
+}
+</script> 
+<script src="//connect.facebook.net/en_US/all.js"></script> 
+<script type="text/javascript">
+// Facebook share
+FB.init({ 
+    appId  : '<?php echo Mage::getStoreConfig('sociallogin/facebook/fbapp_id'); ?>', 
+    status : true, 
+    cookie : true, 
+    xfbml  : true, 
+    channelUrl  : '<?php echo Mage::helper('airhotels/invitefriends')->getReferralUrlForCustomer(); ?>', 
+    oauth : true 
+}); 
+function fbShareForInvitee(){  
+	FB.ui({ 
+	   method: 'feed', 
+	   name: '<?php echo Mage::helper('airhotels/invitefriends')->getFbShareTitle(); ?>', 
+	   link: '<?php echo Mage::helper('airhotels/invitefriends')->getReferralUrlForCustomer(); ?>', 
+	   picture: '<?php echo Mage::helper('airhotels/invitefriends')->getFbShareImageSrc(); ?>', 
+	   caption: '<?php echo Mage::helper('airhotels/invitefriends')->getFbShareCaption(); ?>', 
+	   description: '<?php echo Mage::helper('airhotels/invitefriends')->getFbShareSummary(); ?>' 
+	 }, 
+	 function(response) {
+	 }); 
+}
+function fbPrivateMessageForInvitee(){  
+	FB.ui({ 
+      method: 'send', 		
+      link: '<?php echo Mage::helper('airhotels/invitefriends')->getReferralUrlForCustomer(); ?>',
+      }, requestCallback);
+      function requestCallback(response) {		      
+      }
+}
+</script>

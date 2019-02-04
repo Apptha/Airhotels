@@ -1,0 +1,150 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+?>
+<div class="my-account clearfix">
+<div id="reviews_link_text">
+    <?php
+    $productId = $this->getRequest()->get('id');
+    /**
+     * getting product model
+     */
+    $model = Mage::getModel('catalog/product'); 
+    /**
+     * load the product
+     */
+    $_product = $model->load($productId);
+    /**
+     * Get the Colletion of review
+     */
+    $reviews = Mage::getModel('review/review')->getResourceCollection();
+    $reviews->addStoreFilter(Mage::app()->getStore()->getId())      
+            ->addEntityFilter('product', $_product->getId())
+            ->setDateOrder()
+            ->addRateVotes()
+            ->load();
+    $reviews = $reviews->getData();   
+    ?>
+    <div class="page-title">
+        <h1><span><?php echo $this->__('Property Review').' : '.Mage::helper('airhotels')->wordCounter($_product->getName()); ?></span></h1> 
+        <a href="<?php echo Mage::helper('airhotels/productconfiguration')->getyourlisturl();?>">
+        <?php echo $this->__('Back to My Listings')?>
+        </a>       
+    </div>
+    <div class="review_grid f-left">
+    <span class="yourlist_option_reviews f-left"><?php echo $this->__('Customer Reviews') ?></span>
+    <?php if(count($reviews) > 0){ ?>    
+    <span class="yourlist_option_values f-right"><?php echo $this->__('Enable/Disable') ?></span>
+    <?php } ?>
+<?php
+$c = 1;
+/**
+ * check if count is not null
+ */
+if (count($reviews)) {
+    for ($i = 0; $i < count($reviews); $i++) {
+        ?>
+            <div class="review-product left" >
+<!-- The customer given reviews are calculated and showed here -->
+               <div class="active_hide_btn right">
+
+                    <div id="active<?php echo $c; ?>" <?php echo ($reviews[$i]["status_id"] == 1) ? "style='display:block'" : "style='display:none'"; ?>>
+                        <img title="<?php echo $this->__('Click to disable this review') ?>"
+                         src="<?php echo $this->getSkinUrl('images/active.png'); ?>" height="24" class="yourlist_imgbtn" id="active" name="enable" 
+                         value="<?php echo $this->__('Disable') ?>" 
+                         onClick="airhotelActivate('2','<?php echo $c; ?>','active<?php echo $c; ?>')" />
+                    </div>
+                    
+                    <div id="hide<?php echo $c; ?>" <?php echo ($reviews[$i]["status_id"] == 2 || $reviews[$i]["status_id"] == 3) ? "style='display:block'" : "style='display:none'"; ?>>
+                        <img title="<?php echo $this->__('Click to enable this review') ?>" 
+                        src="<?php echo $this->getSkinUrl('images/hide.png'); ?>"  class="yourlist_imgbtn" id="active" name="disable" 
+                        value="<?php echo $this->__('Enable') ?> " 
+                        onClick="airhotelActivate('1','<?php echo $c; ?>','hide<?php echo $c; ?>')" />
+                    </div>
+                    <span id="loadingSpace<?php echo $c; ?>" class="yourlist_imgbtn yourlist_loading_icon"></span>
+                </div>
+
+                <div class="review-content f-left">
+        <?php echo '<span style="font-weight:bold;font-size:14px;">"</span>' . nl2br($reviews[$i]["detail"]) . '<span style="font-weight:bold;font-size:14px;">"</span>'; ?> 
+
+                </div>
+                <div class="review-text f-left">
+        <?php
+        echo $reviews[$i]["nickname"] . "  " . date("dS F Y", strtotime($reviews[$i]["created_at"]));
+        ?>
+                </div>
+                <input type="hidden" id="productId<?php echo $c; ?>" 
+                value="<?php echo $reviews[$i]["review_id"]; ?>" />
+            </div>
+        <?php
+        $c++;
+    }
+} else {
+    /**
+     * Check wether there is no reviee
+     */
+    echo $this->__('No reviews yet for this property');
+}
+?></div>
+</div>
+</div>
+<script type="text/javascript">
+    function airhotelActivate(pStatus,buttonId,element) {
+        document.getElementById(element).style.display = "none";
+        document.getElementById("loadingSpace"+buttonId).innerHTML = "<img src='<?php echo $this->getSkinUrl('images/ajax-loader-small.gif'); ?>' />";
+        var xmlhttp = getHttp();
+        xmlhttp.onreadystatechange=function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                if(xmlhttp.responseText=="Available"){
+                    document.getElementById("active"+buttonId).style.display ="none";
+                    document.getElementById("hide"+buttonId).style.display ="block";
+                } else{
+                    document.getElementById("active"+buttonId).style.display="block";
+                    document.getElementById("hide"+buttonId).style.display ="none";
+                }
+                document.getElementById("loadingSpace"+buttonId).innerHTML = "";
+                //document.getElementById("calendarWrapper").innerHTML=xmlhttp.responseText;
+            }
+        }
+        var productId = document.getElementById("productId"+buttonId).value;
+        xmlhttp.open("GET","<?php echo Mage::getBaseUrl() . 'property/hourly/reviewstatus/' ?>"+"?status="+pStatus+"&buttonid="+buttonId+"&reviewid="+productId,true);
+        xmlhttp.send();
+    }
+    function getHttp(){
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        return xmlhttp;
+    }
+</script>

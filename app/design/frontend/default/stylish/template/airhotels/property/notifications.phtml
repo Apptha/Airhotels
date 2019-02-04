@@ -1,0 +1,78 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$baseUrl 	= $this->getBaseUrl();
+$skinUrl 	= $this->getSkinUrl();
+$hostId 	= Mage::getSingleton('customer/session')->getId();
+$host 		= Mage::getSingleton('customer/session')->getCustomer();
+$hostFirstName 		= $host->getFirstname(); // First Name
+$notifications 		= Mage::getModel('airhotels/notifications')->getCollection()->addFieldToFilter('user_id', array('eq' =>$hostId))->getData();
+$inbox 				= $notifications[0]['inbox'];
+$recieveRequest 	= $notifications[0]['recieve_request'];
+$responseRequest 	= $notifications[0]['response_request'];
+$accountListing 	= $notifications[0]['account_listing'];
+?>
+<div class="my-account">
+	<div class="personal-info">
+	    <div class="page-title" style="margin:0;">
+	    	<h1 class="dashboard_leftside_heading"><?php echo $this->__('Notifications') ?></h1>
+		</div>
+		<div class="profile_information_body">
+			<form action="<?php echo Mage::getBaseUrl()."property/dashboard/notificationsave" ?>" method="post" id="form-validate" role="form" enctype="multipart/form-data">
+			    <div class="profile_container" style="border-top:none">
+			        <div class="clear"></div>
+			        <ul class="form-list profile_info">
+			        	<li>
+			            	 <div class="form-space">
+			             		<div class="profile_common_label"><label class="profile_label" style="vertical-align:top;"><?php echo $this->__('Mobile Phone') ?></label></div>
+			             		 <div class="profile_input_section">
+			                    <div class="profile_input_section"><p class="notification_text"><?php echo $this->__('You can add and verify phone number on your account from the <a href="'.$this->getBaseUrl().'airhotels/index/profile/id/'.$hostId.'">Edit Profile</a> section');?></p></div>
+			              		</div>
+			             	</div>
+			        	</li>
+			        	<li>
+			        	<div class="form-space">
+			             		<div class="profile_common_label"><label class="profile_label" style="vertical-align:top;"><?php echo $this->__('Notify Me When') ?></label></div>
+			             		 <div class="profile_input_section">
+			             		 <div class="notify_checkbox"><input type="checkbox" name="inbox" class="" <?php if($inbox == "on")echo "checked";?>/>
+			                     <label class="notification_text notification_label" style="float:none;"><i class="sprimg"></i></label><span><?php echo $this->__('I recieve a message from another person on Airhotels.');?></span></div>
+			             		 <div class="notify_checkbox"><input type="checkbox" name="account_listing" class="" <?php if($accountListing == "on")echo "checked";?>/>
+			                     <label class="notification_text notification_label" style="float:none;"> <i class="sprimg"></i></label><span><?php echo $this->__('Changes are made to my Airhotels account or listing.');?></span></div>
+			              		</div>
+			             	</div>
+			        	</li>
+			            <li style="padding:0">
+			                <button style="float:right;" type="submit" title="<?php echo $this->__('Save') ?>" class="import_button"><?php echo $this->__('Save') ?></button>
+			            </li>
+			    	</ul>
+				</div>
+			</form>
+		</div>
+    </div>
+</div>

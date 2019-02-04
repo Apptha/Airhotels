@@ -1,0 +1,149 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php $varTab = $this->getRequest()->getParam('tab');?>
+<div id="invite">
+    <div id="invite" class="clearfix">
+        <div id="left_column">
+            <div id="main_content" class="box">            
+            	<ul id="main_content_discount_sub_nav" class="clearfix">
+                	<li id="manage_discount_disting"
+                            onclick="selected_tab('credited_amount');"
+                            class="main_link <?php if($varTab == 'credited_amount' || $varTab == ''){echo 'selected';}else{echo '';}?>"><a href="#"><?php echo $this->__('Credited Amount'); ?></a>
+                    </li>
+                    <li id="propertyHistoryInvite" onclick="selected_tab('debited_amount');"
+                            class="main_link <?php if($varTab == 'debited_amount'){echo 'selected';}else{echo '';}?>"><a href="#"><?php echo $this->__('Debited Amount') ?></a>
+                    </li>
+                    <li id="content_flag"></li>
+				</ul>           
+                <div class="discount_body_container">
+                    <div id="credit_amount" class="main_content" style="<?php if($varTab == 'credited_amount' || empty($varTab)){ ?>display: block<?php } else { ?>display: none<?php }?>;">
+                        <div class="body_grid1">
+                            <div class="discount_section as_host">
+                                <ul class="discount-list">
+                                <?php 
+                                    $creditAmountCollection = $this->getInviteCredithistory();
+                                    if($creditAmountCollection->getLastPageNumber()>1){
+                                        $varStart = $creditAmountCollection->getPageSize()*($creditAmountCollection->getCurPage()-1)+1;
+                                    }else{
+                                        $varStart =1;
+                                    }
+                                    
+                                    if(count($creditAmountCollection)>0){ ?>
+                                 <div class="discount_history_responsivetable">                            
+                                <table cellspacing="2" cellpadding="2" border="1" id="discount_history_table" class="discount_history"> <!-- property_property -->
+                                    <thead><tr>
+                                        <th style="width: 20%;"><?php echo $this->__('Sno'); ?></th>
+                                        <th style="width: 30%;"><?php echo $this->__('Invitee Name'); ?></th>
+                                        <th style="width: 30%;"><?php echo $this->__('Invitee Email'); ?></th>
+                                        <th style="width: 20%;"><?php echo $this->__('Credited Amount'); ?></th>
+                                    </tr></thead>
+                                    <?php  
+                                    foreach ($creditAmountCollection as $creditValue) { 
+                                        $inviteId = $creditValue->getCustomerId();
+                                        $customerData = Mage::getModel('customer/customer')->load($inviteId);
+                                        echo '<tr>';
+                                        echo '<td style="width: 20%;">' . $varStart . '</td>';
+                                        echo '<td style="width: 30%;">' . $customerData->getName() . '</td>';    
+                                        echo '<td style="width: 30%;">' . $customerData->getEmail() . '</td>';
+                                        echo '<td style="width: 20%;">' . $creditValue->getDiscountAmount(). '</td>';
+                                        echo '</tr>';
+                                        $varStart++;                                      
+									} 
+                                ?>
+                            </table>
+                            <?php echo $this->getPagerHtml("creditpager"); ?>    </div>
+	                                <?php                               
+                                    }else{ ?>
+	                                		<p class="no_transaction_records"><?php echo $this->__("No Transaction available");?></p>
+	                                    <?php }?>
+                                 	</ul>
+                               </div>
+                    		</div>
+                		</div>
+                    	<div id="debited_amount" style="<?php if($varTab == 'debited_amount'){ ?>display: block<?php } else { ?>display: none<?php }?>;"class="main_content norecords"
+	                        <?php
+	                        if (!$this->getRequest()->getParam('from')){
+	                            echo " style='display:none' "; 
+	                        }else{
+	                        	echo " style='display:block' class='main_link selected' ";
+	                        }  ?>>
+                        	<div class="body_grid1">
+                            	<div class="discount_section as_host">
+                               		<ul class="discount-list">
+	                               	 <?php 
+                                    $debitAmountCollection = $this->getInviteDebithistory();
+                                    if($debitAmountCollection->getLastPageNumber()>1){
+                                        $varStart = $debitAmountCollection->getPageSize()*($debitAmountCollection->getCurPage()-1)+1;
+                                    }else{
+                                        $varStart =1;
+                                    }
+                                    if(count($debitAmountCollection)>0){ ?>
+                                 <div class="discount_history_responsivetable">                            
+                                <table cellspacing="2" cellpadding="2" border="1" id="discount_history_table" class="tdiscount_history"> <!-- property_property -->
+                                    <thead><tr>
+                                        <th style="width: 20%;"><?php echo $this->__('Sno'); ?></th>
+                                        <th style="width: 20%;"><?php echo $this->__('Order Id'); ?></th>
+                                        <th style="width: 30%;"><?php echo $this->__('Debited Amount'); ?></th>
+                                        <th style="width: 30%;"><?php echo $this->__('Order Date'); ?></th>
+                                    </tr></thead>
+                                    <?php  
+                                    foreach ($debitAmountCollection as $debitValue) { 
+                                        $order = Mage::getModel('sales/order')->load($debitValue->getOrderId());
+                                        echo '<tr>';
+                                        echo '<td style="width: 20%;">' . $varStart . '</td>';
+                                        echo '<td style="width: 20%;">' . $order->getIncrementId() . '</td>';    
+                                        echo '<td style="width: 30%;">' . $debitValue->getDiscountAmount() . '</td>';
+                                        echo '<td style="width: 30%;">' . $debitValue->getCreatedAt(). '</td>';
+                                        echo '</tr>';
+                                        $varStart++;                                      
+									} 
+                                ?>
+                            </table>  </div>
+                            <?php echo $this->getPagerHtml('debitpager'); ?>
+	                                <?php                               
+                                    }else{ ?>
+	                                		<p class="no_transaction_records"><?php echo $this->__("No Transaction available");?></p>
+	                                    <?php }?>          		 	
+                           		</ul>                               		 	 
+                        	</div>
+                     	</div>
+                  	</div>
+                </div>
+             </div>
+         </div>
+     </div>
+ </div>  
+ <script>
+function selected_tab(select_tab){	
+	window.location='<?php echo Mage::getBaseUrl();?>airhotels/dashboard/invitetransactionhistory/tab/'+select_tab+'/';
+	return true;
+}
+ </script>

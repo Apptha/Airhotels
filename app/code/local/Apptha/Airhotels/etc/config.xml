@@ -1,0 +1,763 @@
+<?xml version="1.0"?>
+
+<!-- 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+-->
+
+<config>
+    <modules>
+        <Apptha_Airhotels>
+            <version>0.2.19</version>
+        </Apptha_Airhotels>
+    </modules>
+    <frontend>
+        <routers>
+            <airhotels>
+                <use>standard</use>
+                <args>
+                    <module>Apptha_Airhotels</module>
+                    <frontName>property</frontName>
+                </args>
+            </airhotels>
+        </routers>
+        <routers>
+			<directory>
+				<args>
+					<modules>
+						<apptha_airhotels before="Mage_Directory">Apptha_Airhotels</apptha_airhotels>
+					</modules>
+				</args>
+			</directory>
+		</routers>
+        <layout>
+            <updates>
+                <airhotels>
+                    <file>airhotels.xml</file>
+                </airhotels>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Airhotels>
+                    <files>
+                        <default>Apptha_Airhotels.csv</default>
+                    </files>
+                </Apptha_Airhotels>
+            </modules>
+        </translate>
+    </frontend>
+    <admin>
+        <routers>
+            <airhotels>
+                <use>admin</use>
+                <args>
+                    <module>Apptha_Airhotels</module>
+                    <frontName>airhotels</frontName>
+                </args>
+            </airhotels>
+        </routers>
+    </admin>
+    <adminhtml>
+        <menu>
+            <airhotels module="airhotels"  translate="title" >
+                <title>Airhotels</title>
+                <sort_order>71</sort_order>
+                <children>
+                    <manage_property module="airhotels">
+                        <title>Manage Property</title>
+                        <sort_order>1</sort_order>
+                        <action>airhotels/adminhtml_products</action>
+                    </manage_property>
+                    <items module="airhotels">
+                        <title>Orders</title>
+                        <sort_order>2</sort_order>
+                        <action>airhotels/adminhtml_airhotels</action>
+                    </items>
+                    <uploadimage module="airhotels">
+                        <title>Add City With Image</title>
+                        <sort_order>3</sort_order>
+                        <action>airhotels/adminhtml_city</action>
+                    </uploadimage>                                       
+					<uploadvideo module="airhotels">
+                        <title>Upload Video</title>
+                        <sort_order>4</sort_order>
+                        <action>airhotels/adminhtml_uploadvideo</action>
+                    </uploadvideo>
+                    <manage_review module="airhotels">
+                        <title>All Reviews</title>
+                        <sort_order>5</sort_order>
+                        <action>adminhtml/catalog_product_review</action>
+                    </manage_review>
+                    <manage_rating module="airhotels">
+                        <title>Manage Ratings</title>
+                        <sort_order>6</sort_order>
+                        <action>adminhtml/rating</action>
+                    </manage_rating>                   
+                    <managebankdetails module="airhotels">
+                        <title>Manage Bank Details</title>
+                        <sort_order>7</sort_order>
+                        <action>airhotels/adminhtml_managebankdetails</action>
+                   	</managebankdetails>
+                   	<tags_verification>                    	
+                      	<title>Verify Host</title>
+                    	<sort_order>6</sort_order>
+                     	<action>airhotels/adminhtml_verifyhost</action>
+                       	<sort_order>8</sort_order>
+                     </tags_verification>
+                     <hostpayoutdetails module="airhotels">
+                        <title>Host Payout Details</title>
+                        <sort_order>9</sort_order>
+                        <action>airhotels/adminhtml_hostpayoutdetails</action>
+                     </hostpayoutdetails>                     
+                    <subscriptiontype translate="title" module="airhotels">
+						<title>Subscription Type</title>
+						<sort_order>10</sort_order>
+						<action>airhotels/adminhtml_subscriptiontype</action>
+					</subscriptiontype>
+					<managesubscriptions translate="title" module="airhotels">
+						<title>Manage Subscriptions </title>
+						<sort_order>11</sort_order>
+						<action>airhotels/adminhtml_managesubscriptions</action>
+					</managesubscriptions> 
+					<recurring translate="title" module="airhotels">
+						<title>Recurring Profiles</title>
+						<sort_order>12</sort_order>
+						<children>
+							<active translate="title" module="airhotels">
+								<title>Active</title>
+								<sort_order>0</sort_order>
+								<action>airhotels/adminhtml_recurringprofiles/active</action>
+							</active>
+							<suspended translate="title" module="airhotels">
+								<title>Suspended</title>
+								<sort_order>1</sort_order>
+								<action>airhotels/adminhtml_recurringprofiles/suspended</action>
+							</suspended>
+							<pending translate="title" module="airhotels">
+								<title>Pending</title>
+								<sort_order>1</sort_order>
+								<action>airhotels/adminhtml_recurringprofiles/pending</action>
+							</pending>							
+							<canceled translate="title" module="airhotels">
+								<title>Canceled</title>
+								<sort_order>2</sort_order>
+								<action>airhotels/adminhtml_recurringprofiles/canceled</action>
+							</canceled>
+							<all translate="title" module="airhotels">
+								<title>All</title>
+								<sort_order>3</sort_order>
+								<action>airhotels/adminhtml_recurringprofiles/index</action>
+							</all>
+						</children>
+					</recurring>
+					<manage_configuration module="airhotels">
+                        <title>Configuration</title>
+                        <sort_order>13</sort_order>
+                        <action>adminhtml/system_config/edit/section/airhotels</action>
+                    </manage_configuration>
+                </children>
+            </airhotels>
+        </menu>
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+            </resources>
+        </acl>
+        <layout>
+            <updates>
+                <airhotels>
+                    <file>airhotels.xml</file>
+                </airhotels>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Airhotels>
+                    <files>
+                        <default>Apptha_Airhotels.csv</default>
+                    </files>
+                </Apptha_Airhotels>
+            </modules>
+        </translate>        
+    </adminhtml>   
+    <global>
+        <fieldsets>
+            <sales_convert_quote_address>
+                <fee_amount>
+                    <to_order>*</to_order>
+                </fee_amount>
+                <base_fee_amount>
+                    <to_order>*</to_order>
+                </base_fee_amount>
+            </sales_convert_quote_address>
+        </fieldsets>
+        <!-- adding service fee in totals -->
+        <sales>
+            <quote>
+                <totals>
+                    <fee>
+                        <class>airhotels/sales_quote_address_total_fee</class>
+                    </fee>
+                </totals>
+            </quote>
+            <order_invoice>
+                <totals>
+                    <fee>
+                        <class>airhotels/sales_order_total_invoice_fee</class>
+                    </fee>
+                </totals>
+            </order_invoice>
+        </sales>
+        <!-- adding service fee in totals -->
+        <catalog>
+            <product>
+                <type>
+                    <property translate="label" module="airhotels">
+                        <label>Property Registration</label>
+                        <model>airhotels/product_type_property</model>
+                        <is_qty>1</is_qty>
+                        <composite>0</composite>
+                        <index_priority>40</index_priority>
+                        <price_model>airhotels/product_type_price</price_model>                         
+                    </property>
+                </type>
+            </product>
+            <rewrite>
+                <product_type_property>Apptha_Airhotels_Model_Product_Type_Property</product_type_property>
+            </rewrite>
+        </catalog>   
+        <routers>
+            <cms>
+                <rewrite>
+                    <index>
+                        <to>airhotels/index</to>
+                        <override_actions>true</override_actions>
+                    </index>
+                </rewrite>
+            </cms>
+        </routers>
+        <rewrite>
+            <apptha_airhotels_checkout_cart_add>
+                <from><![CDATA[#^/checkout/cart/#]]>
+                </from>
+                <to>/airhotels/checkout_cart/</to>
+            </apptha_airhotels_checkout_cart_add>
+        </rewrite>        
+        <rewrite>
+            <apptha_airhotels_customer_account_logout>
+                <from><![CDATA[#^/customer/account/#]]>
+                </from>
+                <to>/airhotels/customer_account/</to>
+            </apptha_airhotels_customer_account_logout>
+        </rewrite>
+        <models>
+            <sales>
+                <rewrite>
+                    <order>Apptha_Airhotels_Model_Order</order>
+                </rewrite>
+            </sales> 
+            <airhotels>
+                <class>Apptha_Airhotels_Model</class>
+                <resourceModel>airhotels_mysql4</resourceModel>
+            </airhotels>
+            <airhotels_mysql4>
+                <class>Apptha_Airhotels_Model_Mysql4</class>
+                <entities>
+                    <airhotels>
+                        <table>airhotels_property</table>
+                    </airhotels>
+                    <calendar>
+                        <table>airhotels_calendar</table>
+                    </calendar>
+                    <security>
+                        <table>airhotels_security</table>
+                    </security>
+                    <city>
+                        <table>airhotels_city</table>
+                    </city>
+                    <customerinbox>
+                        <table>airhotels_customer_inbox</table>
+                    </customerinbox>
+                    <customerphoto>
+                        <table>airhotels_customer_photo</table>
+                    </customerphoto>  
+                    <uploadvideo>
+                        <table>airhotels_uploadvideo</table>
+                    </uploadvideo> 
+                    <verifyhost>
+                        <table>airhotels_verify_host</table>
+                    </verifyhost>
+                    <invitefriends>
+                        <table>airhotels_invite_friends</table>
+                    </invitefriends>
+                    <invitefriendsproduct>
+                        <table>airhotels_invite_friends_product</table>
+                    </invitefriendsproduct>
+                    <invitefriendsorder>
+                        <table>airhotels_invite_friends_order</table>
+                    </invitefriendsorder>
+                    <invitediscount>
+                        <table>airhotels_invite_friends_discount</table>
+                    </invitediscount>
+                    <tagsverification>
+                        <table>airhotels_verification_tags</table>
+                    </tagsverification>
+                    <customerreply>
+                        <table>airhotels_customer_reply</table>
+                    </customerreply>
+                    <notifications>
+                    	<table>airhotels_hostnotifications</table>
+                    </notifications>
+                    <requestproperty>
+                        <table>airhotels_requestproperty</table>
+                    </requestproperty> 
+                    <allcurrency>
+                   		<table>airhotels_allcurrency</table> 
+                    </allcurrency>
+                    <managebankdetails>
+                    	<table>airhotels_managebankdetails</table>
+                    </managebankdetails>
+                    <latitudelongitude>
+                        <table>airhotels_longitude</table>
+                    </latitudelongitude>
+                    <subscriptiontype>
+						<table>apptha_subscriptiontypes</table>
+					</subscriptiontype>
+					<recurringprofiles>
+						<table>apptha_recurringprofiles</table>
+					</recurringprofiles>
+					<managesubscriptions>
+						<table>apptha_managesubscriptions</table>
+					</managesubscriptions>
+					<productsubscriptions>
+						<table>apptha_productsubscriptions</table>
+					</productsubscriptions>
+                </entities>
+            </airhotels_mysql4>
+            <sales>
+                <rewrite>
+                    <quote_address_total_subtotal>Apptha_Airhotels_Model_Quote_Address_Total_Subtotal</quote_address_total_subtotal>
+                </rewrite>
+            </sales> 
+            <catalog_resource>
+                <rewrite>
+                    <product_collection>Apptha_Airhotels_Model_Rewrite_Catalog_Resource_Product_Collection</product_collection>
+                </rewrite>
+            </catalog_resource>            
+        </models>        
+        <template>
+            <email>
+                <airhotels_order_reminder_reminder_template translate="label" module="airhotels">
+                    <label>airhotels order</label>
+                    <file>airhotels/hoster_reminder.html</file>
+                    <type>html</type>
+                </airhotels_order_reminder_reminder_template>
+                <airhotels_order_reminder_orderstatus_template translate="label" module="airhotels">
+                    <label>airhotels order status</label>
+                    <file>airhotels/orderstatus.html</file>
+                    <type>html</type> 
+                </airhotels_order_reminder_orderstatus_template>
+		<airhotels_order_reminder_creditmemo_template translate="label" module="airhotels">
+                    <label>airhotels order status</label>
+                    <file>airhotels/hostcreditmemo.html</file>
+                    <type>html</type> 
+                </airhotels_order_reminder_creditmemo_template>
+                <airhotels_refund_email_refund_template translate="label" module="airhotels">
+                    <label>Refund Notification for Customer</label>
+                    <file>airhotels/refund.html</file>
+                    <type>html</type> 
+                </airhotels_refund_email_refund_template>
+                <airhotels_custom_email_propertydelete_template translate="label" module="airhotels">
+                    <label>Property Delete</label>
+                    <file>airhotels/property_delete.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_propertydelete_template>                
+                <airhotels_custom_email_newproperty_template translate="label" module="airhotels">
+                    <label>New Property</label>
+                    <file>airhotels/newproperty.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_newproperty_template>                
+                <airhotels_custom_email_propertyapproval_template translate="label" module="airhotels">
+                    <label>Property Approval</label>
+                    <file>airhotels/propertyapproval.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_propertyapproval_template>   
+		<airhotels_cancel_order_admin_email_template_selection>
+	 	    <label>Cancel Order Notification</label>
+                    <file>airhotels/order_cancel_admin.html</file>
+                    <type>html</type>
+		</airhotels_cancel_order_admin_email_template_selection>
+             	<airhotels_sales_notification_admin_email_template_selection translate="label" module="airhotels">
+                    <label>Sales Notification</label>
+                    <file>airhotels/sales_notification.html</file>
+                    <type>html</type>
+                </airhotels_sales_notification_admin_email_template_selection>
+                <airhotels_host_review_email_adminapproval_template translate="label" module="airhotels">
+                    <label>Product Review Approval</label>
+                    <file>airhotels/review_approval.html</file>
+                    <type>html</type>
+                </airhotels_host_review_email_adminapproval_template>
+                <airhotels_customer_review_email_adminapproval_template translate="label" module="airhotels">
+                    <label>Customer Review Approval</label>
+                    <file>airhotels/customer_review_approval.html</file>
+                    <type>html</type>
+                </airhotels_customer_review_email_adminapproval_template>
+                <airhotels_customer_review_moderation_email_adminapproval_template translate="label" module="airhotels">
+                    <label>Customer Review Moderation</label>
+                    <file>airhotels/customer_review_moderation.html</file>
+                    <type>html</type>
+                </airhotels_customer_review_moderation_email_adminapproval_template>
+                <airhotels_host_review_moderation_email_adminapproval_template translate="label" module="airhotels">
+                    <label>Product Review Moderation</label>
+                    <file>airhotels/host_review_moderation.html</file>
+                    <type>html</type>
+                </airhotels_host_review_moderation_email_adminapproval_template>
+                <airhotels_host_verify_email_template translate="label" module="airhotels">
+                    <label>Host Verification Email</label>
+                    <file>airhotels/host_verification.html</file>
+                    <type>html</type>
+                </airhotels_host_verify_email_template>
+                <airhotels_custom_email_adminapproval_template translate="label" module="airhotels">
+                    <label>Admin Approval</label>
+                    <file>airhotels/adminapproval.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_adminapproval_template>     
+                 <airhotels_custom_email_admindisapproval_template translate="label" module="airhotels">
+                    <label>Admin Disapproval</label>
+                    <file>airhotels/admindisapproval.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_admindisapproval_template>                
+                <airhotels_custom_email_cancelorder_template translate="label" module="airhotels">
+                    <label>Cancel Order</label>
+                    <file>airhotels/cancel_order.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_cancelorder_template>
+		<airhotels_custom_email_paymentrequest_template translate="label" module="airhotels">
+                    <label>Cancel Order</label>
+                    <file>airhotels/payment_request.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_paymentrequest_template>
+                <airhotels_custom_email_adminpropertydelete_template translate="label" module="airhotels">
+                    <label>Admin Property Delete</label>
+                    <file>airhotels/adminproperty_delete.html</file>
+                    <type>html</type> 
+                </airhotels_custom_email_adminpropertydelete_template>
+                <airhotels_host_notification_neworder_template translate="label" module="airhotels">
+                    <label>Property Purchased Notification for Host</label>
+                    <file>airhotels/new_order_host.html</file>
+                    <type>html</type> 
+                </airhotels_host_notification_neworder_template>
+                <airhotels_admin_notification_neworderadmin_template translate="label" module="airhotels">
+                    <label>Property Purchased Notification for Admin</label>
+                    <file>airhotels/new_order_admin.html</file>
+                    <type>html</type> 
+                </airhotels_admin_notification_neworderadmin_template>
+                <airhotels_host_notification_neworderguest_template translate="label" module="airhotels">
+                    <label>Property Purchased Notification for Customer</label>
+                    <file>airhotels/new_order.html</file>
+                    <type>html</type> 
+                </airhotels_host_notification_neworderguest_template>
+                <airhotels_inbox_notification_newinbox_template translate="label" module="airhotels">
+                    <label>New inbox message</label>
+                    <file>airhotels/new_inbox.html</file>
+                    <type>html</type> 
+                </airhotels_inbox_notification_newinbox_template>  
+                <airhotels_custom_email_invitefriends translate="label" module="airhotels">
+                     <label>Invite Friends </label>
+                    <file>airhotels/invitefriends.html</file><!-- change html file here -->
+                    <type>html</type>
+                 </airhotels_custom_email_invitefriends> 
+                 <airhotels_custom_email_host_cancel_account translate="label" module="airhotels">
+                     <label>Cancel Account </label>
+                    <file>airhotels/cancelaccount.html</file><!-- change html file here -->
+                    <type>html</type>
+                 </airhotels_custom_email_host_cancel_account>
+                 <airhotels_paypal_adaptive_enable_notification_template translate="label" module="airhotels">
+                    <label>Paypal Adaptive Enable Notification</label>
+                    <file>airhotels/enable_paypal_adaptive_notification.html</file>
+                    <type>html</type>
+                </airhotels_paypal_adaptive_enable_notification_template>               
+            </email>
+        </template>    
+        <resources>
+            <airhotels_setup>
+                <setup>
+                    <module>Apptha_Airhotels</module>
+                    <class>Mage_Catalog_Model_Resource_Eav_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </airhotels_setup>
+            <airhotels_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </airhotels_write>
+            <airhotels_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </airhotels_read>
+        </resources>
+        <blocks>
+            <customer>
+                <rewrite>
+                    <account_navigation>Apptha_Airhotels_Block_Account_Navigation</account_navigation>
+                </rewrite>
+            </customer>                  
+            <checkout>
+                <rewrite>
+                    <cart_item_renderer>Apptha_Airhotels_Block_Checkout_Cart_Item_Renderer</cart_item_renderer>
+                </rewrite>
+            </checkout>
+            <sales>
+                <rewrite>
+                    <order_items_renderer_default>Apptha_Airhotels_Block_Checkout_Cart_Item_Renderer</order_items_renderer_default>
+                </rewrite>
+            </sales>
+            <airhotels>
+                <class>Apptha_Airhotels_Block</class>
+            </airhotels>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_totals>Apptha_Airhotels_Block_Adminhtml_Sales_Order_Totals</sales_order_totals>
+                    <sales_order_invoice_totals>Apptha_Airhotels_Block_Adminhtml_Sales_Order_Invoice_Totals</sales_order_invoice_totals>
+                    <sales_order_creditmemo_totals>Apptha_Airhotels_Block_Adminhtml_Sales_Order_Creditmemo_Totals</sales_order_creditmemo_totals>
+		    		<catalog_product_grid>Apptha_Airhotels_Block_Adminhtml_Catalog_Product_Grid</catalog_product_grid>
+                </rewrite>
+            </adminhtml>
+        </blocks>
+        <helpers>
+            <airhotels>
+                <class>Apptha_Airhotels_Helper</class>
+            </airhotels>
+        </helpers>
+        <events>
+            <catalog_product_save_before>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>catalog_product_save_before</method>
+                    </airhotels>
+                </observers>
+            </catalog_product_save_before>
+            <review_save_after>
+            <observers>
+                <airhotels>
+                    <type>singleton</type>
+                    <class>Apptha_Airhotels_Model_Observer</class>
+                    <method>reviewSaveAfter</method>
+                </airhotels>
+            </observers>
+        	</review_save_after>
+            <payment_method_is_active>
+            <observers>
+                <paymentfilter_payment_method_is_active>
+                    <type>singleton</type>
+                    <class>Apptha_Airhotels_Model_Observer</class>
+                    <method>paymentMethodIsActive</method>
+                </paymentfilter_payment_method_is_active>
+            </observers>
+        </payment_method_is_active> 
+            <paypal_prepare_line_items>
+                <observers>
+                    <airhotels>
+                        <class>Apptha_Airhotels_Model_Sales_Quote_Address_Total_Fee</class>
+                        <method>updatePaypalTotal</method>
+                    </airhotels>
+                </observers>
+            </paypal_prepare_line_items>
+            <checkout_type_onepage_save_order_after>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>property</method>
+                    </airhotels>
+                </observers>
+            </checkout_type_onepage_save_order_after>
+            <customer_logout>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>customerlogout</method>
+                    </airhotels>
+                </observers>
+            </customer_logout>
+            <catalog_product_save_before>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>adminProductSave</method>
+                    </airhotels>
+                </observers>
+            </catalog_product_save_before>
+	    <checkout_onepage_controller_success_action>
+		<observers>
+			<airhotels>
+				<type>singleton</type>
+				<class>Apptha_Airhotels_Model_Observer</class>
+				<method>successAfter</method>
+			</airhotels>
+		</observers>
+	    </checkout_onepage_controller_success_action>
+            <sales_order_creditmemo_save_after>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>creditMemoEvent</method>
+                    </airhotels>
+                </observers>
+            </sales_order_creditmemo_save_after>
+            <core_block_abstract_prepare_layout_before>
+                <observers>
+                    <airhotels>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>addApprovedToProductGrid</method>
+                    </airhotels>
+                </observers>
+            </core_block_abstract_prepare_layout_before>
+            <catalog_product_delete_after>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>adminProductDelete</method>
+                    </airhotels>
+                </observers>
+            </catalog_product_delete_after> 
+            <customer_delete_commit_after>
+            <observers>
+                <airhotels>
+                   <type>singleton</type>
+                   <class>Apptha_Airhotels_Model_Observer</class>
+                   <method>customerdelete</method>
+                </airhotels>
+            </observers>
+        </customer_delete_commit_after>
+        <customer_register_success>
+            <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>customerRegisterSuccess</method>
+                    </airhotels>
+                </observers>
+        </customer_register_success> 
+        <controller_action_predispatch>
+        <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>setRefParam</method>
+                    </airhotels>
+                </observers>
+         </controller_action_predispatch>   
+         <sales_quote_collect_totals_after>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>setDiscount</method>
+                    </airhotels>
+                </observers>
+            </sales_quote_collect_totals_after>   
+           <order_cancel_after>
+                <observers>
+                    <airhotels>
+                        <type>singleton</type>
+                        <class>Apptha_Airhotels_Model_Observer</class>
+                        <method>removeDiscount</method>
+                    </airhotels>
+                </observers>
+            </order_cancel_after>
+           <sales_order_invoice_save_after>
+            <observers>
+               <airhotels>
+                  <type>singleton</type>
+                  <class>Apptha_Airhotels_Model_Observer</class>
+                  <method>orderInvoiceSaveAfter</method>
+               </airhotels>
+            </observers>
+         </sales_order_invoice_save_after>        
+        </events>
+    </global>
+    <crontab>
+        <jobs>
+            <airhotels_observer>
+                <schedule>
+                    <cron_expr>0 */1 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>airhotels/observer::syncWithGoogleCalendar</model>
+                </run>
+            </airhotels_observer>
+        </jobs>
+    </crontab> 
+    <default>
+        <airhotels>
+            <custom_group>
+                <airhotels_title>Airhotels</airhotels_title>
+            </custom_group>
+            <custom_banner>
+                <banner_count>10</banner_count>
+            </custom_banner>
+            <layout_settings>
+                <calender_text> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </calender_text>
+            </layout_settings>
+            <max_min>
+                <range_value>700</range_value>
+                <min_value>0</min_value>
+                <max_value>1000</max_value>
+            </max_min>    
+             <experience_gallery_image_configuration>
+                <image_limit_value>10</image_limit_value>
+             </experience_gallery_image_configuration>            
+        </airhotels>
+       
+        <customer>
+            <startup>
+                <redirect_dashboard>0</redirect_dashboard>
+            </startup> 
+        </customer> 
+        <checkout>
+            <options>
+                <guest_checkout>0</guest_checkout>
+            </options>
+        </checkout>   
+    </default>                                
+</config>

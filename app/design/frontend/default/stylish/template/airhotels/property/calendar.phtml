@@ -1,0 +1,666 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */ ?>
+
+<?php
+/**
+ * Initilize property details
+ * A particular day may be represented by a different date in another calendar as in
+ * the Gregorian calendar and the Julian calendar, which have been used simultaneously
+ * in different places. In most calendar systems, the date consists of three parts: the day of month,
+ * month, and the year. There may also be additional parts, such as the day of week. Years are usually
+ * counted from a particular starting point, usually called the epoch, with era referring to the particular
+ *period of time (Note the different use of the terms in geology).
+ *
+ */
+$productId = $this->getRequest()->getParam('id');
+/**
+ * Get the value of 'id'
+ */
+$propertyId = $this->getRequest()->getParam('id');
+/**
+ * Load the Propertty by the ID
+ */
+$property = Mage::getModel('catalog/product')->load($propertyId);
+/**
+ * GoogleICSUrl Value
+ */
+$googleIcsUrl = $property->getGoogleCalendarIcsUrl();
+/**
+ * Property Time
+ */
+$propertyTime = $property->getPropertyTime();
+/**
+ * Property TIme Data
+ */
+$propertyTimeData = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();
+/**
+ * Hourly ENabled Value
+ */
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+?>
+
+<style>
+    .normal{cursor:pointer;}
+    .sel,.startsel,.endsel{
+        background-color:red;
+    }
+</style>
+<div class="my-account">
+    <div class="page-title">
+        <h1 ><?php echo $this->__('Calendar') ?></h1>
+        <a href="<?php echo Mage::helper('airhotels/productconfiguration')->getyourlisturl();?>">
+        <?php echo $this->__('Back to My Listings')?>
+        </a>
+    </div>
+
+    <!--Block the calendar Light Box start-->
+    <div id="light" class="white_content">
+        <div class="search_calander_popupbox">
+            <a href = "javascript:void(0)" onclick = "closePoP()" class="close_link"></a>
+            <div class="search_date" >
+                <div class="checkinDate1"><?php echo $this->__('From'); ?></div>
+                <input type="text" placeholder="<?php echo $this->__('dd-mm-yy'); ?>" autocomplete="off" id="inDate"  name="from" style="color: black;"/>
+            </div>
+            <div class="search_date">
+                <div class="checkinDate1"><?php echo $this->__('To'); ?></div>
+                <div><input type="text" placeholder="<?php echo $this->__('dd-mm-yy'); ?>" autocomplete="off"  id="inTo"  name="to" style="color: black;"/></div>
+            </div>
+            <div class="search_date">
+                <label for="availability" class="required lable_inner"><?php echo $this->__('Availability') ?></label>
+                <div>
+                    <select id="bookavail" name="bookavail"  class="select input-text input-text_pro" style="color: black; margin: 0;" onchange="hide_price(this.value);">
+                        <option value="1"><?php echo $this->__('Available') ?></option>
+                        <option value="2"><?php echo $this->__('Booked') ?></option>
+                        <option value="3"><?php echo $this->__('Not Available') ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="search_date" id="hide_per_night">
+
+                <label for="pernight" class="required lable_inner"><?php echo $this->__('Price (per day/hour)') ?></label>
+                <div>
+                    <input type="text" name="pernight" autocomplete="off" id="pernight" style="color: black;"/> <span class="f-left" style="padding: 4px 0 0 5px;">/ <?php echo Mage::app()->getLocale()->currency( Mage::app()->getStore()->getBaseCurrencyCode() )->getSymbol(); ?> </span>
+                </div>
+            </div>
+            <input type="hidden" name="pid" id="pid" value="<?php echo $this->getRequest()->getParam('id'); ?>" />
+
+            <div class="special_price_calander">
+                <div class="f-left">
+                    <input type="submit" id="calendar_block_submit_button" class="button-glossy blue btn_grid" onclick="return postData();" value="<?php echo $this->__("Submit") ?>"/>
+                </div>
+            </div>
+        </div>
+        <div id="priceValidation"></div>
+    </div>	
+    <div id="timelight" class="hourly_white_content">
+    </div>
+
+    <!-- Hourly wise blocking by host -->
+    <input type="hidden" name="hourlyDateValue" id="hourlyDateValue" value="" />
+
+
+    <div id="fade" class="black_overlay">
+            <div id="hourlyajaxload" style="display:none;">
+                <div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>
+    </div>
+    </div>
+    <!--Block the calendar Light Box end-->
+    <?php
+    /**
+     * Get the product id
+     */
+
+    if (!isset($_GET["date"])) {
+        if (!isset($_GET["x"])) {
+            $x = date("n");
+        } else {
+            $x = $_GET["x"];
+        }
+        if ($x == ""){
+            $x = date("n");
+        }
+        /**
+ * Get the Value of  '$year'
+         */
+        $year = date("Y");
+        /**
+         * Get the Value of  '$date'
+         */
+        $date = strtotime("$year/$x/1");
+        /**
+         * Get the Value of  '$day'
+         */
+        $day = date("D", $date);
+        /**
+ * Get the Value of  '$m'
+         */
+        $m = date("F", $date);
+    }
+    ?>
+
+    <!-- After blocking redirect url -->
+    <input type="hidden" name="selectedBaseUrl" id="selectedBaseUrl" value="<?php echo Mage::getBaseUrl(); ?>" />
+    <input type="hidden" name="selectedProductId" id="hourlyDateValue" value="<?php echo $productId; ?>" />
+    <input type="hidden" name="propertyTime" id="propertyTime" value="<?php echo $propertyTime; ?>" />
+    <input type="hidden" name="propertyTimeData" id="propertyTimeData" value="<?php echo $propertyTimeData; ?>" />
+    <input type="hidden" name="hourlyEnabledOrNot" id="hourlyEnabledOrNot" value="<?php echo $hourlyEnabledOrNot; ?>" />
+
+    <div id="calendarWrapper" style="float:left">
+
+    </div>
+    <div class="clear"></div>
+</div>
+
+<script type="text/javascript">
+                var url = "<?php echo Mage::getBaseUrl() . 'property/property/calendarview/?date=' . $x . '__' . $year . '&ajax=&productid='.$productId; ?>";
+                var flag = 0;
+                var timeflag = 0;
+                var preDate = '';
+                var hourlyBasedBlocking = 0;
+                var hourlyBasedDate = '';
+                window.onload = function() {
+
+                    ajaxLoadCalendar(url);
+                }
+
+
+                jQuery(document).on('click', "td.normal", function() {
+                    var valeDate = jQuery(this).attr('id');
+                    var temp;
+                    jQuery("#priceValidation").html('');
+                    jQuery(this).addClass("sel");
+                    if (flag == 0) {
+                        preDate = '';
+                        jQuery(this).addClass("startsel");
+                        temp = valeDate.split("_");
+                        if (timeflag == 0) {
+                            jQuery("#inDate").val(temp[1]);
+                        } else {
+                            jQuery("#inDate").val(temp[0]);
+                        }
+                        preDate = temp[1];
+                        flag = 1;
+
+                    } else {
+                        jQuery(".normal").removeClass("endsel");
+                        jQuery(this).addClass("endsel");
+                        temp = valeDate.split("_");
+                        jQuery('#inTo').val(temp[1]);
+                        var propertyTime = jQuery('#propertyTime').val();
+                        var propertyTimeData = jQuery('#propertyTimeData').val();
+                        var hourlyEnabledOrNot = jQuery('#hourlyEnabledOrNot').val();
+                            if(propertyTime == propertyTimeData && hourlyEnabledOrNot == 0){
+                                if (preDate != '' && preDate == temp[1] && timeflag == 0) {
+                                blackTimeWise(preDate);
+                            } else {
+                            jQuery("#light").show();
+                             jQuery("#timelight").hide();
+                            }
+                            }else{
+                            jQuery("#light").show();
+                            }
+
+                        jQuery("#fade").show();
+                        flag = 0;
+                    }
+                });
+
+
+            function getRailwayTimeFormat(propertyServiceFromPeriod, propertyServiceFrom) {
+                    if (propertyServiceFromPeriod == 'PM') {
+                        if (propertyServiceFrom != 12) {
+                            propertyServiceFromRail = parseInt(propertyServiceFrom) + 12;
+                        } else {
+                            propertyServiceFromRail = propertyServiceFrom;
+                        }
+                    } else {
+                        if (propertyServiceFrom != 12) {
+                            propertyServiceFromRail = propertyServiceFrom;
+                        } else {
+                            propertyServiceFromRail = 0;
+                        }
+                    }
+                    return propertyServiceFromRail;
+             }
+
+                function ajaxLoadCalendar(url) {
+
+
+                    jQuery.ajax({
+                        url: url,
+                        type: "GET",
+                        success: function(data) {
+
+                            jQuery("#calendarWrapper").html(data);
+                            jQuery("#light").hide();
+
+                        }
+
+                    });
+                }
+
+                jQuery(function() {
+                    jQuery(document).on("mouseover", '.normal', function() {
+                        if (jQuery(this).attr("class") != "startsel") {
+                            if (jQuery(".startsel").length > 0) {
+                                var classes = jQuery(this).attr("class").split(" ");
+                                var startclass = jQuery(".startsel").attr("class").split(" ");
+                                jQuery(".normal").not(".startsel").removeClass("sel");
+                                for (var i = parseInt(startclass[2]); i <= parseInt(classes[2]); i++) {
+                                    jQuery("." + i).addClass("sel");
+                                }
+                                jQuery(this).addClass("sel");
+                            }
+                        }
+                        if (jQuery(".startsel").length > 0 && jQuery(".endsel").length > 0) {
+                            var startselectDate = jQuery(".startsel").attr("class").split(" ");
+                            var endselectDate = jQuery(".endsel").attr("class").split(" ");
+                            for (var i = parseInt(startselectDate[2]); i <= parseInt(endselectDate[2]); i++) {
+                                jQuery("." + i).addClass("sel");
+                            }
+                        }
+
+                    });
+
+                    jQuery(document).on("mouseout", ".blockcal", function() {
+                        if (jQuery(".startsel").length > 0 && jQuery(".endsel").length > 0) {
+                            var startselectDate = jQuery(".startsel").attr("class").split(" ");
+                            var endselectDate = jQuery(".endsel").attr("class").split(" ");
+
+                            for (var i = 1; i <= 31; i++) {
+                                jQuery("." + i).removeClass("sel");
+                            }
+                            for (var i = parseInt(startselectDate[2]); i <= parseInt(endselectDate[2]); i++) {
+                                jQuery("." + i).addClass("sel");
+                            }
+                        }
+                    });
+                });
+                function closePoP() {
+                    jQuery("#light").hide();
+                    jQuery("#timelight").hide();
+                    jQuery("#fade").hide();
+                    jQuery("#monthid").val(" ");
+                    jQuery("#yearid").val(" ");
+                    jQuery(".normal").removeClass("startsel");
+                    jQuery(".normal").removeClass("endsel");
+                    jQuery(".normal").removeClass("sel");
+                    jQuery('#hourlyDateValue').val('');
+                    timeflag = 0;
+                    flag = 0;
+                    hourlyBasedBlocking = 0;
+                    hourlyBasedDate = '';
+                    jQuery("#inDate").removeAttr("disabled");
+                    jQuery("#inTo").removeAttr("disabled");
+                }
+                function postData() {
+                jQuery('#calendar_block_submit_button').attr('disabled','disabled');
+                    var hourlyDateValue = jQuery("#hourlyDateValue").val();
+                    var checkin = jQuery("#inDate").val();
+                    var checkout = jQuery("#inTo").val();
+                    if(checkin.indexOf('-') !== -1){
+                    	var fromTime= checkin.substr(0, checkin.indexOf('-'));
+                    	var fromMeridian = checkin.substr(checkin.indexOf("-") + 1);
+                    	var toTime= checkout.substr(0, checkout.indexOf('-'));
+                    	var toMeridian = checkout.substr(checkout.indexOf("-") + 1);
+
+                    	var fromTimeValue = getRailwayTimeFormat(fromMeridian,fromTime);
+                    	var toTimeValue = getRailwayTimeFormat(toMeridian,toTime);
+                    	if(parseInt(fromTimeValue) > parseInt(toTimeValue)){
+                        	alert("Please select a different To Date.");
+                        	jQuery('#calendar_block_submit_button').removeAttr('disabled');
+                        	return false;
+                       }
+                    }
+
+                    if(new Date(checkin) > new Date(checkout)){
+                    	alert("Please select a different To Date.");
+                    	jQuery('#calendar_block_submit_button').removeAttr('disabled');
+                    	return false;
+                    }
+                    var bookavail = jQuery("#bookavail").val();
+                    var productId = jQuery("#pid").val();
+                    var price = jQuery("#pernight").val();
+                    var validatePrice = function(price) {
+                      return /^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(price);
+                    }
+                    var validatePriceResponse = validatePrice(price); 
+                    if(bookavail == 3){validatePriceResponse = true;}                 
+                    if(validatePriceResponse){                        
+                        var date = jQuery("#currentMonth").val() + "__" + jQuery("#currentYear").val();
+                        var req = jQuery.noConflict();
+                        var posturl = "<?php echo Mage::helper('airhotels/product')->getblockurl() ?>";
+                        req.ajax({
+                            type: 'POST',
+                            url: posturl,
+                            data: {check_in: checkin, check_out: checkout, book_avail: bookavail, productid: productId, price_per: price, date: date, hourlyDateValue: hourlyDateValue},
+                            success: function(data) {
+                                jQuery("#light").hide();
+                                jQuery("#fade").hide();
+                                jQuery("#timelight").hide();
+                                jQuery("#monthid").val(" ");
+                                jQuery("#yearid").val(" ");
+                                jQuery('#hourlyDateValue').val('');
+                                var selectedDateValue = '';
+                                var selectedMonthValue = '';
+                        if(hourlyBasedBlocking == 1){
+                        selectedDateValue = hourlyBasedDate;
+                        }else{
+                        selectedDateValue = jQuery("#inDate").val();
+                        }
+                        var selectedDateArray = selectedDateValue.split("/");
+                        var selectedBaseUrl =   jQuery("#selectedBaseUrl").val();
+                        var selectedProductId =   jQuery("#pid").val();
+                        postUrl = selectedBaseUrl + 'property/property/calendarview/?date=' + parseInt(selectedDateArray[0]) +'__'+selectedDateArray[2]+'&ajax=&productid=' + selectedProductId;
+                        ajaxLoadCalendar(postUrl);
+                        timeflag = 0;
+                        flag = 0;
+                        hourlyBasedBlocking = 0;
+                        hourlyBasedDate = '';
+                        jQuery('#calendar_block_submit_button').removeAttr('disabled');
+                        }
+                        });
+                        return true;
+                    }else{
+						jQuery("#priceValidation").html('Please Enter price field');
+						jQuery('#calendar_block_submit_button').removeAttr('disabled');
+						return false;
+                    }
+                }
+                function hide_price(hide_pri)
+                {
+                    var hide_pri;
+                    if (hide_pri == 3)
+                    {
+                        document.getElementById('hide_per_night').style.display = 'none';
+                    }
+                    else
+                    {
+                        document.getElementById('hide_per_night').style.display = 'block';
+                    }
+                }
+
+                function blackTimeWise(preDate) {
+                    jQuery('#hourlyajaxload').show();
+                    var dateTime = preDate;
+                    var productId = jQuery("#pid").val();
+                    var req = jQuery.noConflict();
+                    var posturl = "<?php echo Mage::getUrl('airhotels/hourly/hourlyBlock', array('_secure' => true)); ?>";
+                    req.ajax({
+                        type: 'POST',
+                        url: posturl,
+                        data: {productid: productId, dateTime: dateTime},
+                        success: function(data) {
+                            hourlyBasedBlocking = 1;
+                            jQuery(".normal").removeClass("startsel");
+                            jQuery(".normal").removeClass("endsel");
+                            jQuery(".normal").removeClass("sel");
+                            jQuery('#timelight').html(data);
+                            jQuery('#hourlyajaxload').hide();
+                            jQuery('#timelight').show();
+                            jQuery('#hourlyDateValue').val(preDate);
+                            timeflag = 1;
+                            hourlyBasedDate = preDate;
+                            jQuery("#inDate").attr("disabled", "disabled");
+                            jQuery("#inTo").attr("disabled", "disabled");
+                        }
+                    });
+                }
+
+
+</script>
+<p>NOTE : Block the property by hourly basis only.</p>
+<div id="cal_legend">
+
+         <h2 class="past_grid">
+         <?php echo $this->__('Past') ?>
+         </h2>
+          <h2 class="available_grid">
+          <?php echo $this->__('Available') ?>
+          </h2>
+          <h2 class="specialprice_grid">
+          <?php echo $this->__('Special Price') ?>
+          </h2>
+          <h2 class="booked_grid">
+          <?php echo $this->__('Booked') ?></h2>
+           <?php
+            /**
+            * Getting the hourly Enabled value
+             */
+            $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+                                           /**
+                                             * check weather the hourly enabled is zero
+                                             */
+           if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+           <h2 class="partially_available_grid"><?php echo $this->__('Partially Available') ?></h2>
+            <?php } ?>
+            <h2 class="unavailable_grid"><?php echo $this->__('Not Available') ?>
+            </h2>
+
+</div>
+
+<?php
+/**
+ * Check the value has set
+ */
+if($propertyTime != $propertyTimeData || $hourlyEnabledOrNot != 0){
+/**
+ * Get the ics File Enabled or not
+ */
+$icsFileEnable = (int) Mage::getStoreConfig('airhotels/ical/enable');
+/**
+ * Check the ics ENabled
+ */
+if ($icsFileEnable == 0) {
+
+    /**
+     * Initilize property details
+     */
+    $propertyId = $this->getRequest()->getParam('id');
+    /**
+     * Property Name by loAD THE catalog/product
+     */
+    $property = Mage::getModel('catalog/product')->load($propertyId);
+    /**
+     * Google ICS URL
+     */
+    $googleIcsUrl = $property->getGoogleCalendarIcsUrl();
+    /**
+     * Auto_sync_url
+     */
+    $autoIcsSync = $property->getAttributeText('auto_ics_sync');
+    ?>
+    <?php
+    /**
+     *
+     *
+     * Getting Import /export calendar
+     */
+
+
+    ?>
+    <div class="my-account calender_import_export">
+        <div class="page-title">
+            <h2><?php echo $this->__('Calendar Import / Export') ?></h2>
+        </div>
+        <ul class="form-list">
+            <li class="fields">
+                <div>
+                    <h3><?php echo $this->__('Import Calendar'); ?></h3>
+                    <p class="google_ical"><?php echo $this->__('ICAL Link'); ?>*</p>
+                    <form <?php
+                    /**
+                     * Check the value of $googleIcsUrl
+                     */
+    if (!empty($googleIcsUrl)) {
+        echo 'style="display:none;"';
+    }
+    ?> id="external_calendar_ics_file_url_id" action="<?php echo Mage::getBaseUrl() . "property/calendar/importExternalCalendar" ?>" method="post" id="external_calendar_ics_url" enctype="multipart/form-data">
+                        <input id="external_calendar_ics_file_url" onchange="validateImportButtonForIcal(this.value)" onkeyup="validateImportButtonForIcal(this.value)" class="left required-entry" name="external_calendar_ics_file_url" size="100" type="text" value="<?php
+                        /**
+                         * Check the value of $googleIcsUrl
+                         */
+                if (!empty($googleIcsUrl)) {
+                    echo $googleIcsUrl;
+                }
+    ?>" class="required-entry">
+                        <input type="hidden" name="external_calendar_ics_file_url_value" id="external_calendar_ics_file_url_value" value="<?php echo $googleIcsUrl; ?>" />
+                        <input type="hidden" name="property_id" id="property_id" value="<?php echo $propertyId; ?>" />
+                        <div class="calender_auto_sync f-left">
+                            <input type="hidden" id="auto_ics_sync_value" name="auto_ics_sync_value" value="<?php if (isset($autoIcsSync) ) {
+/**
+ * make sure the value of $autoIcsSync set to yes.
+ */
+                            if (trim($autoIcsSync) == 'Yes') {
+                                   echo '1';
+                               } else {
+                                   echo '0';
+                               }
+                           } else {
+                               echo '0';
+                           } ?>" />
+                            <input class="f-left" type="checkbox" id="auto_ics_sync" name="auto_ics_sync" onclick="autoIcsSync();" <?php if ( isset($autoIcsSync) && trim($autoIcsSync) == 'Yes' ) {
+                                   echo 'checked="checked"';
+                           } ?> />
+                            <label for="auto_ics_sync" class="f-left"><?php echo $this->__('Auto-sync (external ics url to your calendar)'); ?></label>
+                        </div>
+                        <button disabled="disabled" id="ical_import_button" type="submit" title="<?php echo $this->__('Import'); ?>" class="disabled button google_ical_update left"><span>
+                        <span><?php echo $this->__('Import'); ?></span></span></button>
+                        <a class="google_ical_cancel left" href ="javascript:void(0);" title="<?php echo $this->__('Clear'); ?>" onclick="document.getElementById('external_calendar_ics_file_url').value = '';">
+                        <span><?php echo $this->__('Clear'); ?></span></a>
+    <?php if (!empty($googleIcsUrl)) { ?>
+                            <a class="google_ical_cancel left" href ="javascript:void(0);" title="<?php echo $this->__('Cancel'); ?>"  onclick="cancelExternalIcsSync()">
+                            <span><?php echo $this->__('Cancel'); ?></span></a>
+    <?php } ?>
+                    </form>
+    <?php if (!empty($googleIcsUrl)) { ?>
+                        <p class="google_ics_file_url left" id="google_ics_file_url_data_id">
+                            <i class="left"><?php echo $googleIcsUrl; ?></i>
+                            <a hre="javascript:void(0);" title="<?php echo $this->__('Edit'); ?>" onclick="changeGoogleIcsUrl();">
+                            <span class="google_ical_change left"><?php echo $this->__('Edit'); ?></span></a>
+                            <a href ="javascript:void(0);" id="external_ics_sync_now" onclick="externalIcsSync()" title="<?php echo $this->__('Refresh'); ?>"  class="google_ical_sync left">
+                            <span class="sync_now"><?php echo $this->__('Refresh'); ?></span></a>
+                            <a href = "<?php echo Mage::getBaseUrl() . "property/calendar/removeExternalCalendar/property_id/" . $propertyId; ?>"
+                            onclick="return confirm('<?php echo $this->__('Are you sure want to remove?'); ?>');"
+                            title="<?php echo $this->__('Remove'); ?>"  class="google_ical_sync left">
+                            <?php echo $this->__('Remove'); ?></a>
+                        </p>
+
+    <?php } ?>
+                </div>
+            </li>
+            <li class="fields">
+                <div>
+                    <h3><?php echo $this->__('Export Calendar'); ?></h3>
+                    <a href = "<?php echo Mage::getBaseUrl() . "property/calendar/exportExternalCalendar/property_id/" . $propertyId . '/property_name/' . $property->getName(); ?>" >
+                    <i><?php echo $property->getName() . '.ics'; ?></i></a>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+                    var myForm = new VarienForm('external_calendar_ics_file_url_id', true);
+
+                    function changeGoogleIcsUrl() {
+                        $('google_ics_file_url_data_id').hide();
+                        $('external_ics_sync_now').hide();
+                        $('external_calendar_ics_file_url_id').show();
+                        var urlText = $('external_calendar_ics_file_url').value;
+                        if (urlText == '') {
+                            $('external_calendar_ics_file_url').value = $('external_calendar_ics_file_url_value').value;
+                        }
+                    }
+
+                    function cancelExternalIcsSync() {
+                        $('google_ics_file_url_data_id').show();
+                        $('external_ics_sync_now').show();
+                        $('external_calendar_ics_file_url_id').hide();
+                    }
+
+                    function externalIcsSync() {
+                        document.getElementById("external_calendar_ics_file_url_id").submit();
+                    }
+
+                    function autoIcsSync() {
+                        if ($('auto_ics_sync').checked) {
+                            document.getElementById('auto_ics_sync_value').value = "1";
+                        } else {
+                            document.getElementById('auto_ics_sync_value').value = "0";
+                        }
+                    }
+
+                    function validateImportButtonForIcal(value){
+                    if(value == ''){
+                    jQuery('#ical_import_button').attr('disabled','disabled');
+                    jQuery('#ical_import_button').addClass('disabled');
+                    }else{
+                    jQuery('#ical_import_button').removeAttr('disabled');
+                    jQuery('#ical_import_button').removeClass('disabled');
+                    }
+                    }
+
+    </script>
+
+<?php }
+} ?>
+
+    <script type="text/javascript">
+    // Remove double click text select
+    document.ondblclick = function(evt) {
+        if (window.getSelection)
+            window.getSelection().removeAllRanges();
+        else if (document.selection)
+            document.selection.empty();
+    }
+    jQuery(function() {
+    	var dates = jQuery( "#inDate, #inTo" ).datepicker({
+    		changeMonth: false,
+    	    minDate: '0',numberOfMonths: 1,
+    	    monthNames:["January","February","March","April","May","June","July","August","September","October","November","December"],
+    	    onSelect: function( selectedDate ) {var option = this.id == "inDate" ? "minDate" : "maxDate",
+    		    instance = jQuery( this ).data( "datepicker" ), date = jQuery.datepicker.parseDate(
+    		    instance.settings.dateFormat || jQuery.datepicker._defaults.dateFormat,
+    		    selectedDate, instance.settings );
+    		    dates.not( this ).datepicker( "option", option, date ); jQuery("#inDate" ).datepicker("option","maxDate","");
+    	    	if(this.id == "inDate"){ instance = jQuery( this ).data( "datepicker" )
+    		    	var depart = jQuery.datepicker.parseDate(jQuery.datepicker._defaults.dateFormat, selectedDate);
+    				<?php if(Mage::helper('airhotels/product')->getHourlyEnabledOrNot() != 0){ ?>
+    		    		depart.setDate(depart.getDate() + 1);
+    		    	<?php }else{ ?>
+    		    		depart.setDate(depart.getDate());
+    		    	<?php } ?>	jQuery("#inTo" ).datepicker(  "option", "minDate", depart );
+    			}
+    		}
+    	});
+    });
+    </script>
+
+

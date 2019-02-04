@@ -1,0 +1,241 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$request = $this->getRequest('');
+$controllerAction = $request->getActionName();
+$hostId = $this->getRequest()->getParam('id');
+$customer = Mage::getModel('customer/customer')->load($hostId);
+if(empty($hostId)) {
+	Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getBaseUrl());
+}
+$customer_name = $customer->getFirstname();
+$customer_month = date("F", strtotime($customer->getCreatedAt()));
+$customer_year = date('Y',strtotime($customer->getCreatedAt()));
+$profilePhoto = Mage::getModel('airhotels/product')->getCustomerPictureById($hostId);
+$airhotelsTitle = Mage::getStoreConfig ( 'airhotels/custom_group/airhotels_title' );
+$about = '';
+if(isset($profilePhoto[0]["more_host"])){
+	$about = $profilePhoto[0]["more_host"];
+}
+$hostCity  = $profilePhoto[0]['city'];
+$hostCountryCode  = $profilePhoto[0]['country'];
+if(!empty($hostCountryCode)) {
+$hostCountry = Mage::getModel('directory/country')->loadByCode($hostCountryCode);
+$hostCountry = $hostCountry->getName();
+}
+$PropertyCollection = Mage::getModel('airhotels/property')
+        ->getpropertycollection()
+        ->addAttributeToFilter('propertyapproved', array('eq' => 1))
+        ->addAttributeToFilter('userid', array('eq' => $hostId));
+foreach ($PropertyCollection as $property) {
+    $productId[] = $property->getId();
+}
+$count = 0;
+if(isset($productId)){
+	$count = count($productId);
+}
+$reviewCount = 0;
+for($i = 0; $i < $count;$i++){
+$review = Mage::getModel('review/review')
+->getResourceCollection()
+->addStoreFilter(Mage::app()->getStore()->getId())
+->addEntityFilter('product',$productId[$i])
+->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+->setDateOrder()
+->addRateVotes();
+$reviewCount += count($review);
+}
+$review = Mage::getModel('airhotels/property')->getreview();
+?>
+<div class="my-account">
+<div class="personal-info">
+<div class="profile_information_body">
+    <div class="page-title" style="margin:0;">
+		<?php if($controllerAction != "viewprofile") { ?>
+        <h1 class="dashboard_leftside_heading"><?php echo $this->__('Welcome to '.$airhotelsTitle); ?> <span style="color:#479BFF;"><?php echo $customer_name;?></span></h1>
+        <span class="member_since"><?php echo $this->__('Member Since') ?> <?php echo $customer_month .' '.$customer_year;?></span>
+        <?php } else { ?>
+         <h1 class="vp_name"><?php echo $this->__("Hey, I'am") ?> <span style="color:#479BFF;"><?php echo $customer_name;?></span></h1>
+        <?php } ?>
+        </div>
+        <div class="body_grid clearfix">
+        <span class="vp_location"><?php if(!empty($hostCity)) { echo $hostCity;}if(!empty($hostCountry)){echo ", $hostCountry";}?></span><span class="vp_location" style="font-size: 12px;font-weight: 100;margin: 0 0 0 10px;"><?php echo $this->__('Member Since') ?> <?php echo $customer_month .' '.$customer_year;?></span>
+        	<?php if($about!=''){ ?>
+        		<span><?php //echo $this->__("Biography");?></span>
+        		<p class="vp_host_description comment more" id="more_text"><?php echo $about;?></p>
+        	<?php } else {?>
+        		<p style="margin:10px 0;color:#479BFF;text-align:left;font-weight:normal"><?php echo $this->__('No description available');?></p>
+        	<?php } ?>
+      </div>
+      <?php       
+      if($profilePhoto[0]['video_url'] != ''){?>
+     <h1 class="dashboard_leftside_heading profilepicture_titles"><?php echo $this->__("Profile Video");?></h1>
+   <div class="profile_video_section clearfix" style="padding:10px;">
+    <ul class="clearfix id_document_tags" style="margin:0">
+    <li style="margin:0"><div class="profilevideoplace">
+    <?php $videoUrl = $profilePhoto[0]['video_url'];
+         if($videoUrl) { ?>
+            <video class="video" controls>
+            <source src="<?php echo $profilePhoto[0]['video_url'];?>" type="video/mp4" codecs="avc1.42E01E, mp4a.40.2"/>
+      		</video>
+      		<?php } ?></div></li>
+      		</ul>
+      		</div>
+      	<?php } ?>	
+      <?php $verifiedTags = $this->verificationProfile();
+      $verifyHostCount = count($verifiedTags);
+      ?>
+      <div class="trust-section"><?php
+	     if($verifyHostCount >= 1){?>
+            <span class="trust-title"><?php echo $this->__('Trust'); ?></span>
+          <?php }
+         if($verifyHostCount >= 3){ ?>
+            <span class="verified-host-img airhotel-sprite"></span>
+           <?php }
+	     foreach ($verifiedTags as $verifiedTag){
+                  ?>
+	        <span class="airhotel-sprite host_tags_<?php echo $verifiedTag->getTagId(); ?>"></span>
+	    <?php } ?>
+	  </div>
+      <?php $wishListItemCollection = $this->viewWishlist();
+      $wishlistCount = count($wishListItemCollection); ?>
+      <div class="page-title host_review" style="margin:0;">
+      <h1 class="dashboard_leftside_heading"><?php echo $this->__('My WishList')?></h1>
+      <?php if($wishlistCount >6 ) { ?>
+        <span><a TARGET="_blank" href="<?php echo Mage::getBaseUrl().'wishlist'?>"><?php echo $this->__('See Your Wishlist'); ?></a></span>
+      <?php } ?>
+      </div>
+      <div class="vp_whistlist">
+      	<ul class="clearfix vp_whistitems">
+      	    <?php
+      	    if($wishlistCount) {
+                 $i = 0;
+                 foreach ($wishListItemCollection as $item) {
+                      $i++;
+                      $item = Mage::getModel('catalog/product')->setStoreId($item->getStoreId())->load($item->getProductId());
+                      if ($item->getId()) :
+                      ?>
+                      <li><img src="<?php echo Mage::helper('catalog/image')->init($item, 'image')->resize(450,300); ?>" /><a TARGET="_blank" href="<?php echo $item->getProductUrl(); ?>" class="import_button whished_items"><?php echo $this->__('View List'); ?></a></li>
+                      <?php endif;
+                      if($i == 6): break; endif;
+                 }
+            } else{ ?>
+                 <p class="no_transaction_records"><?php echo $this->__('No Wishlist!'); ?></p>
+            <?php } ?>
+      	</ul>
+      </div>
+      <div class="page-title host_review" style="margin:0;">
+       <h1 class="dashboard_leftside_heading"><?php echo $this->__('Review From Guests ('.$reviewCount.")") ?></h1>
+       </div>
+      <div id="review_about" class="main_content">
+                        <div class="body_grid"><div class="reviews_section as_host"><ul class="review-list">
+                                <?php
+                                $productNameArrayVal = array();
+                                if (count($review)) {
+                                    for ($i = 0; $i < count($review); $i++) {
+                                        $customerDataVal = Mage::getModel('airhotels/product')->getCustomerPictureById($review[$i]["customer_id"]);
+                                        $prReview_id = $review[$i]["entity_pk_value"];
+                                        if(in_array($prReview_id, $productId)){
+                                            $productCollection = Mage::getModel('catalog/product')->load($prReview_id);
+                                            $productName = $productCollection->getName();
+                                            $productNameArrayVal[] = $productCollection->getName();
+                                            $productUrl = $productCollection->getProductUrl();
+                                            ?>
+                                        <li class="reviews-list-item clearfix"><div class="profile_pic">
+                                                <div class="_pm_container small"><div class="_pm_shadow r"></div><div class="_pm_shadow l"></div>
+                                                    <div class="_pm">
+                                                        <div class="_pm_inner clearfix"><div class="_pm_shadow_inner r"></div><div class="_pm_shadow_inner l"></div><div class="_pm_shadow_inner t"></div><div class="_pm_shadow_inner b"></div>
+                                                            <?php if (!empty($customerDataVal[0]["imagename"])): ?>
+                                                                <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerDataVal[0]["imagename"] ?>" width="68px " height="68px" alt="">
+                                                            <?php else: ?>
+                                                                <img src="<?php echo $this->getSkinUrl('images/no_user.jpg') ?>" width="68px " height="68px" alt="">
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="name"><?php echo $review[$i]["nickname"];?></span>
+                                            </div>
+                                            <div class="bubble">
+                                                <p class="vp_profile_title">
+                                                	<span>
+                                                		<?php echo $review[$i]["title"];?>
+                                                	</span>
+                                                </p>
+                                                <p class="vp_message">
+                                                	<?php echo $review[$i]["detail"];?>
+                                                </p>
+                                                <p class="message_posted">
+                                                <a class="vp_listing_name" href="<?php echo $productUrl; ?>">
+                                                	<?php echo $productName; ?>
+                                                </a>
+                                                <span style="color: #545454;font-size: 12px;" class="date">
+                                                  <?php echo date("jS, F Y", strtotime($review[$i]["created_at"]));?>
+                                                </span>
+                                             </p>
+                                            </div>
+                                         </li><?php
+                                        }
+                                      }
+                                    }
+                                    if(count($productNameArrayVal) < 1){?>
+                                <p class="no_transaction_records">  <?php echo $this->__("No reviews available");?></p>
+                                   <?php }?>
+                                 </ul></div></div></div>
+
+</div>
+</div></div>
+<script type="text/javascript">
+var jQ = jQuery.noConflict();
+jQ(document).ready(function() {
+	var showChar = 1000;
+	var ellipsestext = "...";
+	var moretext = "Read More";
+	var lesstext = "Less Read";
+	var content = jQ('#more_text').text();
+		if(content.length > showChar) {
+			var c = content.substr(0, showChar);
+			var h = content.substr(showChar-1, content.length - showChar);
+			var html = c + '<span class="moreelipses">'+ellipsestext+'</span>&nbsp;<span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class="morelink">'+moretext+'</a></span>';
+			jQ('#more_text').html(html);
+		}
+
+	jQ(".morelink").click(function(){
+		if(jQ(this).hasClass("less")) {
+			jQ(this).removeClass("less");
+			jQ(this).html(moretext);
+		} else {
+			jQ(this).addClass("less");
+			jQ(this).html(lesstext);
+		}
+		jQ(this).parent().prev().toggle();
+		jQ(this).prev().toggle();
+		return false;
+	});
+});
+</script>

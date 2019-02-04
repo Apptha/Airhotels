@@ -1,0 +1,45 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+ 
+/**
+ * Save the Current Product in Magento Registry
+ */
+$_product = Mage::registry('current_product'); ?>
+<?php
+/**
+ * Check Weather the product is set
+ * the meta informations are set to the current url,Descriptions, Name, And product Image.
+ */
+if ($_product) : ?>
+    <meta property="og:url" content="<?php echo Mage::helper('core/url')->getCurrentUrl(); ?>"/>
+    <meta property="og:description" content="<?php echo htmlspecialchars($_product->getDescription())?>"/> 
+    <meta property="og:title" content="<?php echo htmlspecialchars($_product->getName())?>"/>
+    <meta property="og:image" content="<?php echo $this->helper('catalog/image')->init($_product, 'image')?>"/>
+<?php endif;?>

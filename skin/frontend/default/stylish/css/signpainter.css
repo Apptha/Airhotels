@@ -1,0 +1,15 @@
+@font-face {
+	font-family: SignPainterMedium;
+	src: url('../../fonts/signpainter/signpah1-webfont.eot?#') format('eot'),
+		url('../../fonts/signpainter/signpah1-webfont.woff') format('woff'),
+		url('../../fonts/signpainter/signpah1-webfont.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.signpainter {
+	font-weight: 100;
+	font-style: normal;
+	line-height: normal;
+	font-family: SignPainterMedium, sans-serif;
+}

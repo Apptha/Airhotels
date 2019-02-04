@@ -1,0 +1,74 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$request 			= $this->getRequest('');
+$controllerAction 	= $request->getActionName();
+$id = $this->getRequest()->getParam('id');
+?>
+<div class="content_block">
+	<h1 class="dashboard_leftside_heading"><?php echo $this->__('Account'); ?></h1>
+  	<div class="dashboard_leftside_heading_contents">
+	  	<ul>
+	  		<li><a href="<?php echo Mage::getBaseUrl().'airhotels/dashboard/notifications'; ?>" 
+	  			<?php if($controllerAction == 'notifications'){?>class="selected"<?php }?>><?php echo $this->__('Notifications'); ?></a>
+			</li>
+	    	<li>	    	
+	    		<a href="<?php echo Mage::getBaseUrl().'property/dashboard/transactionhistory/'; ?>" <?php if($controllerAction == 'transactionhistory'){?>class="selected"<?php }?>><?php echo $this->__('Transaction History'); ?></a>
+	    	</li>
+	    	<?php if(( int ) Mage::helper ( 'airhotels/invitefriends' )->getInviteFriendsEnabledOrNot () == 0){?>
+	    	<li>	    	
+	    		<a href="<?php echo Mage::getBaseUrl().'property/dashboard/invitetransactionhistory/'; ?>" <?php if($controllerAction == 'transactionhistory'){?>class="selected"<?php }?>><?php echo $this->__('Invite Friends Transaction History'); ?></a>
+	    	</li>
+	    	<?php } ?>
+	    	<li>
+	    		<a href="<?php echo Mage::getBaseUrl().'airhotels/dashboard/payment'; ?>" 
+	    			<?php if($controllerAction == 'payment'){?>class="selected"<?php }?>><?php echo $this->__('Payout Preference'); ?>
+	    		</a>
+	    	</li>  
+	    	<li>
+	    		<a href="<?php echo Mage::getBaseUrl().'airhotels/dashboard/security'; ?>" <?php if($controllerAction == 'security'){?>class="selected"<?php }?>>
+	    			<?php echo $this->__('Security'); ?>
+	    		</a>
+	    		
+	    	</li>
+	    	<li>
+	    		<a href="<?php echo Mage::getBaseUrl().'airhotels/dashboard/settings'; ?>" <?php if($controllerAction == 'settings'){?>class="selected"<?php }?>><?php echo $this->__('Settings'); ?></a>
+	    	</li>
+	 	</ul>
+  	</div>
+  	<?php if(( int ) Mage::helper ( 'airhotels/invitefriends' )->getInviteFriendsEnabledOrNot () == 0){?>
+	<div class="clearfix invite_friends_button_section">
+	    <ul>
+	  		<li class="invite_friends_button">
+	  			<a href="<?php echo $this->getBaseUrl();?>property/invitefriends/invite"><?php echo $this->__('Invite Friends');?></a>
+	  		</li>
+	  	</ul>
+ 	</div>
+ 	<?php } ?>
+</div>

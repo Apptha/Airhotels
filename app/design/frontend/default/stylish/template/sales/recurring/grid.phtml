@@ -1,0 +1,84 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php /* @var $this Mage_Core_Block_Template */?>
+<div <?php echo $this->getGridHtmlClass() ? ' class="' . $this->getGridHtmlClass() . '"' : ''?><?php echo $this->getGridHtmlCss() ? ' style="' . $this->getGridHtmlCss() . '"' : ''?>>
+
+<?php if ($caption = $this->getGridCaption()): ?>
+<h2 class="table-caption"><?php echo $this->escapeHtml($caption) ?></h2>
+<?php endif; ?>
+
+<?php $gridElements = $this->getGridElements(); ?>
+<?php if ($gridElements): ?>
+    <?php echo $this->getChildHtml('pager'); ?>
+    <table id="<?php echo $this->getGridHtmlId() ?>" class="data-table">
+<?php foreach ($this->getGridColumns() as $column):?>
+        <col <?php $width = $this->getObjectData($column, 'width'); echo $width ? ' width="' . $width . '"' : '' ?>/>
+<?php endforeach; ?>
+        <thead>
+            <tr>
+<?php foreach ($this->getGridColumns() as $column):
+$nobr = $this->getObjectData($column, 'is_nobr') ? '<span class="nobr">%s</span>' : '%s';
+$title = $this->getObjectData($column, 'title');
+?>
+                <th><?php echo $title ? sprintf($nobr, $this->escapeHtml($title)) : '&nbsp;' ?></th>
+<?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+<?php foreach($gridElements as $row): ?>
+            <tr>
+<?php foreach ($this->getGridColumns() as $column):
+$nobr = $this->getObjectData($column, 'is_nobr') ? '<span class="nobr">%s</span>' : '%s';
+$index = $this->getObjectData($column, 'index');
+$value = $this->getObjectData($row, $index);
+$linkUrl = $this->getObjectData($row, "{$index}_link_url");
+$linkAnchorText = $this->getObjectData($row, "{$index}_link_text");
+$linkText = $linkUrl ? ($linkAnchorText ? $linkAnchorText : $value) : '';
+$linkFormat = $linkUrl ? '<a href="%s">%s</a>' : '';
+?>
+                <td<?php $this->getObjectData($row, 'is_amount') ? ' class="a-right"' : '' ?>><?php
+if ($linkFormat) {
+    echo sprintf($nobr, sprintf($linkFormat, $this->escapeHtml($linkUrl), $this->escapeHtml($linkText)));
+} else {
+    echo sprintf($nobr, $this->escapeHtml($value));
+}
+                ?></td>
+<?php endforeach; ?>
+            </tr>
+<?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php echo $this->getChildHtml('pager'); ?>
+    <script type="text/javascript">decorateTable('<?php echo $this->getGridHtmlId() ?>')</script>
+<?php else: ?>
+    <p><?php echo $this->escapeHtml($this->getEmptyGridMessage()); ?></p>
+<?php endif; ?>
+</div>

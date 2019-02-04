@@ -1,0 +1,578 @@
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+
+<div id="content-container">
+    <div class="content-wrapper"><?php
+        $count    = 1;
+        $threeDiv = 1;
+        $model           = Mage::getModel ( 'catalog/product' );
+        $baseurl         = Mage::getBaseUrl ( 'skin' );
+        $tagsId          = array('id','video','document');
+        $propertyTimeData = $propertyTimeId = Mage::helper ( 'airhotels/airhotel' )->getPropertyTimeLabelByOptionId ();
+        $customer        = Mage::getSingleton ( 'customer/session' )->getCustomer ();
+        $wishList        = Mage::getSingleton ( 'wishlist/wishlist' )->loadByCustomer ( $customer );
+        $wishListItemCollection = $wishList->getItemCollection ();
+        $arrProductIds   = array ();
+        if (count ( $wishListItemCollection )) {
+            foreach ( $wishListItemCollection as $item ) {
+              $product = $item->getProduct ();
+              $arrProductIds [] = $product->getId ();
+          }
+        }
+        $storeId = Mage::app()->getStore()->getId();
+        $currencySymbol = Mage::app ()->getLocale ()->currency ( Mage::app ()->getStore ()->getCurrentCurrencyCode () )->getSymbol ();
+      /**
+       * Inspired To Experience block ends here
+       */
+      /**
+       * Explore the world block start from here
+       */
+      ?>
+      <div class="clear"></div>
+       <h2><?php echo $this->__('Explore the World'); ?>
+           <span><?php echo $this->__('Play with locals and experience new life. Have fun all around the world');?></span>
+       </h2>
+       <ul id="world-container"><?php
+          /**
+           * Display cities
+           */
+          $exploreWorldCollection = $this->getInspiredExperience ();          
+          if (count ( $exploreWorldCollection ) != 0) {
+              $exploreIncrement = 0;
+              foreach ( $exploreWorldCollection as $key => $value ) {                 
+                 $cityDetails = $key.','.$value;
+                 if ($exploreIncrement >= 0 && $exploreIncrement <= 6) {
+                 /**
+                  * Display first city
+                 */
+                      if ($exploreIncrement == 0) {?>
+                          <li class="row">
+                              <?php $getCityImage = Mage::getModel('airhotels/city')->load($key,'city'); ?>
+                              <a href="<?php echo Mage::getBaseUrl() . 'property/property/advsearch/?searchTextField='.urlencode($cityDetails); ?>"
+                                class="matte-media-box" style="background-image: url(
+                              <?php
+                              if($getCityImage->getCityImage() != ''){
+                              		echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$getCityImage->getCityImage());
+                              }else{
+								 echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_SKIN ).'frontend/default/stylish/images/no-image-thumb.jpg'; } ?>)">
+                              <span class="cities_info_overlay"></span>
+                              <span class="world-info"> <?php echo $key;?></span>
+                              </a>
+                          </li><?php
+                          /**
+                          * get popular product id to display in explore world block
+                          */
+                          $getProductId = Mage::getModel ( 'airhotels/property' )->getPopularProperty ();                          
+                          $productIncrement = 0;
+                          foreach ( $getProductId as $_getProductId ) {                          
+                              if ($productIncrement == 0) { ?>
+                                  <li class="margin_right_list"><?php
+                                      /**
+                                      * Displayed verified tags for id,video and document
+                                      */
+                                      $loadProduct  = Mage::getModel ( 'catalog/product' )->load ( $_getProductId ['entity_id'] );
+                                      $customerData = Mage::getModel ( 'airhotels/product' )->getCustomerPictureById ( $loadProduct->getUserid () );
+                                      $customer     = Mage::getModel ( 'customer/customer' )->load ( $loadProduct->getUserid () );                                      
+                                      $popularpdct   = $this->helper ( 'catalog/image' )->init ( $loadProduct, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 315 ); ?>
+                                      <a href="<?php echo Mage::getBaseUrl() . $loadProduct->getUrlPath(); ?>" style="background-image: url(
+                                      <?php if ($loadProduct->getImage () != 'no_selection') {
+                                          echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$loadProduct->getImage ();
+                                      } else {
+                                          echo $loadProduct->getImageUrl ();
+                                      }
+                                      ?>)">
+                                      <span class="cities_info_overlay"></span>
+                                      <span class="world-info m-top admin"><?php
+                                          if (!empty($customerData[0]["imagename"])): ?>
+                                              <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>"
+                                              height="38" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>" title=""><?php
+                                          else: ?>
+                                              <img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>" height="38" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>" title="">
+                                              <?php
+                                          endif; ?>
+                                        <span class="admin_name_home">  <?php echo $customer->getName(); ?></span>
+                                          <span class="citie_s"><?php echo $loadProduct->getCity();?></span>
+                                      </span>
+                                      <span class="price"> <span class="price-tag-price"><?php
+                                          echo $currencySymbol . ' '.round ( Mage::helper ( 'directory' )->currencyConvert ( $loadProduct->getPrice (), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 0 ); ?>
+                                      </span><?php
+                                          $propertyTime = $loadProduct->getPropertyTime (); ?>
+                                      </span>                                      
+                                      </a>
+                                  </li><?php
+                               }
+                              $productIncrement ++;
+                            }
+                            $exploreIncrement++;
+                        } 
+                        if ($exploreIncrement >= 2 && $exploreIncrement <= 4) {?>
+                          <li class="<?php if($exploreIncrement==4){ echo 'margin_right_list'; }?>"><?php
+                              $getCityImage = Mage::getModel ( 'airhotels/city' )->load ( $key, 'city' ); ?>
+                              <a href="<?php echo Mage::getBaseUrl() . 'property/property/advsearch/?searchTextField='.urlencode($cityDetails); ?>"
+                              class="matte-media-box" style="background-image: url(
+                              <?php if($getCityImage->getCityImage() != ''){
+                                    echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$getCityImage->getCityImage());
+                              }else{
+								 echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_SKIN ).'frontend/default/stylish/images/no-image-small.jpg'; ?>
+                              <?php } ?>)">
+                              <span class="cities_info_overlay"></span>
+                              <span class="world-info"> <?php echo $key;?></span>
+                              </a>
+                          </li><?php
+                       }
+                       if ($exploreIncrement == 5) {
+                       /**
+                       * get popular product id to display in explore world block
+                       */
+                      $getProductId = Mage::getModel ( 'airhotels/property' )->getPopularProperty ();
+                      $productIncrement = 0;
+                      if(count($getProductId) > 2){ $productIncrementCount = 2 ;}else{$productIncrementCount = 1 ;}
+                      foreach ( $getProductId as $_getProductId ) {
+                          if ($productIncrement == $productIncrementCount) { ?>
+                            <li><?php
+                                $loadProduct  = Mage::getModel ( 'catalog/product' )->load ( $_getProductId ['entity_id'] );
+                                $customerData = Mage::getModel ( 'airhotels/product' )->getCustomerPictureById ( $loadProduct->getUserid () );
+                                $customer     = Mage::getModel ( 'customer/customer' )->load ( $loadProduct->getUserid () );
+                                $popularpdct  = $this->helper ( 'catalog/image' )->init ( $loadProduct, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 315 ); ?>
+                                <a  href="<?php echo Mage::getBaseUrl() . $loadProduct->getUrlPath(); ?>"
+                                class="matte-media-box" style="background-image: url(<?php
+                                if ($loadProduct->getImage () != 'no_selection') {
+                                    echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$loadProduct->getImage ();
+                                } else {
+                                    echo $loadProduct->getImageUrl ();
+                                }
+                                ?> )">
+                                <span class="cities_info_overlay"></span>
+                                <span class="world-info m-top admin">
+                                <?php                                     
+                                if (!empty($customerData[0]["imagename"])): ?>
+                                        <img src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/" . $customerData[0]["imagename"] ?>" height="38" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>" title=""><?php
+                                    else: ?>
+                                        <img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>" height="38" alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>" title=""><?php
+                                    endif; ?>
+                                   <span class="admin_name_home"> <?php echo $customer->getName(); ?></span>
+                                    <span class="citie_s"><?php echo $loadProduct->getCity();?></span>
+                                </span>
+                                <span class="price">
+                                    <span class="price-tag-price">
+                                    <?php echo $currencySymbol . ' '.round ( Mage::helper ( 'directory' )->currencyConvert ( $loadProduct->getPrice (), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 0 );?>
+                                    </span>
+                                    <?php $propertyTime = $loadProduct->getPropertyTime (); ?>
+                                </span>
+                                	 </a> </li>
+                            <?php }
+                          $productIncrement ++;
+                      }
+                      $getCityImage = Mage::getModel ( 'airhotels/city' )->load ( $key, 'city' );?>
+                      <li class="row"> <a href="<?php echo Mage::getBaseUrl() . 'property/property/advsearch/?searchTextField='.urlencode($cityDetails); ?>" class="matte-media-box" style="background-image: url(
+                          <?php if($getCityImage->getCityImage() != '')
+                          echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).str_replace('\\', '/',$getCityImage->getCityImage());
+                          else echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_SKIN ).'frontend/default/stylish/images/no-image-thumb.jpg'; ?>
+                          )">
+                          <span class="cities_info_overlay"></span>
+                          <span class="world-info"><?php echo $key;?></span>
+                          </a>
+                      </li><?php
+                  }
+              }
+              $exploreIncrement ++;
+            }
+        } else {
+            echo '<div class="emty_grid" style="height: 221px;">' . $this->__ ( 'No Records!' ) . '</div>';
+        } ?>
+      </ul>
+      <?php
+      /**
+       * Explore the world block ends here
+       */
+      ?>
+      <div class="clear"></div>
+      <div id="most-popular-container">
+        <ul class="tab">
+            <li id="menuwhatnew" class="main_link selected">
+                <a href="#whatnew" onclick="showTabs('whatsnew','menuwhatnew')"><?php echo $this->__("What's New"); ?></a>
+            </li>
+            <li id="menuRated" class="main_link">
+                <a href="#mostrated" onclick="showTabs('rated_div','menuRated')"><?php echo $this->__('Most Rated'); ?></a>
+            </li>
+            <li id="menuPopular" class="main_link">
+                <a href="#mostpopular" onclick="showTabs('popular_div','menuPopular')"><?php echo $this->__('Most Popular'); ?></a>
+            </li>
+        </ul>
+        <?php
+        /**
+         * Whats New block experience display code starts here
+         */
+        ?>
+        <div id="whislist_message"></div>
+        <div id="whatsnew" class="main_content" style="display: block;">
+            <ul id="homepage_badges" class="rounded tab-section"><?php
+                $newExperiencecollection = $this->newExperienceCollection ();
+                if (count ( $newExperiencecollection ) != 0) {
+                    $count = 1;
+                    foreach ( $newExperiencecollection as $_newExperiencecollection ) :
+                        if ($count <= count ( $newExperiencecollection )) :
+                          $mainimage = $this->helper ( 'catalog/image' )->init ( $_newExperiencecollection, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 193 )?>
+                          <li class="hosting <?php if($count == 3) { echo 'clear-r' ;}?>">
+                              <a class="explore_world_slider_class" href="<?php echo Mage::getBaseUrl() . $_newExperiencecollection->getUrlPath(); ?>"
+                              style="background-image: url( <?php
+                              if ($_newExperiencecollection->getImage () != 'no_selection') {
+                                echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$_newExperiencecollection->getImage();
+                              } else {
+                                echo $_newExperiencecollection->getImageUrl ();
+                              }
+                              ?>)"><?php
+                              /**
+                               * Displayed verified tags for id,video and document
+                               */
+	                            ?>
+                                 <span class="cities_info_overlay"></span>
+                              </a>
+                              <span class="price"><?php
+                                      echo $currencySymbol .' '. round ( Mage::helper ( 'directory' )->currencyConvert ($_newExperiencecollection->getPrice(), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 2 );
+                                      $propertyTime = $_newExperiencecollection->getPropertyTime ();?>
+                                  </span>
+                              <a href="<?php echo $this->helper('wishlist')->getAddUrl($_newExperiencecollection) ?>" class="wish_list_button link-cart" title="Save this experience to review later"  >
+									<span class="wishlist-icons_<?php echo $_newExperiencecollection->getId(); ?> <?php if(in_array($_newExperiencecollection->getId(),$arrProductIds)){
+											echo ' pink-icon sprimg';
+									}else{
+										echo ' icon sprimg';
+									} ?>"></span>
+							 </a>
+                              <span class="info">
+                                  <strong><?php echo Mage::helper('airhotels/property')->getPropertyName($_newExperiencecollection->getName()); ?>
+
+                                  </strong>
+                              </span>
+                              <div class="search-result-right">
+			                    <div class="search-result-title-left">
+			                        <div class="room_details">
+			              				<span class="city"><?php $str = ucwords($_newExperiencecollection->getCity()).', '.ucwords($_newExperiencecollection->getCountry());
+			              				if (strlen($str) > 20)
+			              					$str = substr($str, 0, 20) . '...';
+			              					echo $str;?></span>
+			                            <div class="search-result-reviews">
+			                            <em class="dot airhotel-sprite"></em>
+			                            <?php
+			                            $rating = Mage::getModel('airhotels/product')->getCustomerRatings($_newExperiencecollection->getId());
+			                            $avgNewExpRating = $sum = 0;
+			                            for ($i = 0; $i < count($rating); $i++) {
+			                                $sum +=$rating[$i]["percent"];
+			                            }
+			                           if(count($rating) != 0){
+			                           $avgNewExpRating = $sum / count($rating);
+			                           }
+			                           $newBlockMethod = new Apptha_Airhotels_Block_Airhotels();
+			                            if ($avgNewExpRating > 1 && $avgNewExpRating <= 20) {
+			                                echo $newBlockMethod->showratingCode(1);
+			                            } else if ($avgNewExpRating > 21 && $avgNewExpRating <= 40) {
+			                                echo $newBlockMethod->showratingCode(2);
+			                            } else if ($avgNewExpRating > 41 && $avgNewExpRating <= 60) {
+			                                echo $newBlockMethod->showratingCode(3);
+			                            } else if ($avgNewExpRating > 61 && $avgNewExpRating <= 80) {
+			                                echo $newBlockMethod->showratingCode(4);
+			                            } else if ($avgNewExpRating > 81 && $avgNewExpRating <= 100) {
+			                                echo $newBlockMethod->showratingCode(5);
+			                            } else {
+			                                echo $newBlockMethod->showratingCode(0);
+			                            }
+			                            ?>
+			                            <em class="dot airhotel-sprite"></em>
+			                            <div class="reviews-count">
+					                        <?php		                                    
+                                            $summaryData = Mage::getModel('review/review_summary')
+                                                					->setStoreId($storeId)
+                                                					->load($_newExperiencecollection->getId());        		                                                                      
+		                                    ?>
+											<div class="respond-review">
+												<span class="reviews_count_no"><?php if($summaryData->getReviewsCount()){
+													echo $summaryData->getReviewsCount();
+												}else{
+													echo "0";
+												}
+												echo strtoupper($this->__(' Reviews'));?></span>
+
+											</div>
+	                                    </div>
+			                        </div>
+		                        </div>
+		                    </div>
+		                </div>
+                          </li><?php
+                        endif;
+                        if($count > 2){
+                          break;
+                        }
+                        $count ++;
+                    endforeach;
+                } else { ?>
+                <li class="homepage_no_records_found"><span><?php echo $this->__('No Records!') ?></span></li><?php
+                } ?>
+            </ul>
+        </div>
+        <?php
+        /**
+        * Whats New block experience display code ends here
+        */
+        /**
+        * Most rated block experience display code starts here
+        */
+        $rateCollection = Mage::getModel ( 'airhotels/property' )->getRatedProperty ();   ?>
+        <div id="rated_div" class="main_content" style="display: none;">
+          <ul id="rated_badges" class="rounded tab-section">
+             <?php
+               if (count ( $rateCollection ) != 0) {
+                  $countRate = 0;
+                  for($s = 0; $s < count ( $rateCollection ); $s ++) {
+                      $rateProduct = $model->load ( $rateCollection [$s] ["entity_id"] ); ?>
+                      <?php
+                      $rateimage = $this->helper ( 'catalog/image' )->init ( $rateProduct, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 193 )?>
+                      <li class="hosting <?php if($s == 2) { echo 'clear-r' ;}?>">
+                          <a class="explore_world_slider_class" href="<?php echo Mage::getBaseUrl() . $rateProduct->getUrlPath(); ?>" style="background: url(<?php
+                              if ($rateProduct->getImage () != 'no_selection') {
+                                echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$rateProduct->getImage ();
+                              } else {
+                                echo $rateProduct->getImageUrl ();
+                              }
+                              ?>)">
+                          </a>
+                           <span class="price"><?php
+                                  echo $currencySymbol .' '. round ( Mage::helper ( 'directory' )->currencyConvert ($rateProduct->getPrice(), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 2 );
+                                  $propertyTime = $rateProduct->getPropertyTime (); ?>
+                              </span>
+                           <a href="<?php echo $this->helper('wishlist')->getAddUrl($rateProduct) ?>" class="wish_list_button link-cart" title="Save this experience to review later"  >
+								<span class="wishlist-icons_<?php echo $rateProduct->getId(); ?> <?php if(in_array($rateProduct->getId(),$arrProductIds)){
+										echo ' pink-icon sprimg';
+								}else{
+									echo ' icon sprimg';
+								} ?>"></span>
+						  </a>
+                          <span class="info">
+                              <strong><?php echo Mage::helper('airhotels/property')->getPropertyName($rateProduct->getName()); ?>
+
+                              </strong>
+                          </span>
+                          <div class="search-result-right">
+			                    <div class="search-result-title-left">
+			                        <div class="room_details">
+			              				<span class="city"><?php $str = ucwords($rateProduct->getCity()).', '.ucwords($rateProduct->getCountry());
+			              				if (strlen($str) > 20)
+			              					$str = substr($str, 0, 20) . '...';
+			              					echo $str;?></span>
+			                            <div class="search-result-reviews">
+			                            <em class="dot airhotel-sprite"></em>
+			                            <?php
+			                            $rating = Mage::getModel('airhotels/product')->getCustomerRatings($rateProduct->getId());
+			                            $avgRateRating = $sum = 0;
+			                            for ($i = 0; $i < count($rating); $i++) {
+			                                $sum +=$rating[$i]["percent"];
+			                            }
+			                           if(count($rating) != 0){
+			                           $avgRateRating = $sum / count($rating);
+			                           }
+			                           $reviewBlockMethod = new Apptha_Airhotels_Block_Airhotels();
+			                            if ($avgRateRating > 1 && $avgRateRating <= 20) {
+			                                echo $reviewBlockMethod->showratingCode(1);
+			                            } else if ($avgRateRating > 21 && $avgRateRating <= 40) {
+			                                echo $reviewBlockMethod->showratingCode(2);
+			                            } else if ($avgRateRating > 41 && $avgRateRating <= 60) {
+			                                echo $reviewBlockMethod->showratingCode(3);
+			                            } else if ($avgRateRating > 61 && $avgRateRating <= 80) {
+			                                echo $reviewBlockMethod->showratingCode(4);
+			                            } else if ($avgRateRating > 81 && $avgNewExpRating <= 100) {
+			                                echo $reviewBlockMethod->showratingCode(5);
+			                            } else {
+			                                echo $reviewBlockMethod->showratingCode(0);
+			                            }
+			                            ?>
+			                            <em class="dot airhotel-sprite"></em>
+			                            <div class="reviews-count">
+					                        <?php
+		                                    $summaryData = Mage::getModel('review/review_summary')
+                                                					->setStoreId($storeId)
+                                                					->load($rateProduct->getId());
+		                                    ?>
+											<div class="respond-review">
+												<span class="reviews_count_no"><?php if(count($summaryData->getReviewsCount()) != ''){
+													echo $summaryData->getReviewsCount();
+												}else{
+													echo "0";
+												}
+												echo strtoupper($this->__(' Reviews'));?></span>
+											</div>
+	                                    </div>
+			                        </div>
+		                        </div>
+		                    </div>
+		                </div>
+                      </li>
+                      <?php
+                      if($countRate >= 2){
+                        break;
+                      }
+                      $countRate ++;
+                   }
+                } else { ?>
+                    <li class="homepage_no_records_found"><span><?php echo $this->__('No Records!') ?></span></li><?php
+                } ?>
+              </ul>
+        </div>
+        <?php
+        /**
+        * Most rated block experience display code ends here
+        */
+
+        /**
+        * Most popular block experience display code starts here
+        */
+        $popularProperty = Mage::getModel ( 'airhotels/property' )->getPopularProperty();?>
+        <div id="popular_div" class="main_content" style="display: none;">
+          <ul id="popular_badges" class="rounded tab-section"><?php
+
+              if (count ( $popularProperty ) != 0) {
+                $countPopular = 0;
+                for($s = 0; $s < count ( $popularProperty ); $s ++) {
+                    $popularCollection = $model->load ( $popularProperty [$s] ["entity_id"] );
+                    $popularImage = $this->helper ( 'catalog/image' )->init ( $popularCollection, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 193 )?>
+                    <li class="hosting <?php if($s== 2) { echo 'clear-r' ;}?>">
+                        <a class="explore_world_slider_class" href="<?php echo Mage::getBaseUrl() . $popularCollection->getUrlPath(); ?>"
+                        style="background: url(
+                        <?php
+                        if ($popularCollection->getImage () != "no_selection") {
+                          echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$popularCollection->getImage ();
+                        } else {
+                          echo $popularCollection->getImageUrl ();
+                        }
+                        ?>)">
+                        </a>
+                         <span class="price"><?php
+                              echo $currencySymbol .' '. round ( Mage::helper ( 'directory' )->currencyConvert ($popularCollection->getPrice(), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 2 );
+                              $propertyTime = $popularCollection->getPropertyTime (); ?>
+                          </span>
+                         <a href="<?php echo $this->helper('wishlist')->getAddUrl($popularCollection) ?>" class="wish_list_button link-cart" title="Save this experience to review later"  >
+								<span class="wishlist-icons_<?php echo $popularCollection->getId(); ?> <?php if(in_array($popularCollection->getId(),$arrProductIds)){
+									echo 'pink-icon sprimg';
+								}else{
+									echo 'icon sprimg';
+								} ?>"></span>
+						 </a>
+                        <span class="info">
+                          <strong><?php echo Mage::helper('airhotels/property')->getPropertyName($popularCollection->getName()); ?>
+
+                          </strong>
+                        </span>
+                        <div class="search-result-right">
+			                    <div class="search-result-title-left">
+			                        <div class="room_details">
+			              				<span class="city"><?php
+			              				$str = ucwords($popularCollection->getCity()).', '.ucwords($popularCollection->getCountry());
+			              				if (strlen($str) > 20)
+			              					$str = substr($str, 0, 20) . '...';
+			              					echo $str;
+			              				?></span>
+			                            <div class="search-result-reviews">
+			                            <em class="dot airhotel-sprite"></em>
+			                            <?php
+			                            $rating = Mage::getModel('airhotels/product')->getCustomerRatings($popularCollection->getId());
+			                            $avgPopularRating = $sum = 0;
+			                            for ($i = 0; $i < count($rating); $i++) {
+			                                $sum +=$rating[$i]["percent"];
+			                            }
+			                           if(count($rating) != 0){
+			                           $avgPopularRating = $sum / count($rating);
+			                           }
+			                           $popularBlockMethod = new Apptha_Airhotels_Block_Airhotels();
+			                            if ($avgPopularRating > 1 && $avgPopularRating <= 20) {
+			                                echo $popularBlockMethod->showratingCode(1);
+			                            } else if ($avgPopularRating > 21 && $avgPopularRating <= 40) {
+			                                echo $popularBlockMethod->showratingCode(2);
+			                            } else if ($avgPopularRating > 41 && $avgPopularRating <= 60) {
+			                                echo $popularBlockMethod->showratingCode(3);
+			                            } else if ($avgPopularRating > 61 && $avgPopularRating <= 80) {
+			                                echo $popularBlockMethod->showratingCode(4);
+			                            } else if ($avgPopularRating > 81 && $avgPopularRating <= 100) {
+			                                echo $popularBlockMethod->showratingCode(5);
+			                            } else {
+			                                echo $popularBlockMethod->showratingCode(0);
+			                            }
+			                            ?>
+			                            <em class="dot airhotel-sprite"></em>
+			                            <div class="reviews-count">
+					                        <?php
+		                                    $summaryData = Mage::getModel('review/review_summary')
+                                                					->setStoreId($storeId)
+                                                					->load($popularCollection->getId());
+		                                    ?>
+											<div class="respond-review">
+												<span class="reviews_count_no"><?php if(count($summaryData->getReviewsCount()) != ''){
+													echo $summaryData->getReviewsCount();
+												}else{
+													echo "0";
+												}
+												echo strtoupper($this->__(' Reviews'));?></span>
+
+											</div>
+	                                    </div>
+			                        </div>
+		                        </div>
+		                    </div>
+		                </div>
+                    </li>
+                    <?php
+                    if($countPopular >= 2){
+                      break;
+                    }
+                    $countPopular ++;
+                  }
+               } else { ?>
+                  <li class="homepage_no_records_found"><span><?php echo $this->__('No Records!') ?></span></li><?php
+               } ?>
+           </ul>
+        </div>
+        <?php
+        /**
+        * Most popular block experience display code ends here
+        */
+        ?>
+      </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var jQ = jQuery.noConflict();
+    function showTabs(id,menuName){
+    	jQuery('#whislist_message').replaceWith('<div id="whislist_message"></div>');
+        jQ(".main_content").hide();
+        jQ(".main_link").removeClass("selected");
+        jQ("#"+menuName).addClass("selected");
+        jQ("#"+id).show();
+    }
+</script>

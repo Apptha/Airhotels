@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <tabs>
+        <Apptha translate="label" module="paypaladaptive">
+            <label>Apptha</label>
+            <sort_order>200</sort_order>
+        </Apptha>
+    </tabs>
+    <sections>
+        <payment>
+            <groups>
+                <paypaladaptive translate="label">
+                    <label>Apptha Paypal Adaptive</label>
+                    <tab>Apptha</tab>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </active>
+                        <sandbox translate="label">
+                            <label>Sandbox Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </sandbox>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title> 
+                        <description translate="label">
+                            <label>Description</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>4</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </description>  
+                        <order_status translate="label">
+                            <label>New Order Status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status_new</source_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </order_status>
+                        <order_success translate="label">
+                            <label>Payment Successful Order Status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paypaladaptive/system_config_source_status</source_model>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </order_success>
+                        <order_refund translate="label">
+                            <label>Enable Refund Process</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </order_refund>
+                        <payment translate="label">
+                            <label>Select Payment Method</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paypaladaptive/system_config_source_payment</source_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </payment>                        
+                        <feepayer translate="label">
+                            <label>Paypal Fee Payer</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paypaladaptive/system_config_source_feepayer</source_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </feepayer>                       
+                        <merchant_paypal_mail translate="label">
+                            <label>Merchant Paypal Mail Address</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchant_paypal_mail> 
+                        <paypal_app_id translate="label">
+                            <label>Paypal Application Id</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>11</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </paypal_app_id> 
+                           <paypal_api_username translate="label">
+                            <label>Paypal API Username</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>12</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </paypal_api_username> 
+                        <paypal_api_password translate="label">
+                            <label>Paypal API Password</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>13</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </paypal_api_password> 
+                        <paypal_api_signature translate="label">
+                            <label>Paypal API Signature</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>14</sort_order>                           
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </paypal_api_signature> 
+                        <model>
+                        </model>
+                    </fields>
+                </paypaladaptive>
+            </groups>
+        </payment>
+    </sections>
+</config>

@@ -1,0 +1,73 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="page-title">
+    <h1><?php echo $this->__('My Product Reviews') ?></h1>
+</div>
+<?php if( $this->getCollection() && $this->count()): ?>
+    <?php echo $this->getToolbarHtml() ?>
+        <table class="data-table" id="my-reviews-table">
+            <col width="1" />
+            <col width="210" />
+            <col width="1" />
+            <col />
+            <col width="1" />
+            <tbody>
+                <?php foreach ($this->getCollection() as $_review): ?>
+                <tr>
+                    <td><span class="nobr"><?php echo $this->dateFormat($_review->getReviewCreatedAt()); ?></span></td>
+                    <td><h2 class="product-name"><a href="<?php echo $this->getProductLink() ?>id/
+                    <?php echo $_review->getEntityPkValue() ?>">
+                    <?php echo $this->htmlEscape($_review->getName()) ?></a></h2></td>
+                    <td>
+                    <?php if($_review->getSum()): ?>
+                        <div class="rating-box">
+                            <div class="rating" style="width:<?php echo  $_review->getSum() / $_review->getCount();  ?>%;"></div>
+                        </div>
+                    <?php endif; ?>
+                    </td>
+                    <td><?php echo $this->helper('review')->getDetailHtml($_review->getDetail()) ?></td>
+                    <td><a href="<?php echo $this->getReviewLink() ?>id/
+                    <?php echo $_review->getReviewId() ?>" class="nobr">
+                    <?php echo $this->__('View Details') ?></a></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <script type="text/javascript">decorateTable('my-reviews-table')</script>
+    <?php echo $this->getToolbarHtml() ?>
+<?php else: ?>
+    <p><?php echo $this->__('You have submitted no reviews.') ?></p>
+<?php endif; ?>
+<div class="buttons-set">
+    <p class="back-link"><a href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>"><small>&laquo; </small>
+    <?php echo $this->__('Back') ?></a></p>
+</div>

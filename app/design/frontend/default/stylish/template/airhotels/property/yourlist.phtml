@@ -1,0 +1,236 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Host Property list page
+ *
+ *  @see Apptha_airhotels_Block_Property_Yourlist
+ */
+?>
+<div id="rooms">
+    <div id="room" class="clearfix">
+        <div id="left_column" style="padding:0">
+            <div id="main_content" class="box">
+                <div class="my-account" style="padding:0">
+                <h1 class="dashboard_leftside_heading"><?php echo $this->__('Manage Listing');?></h1>
+                	<div id="newlist" class="clearfix" style="padding:0 10px 10px 10px;text-align:right">
+                    	<input type="button" class="import_button" id="list" name="list" value="<?php echo $this->__('Post new listing'); ?>" onClick="location.href='<?php echo Mage::getBaseUrl() . 'property/property/form/'; ?>'" />
+                    </div>
+                    <!-- Property List Start-->
+                    <div id="list_div" class="main_content list_right_side_bg"
+					<?php
+					if ($this->getRequest()->getParam('from') || $this->getRequest()->getParam('clear'))
+					    echo " style='display:none' "; else
+					    echo " style='display:block' " ?>
+                         style="display: block;">
+                        <div class="fieldset floatleft" id="manage_list">
+                            <div class="yourlist_main"><?php
+			                $model = Mage::getModel('catalog/product');
+			                $todayDate = strtotime(Mage::app()->getLocale()->date()->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+			                $todayDate = date('m/d/y', $todayDate);
+			                $products = $this->getCollection();
+			                if (count($products) != 0 ) {
+			                   $c = $imageUrlStatusForProperty = 0;
+			                   $preImageUrl = $currentImageUrl = '';
+			                    foreach ($products as $_product) {
+			                    /**
+			                     * For catalog flat enabled
+			                     */
+			                    if (Mage::helper('catalog/category_flat')->isEnabled()) {
+			                    $_product = $model->load($_product->getId());
+			                    $currentImageUrl = $_product->getImage();
+			                    if($preImageUrl == $currentImageUrl && $preImageUrl != ''){
+			                    $imageUrlStatusForProperty = 1;
+			                    }else{
+			                    $imageUrlStatusForProperty = 0;
+			                    }
+			                    $preImageUrl = $_product->getImage();
+			                    }else{
+			                    $imageUrlStatusForProperty = 0;
+			                    }
+                       			$baseurl = Mage::getBaseUrl('media');
+                                $yourlist=$this->helper('catalog/image')->init($_product, 'image')
+				                                ->constrainOnly(TRUE)
+				                                ->keepAspectRatio(TRUE)
+				                                ->keepFrame(FALSE)
+				                                ->resize(63,null)
+                            		?>
+                                        <div class="listing_main">
+                                            <div class="yourlist_img">
+                                            <?php if($_product->getStatus() == 1) { ?>
+                                                <a href="<?php echo $_product->getProductUrl(); ?>" target="_blank" title="<?php print $this->__('Click To Preview'); ?>">
+                                            <?php } ?>
+                                                <?php if ($_product->getImage() && $imageUrlStatusForProperty != 1) { ?> <img
+                                                        src="<?php echo $yourlist; ?>"
+                                                        style="width: 63px !important; height: 53px !important"> <?php } else { ?>
+                                                    <img
+                                                        src="<?php echo $this->getSkinUrl('images/np_more_img.gif'); ?>"
+                                                        style="width: 63px !important; height: 53px !important"> <?php } ?>
+                                                    </a>
+                                                    <div class="listing-info">
+                                                        <div class="clearfix">
+                                                    <div class="listing_user_name"><h5 class="manage_lisitng_title"><a href="<?php echo $_product->getProductUrl(); ?>" target="_blank" title="<?php print $this->__('Click To Preview'); ?>">
+                                                    <?php echo $_product->getName(); ?></a></h5>
+                                                   </div>
+                                                    <div class="slider-widget-container">
+                                                        <ul>
+                                                              <li id="active<?php echo $c; ?>"
+                                                        <?php echo ($_product->getStatus() == 2 && $_product->getPropertyapproved()) ? "style='display:block'" : "style='display:none'"; ?>><a
+
+                                                            title="<?php echo $this->__('click to Active'); ?>" class="hide_grid" id="active"
+                                                            name="active"
+                                                            onClick="airbnbActivate('1','<?php echo $c; ?>','hide<?php echo $c; ?>')" ><span style="font-size:12px;"><?php echo $this->__("HIDDEN"); ?></span></a></li>
+                                                    <li id="hide<?php echo $c; ?>"
+                                                        <?php echo ($_product->getStatus() == 1 && $_product->getPropertyapproved() ) ? "style='display:block'" : "style='display:none'"; ?>><a
+
+                                                           title="<?php echo $this->__('click to Hide') ?>" class="visible_grid" id="deactive"
+                                                            name="active"
+                                                            onClick="airbnbActivate('2','<?php echo $c; ?>','active<?php echo $c; ?>')" ><span style="font-size:12px;"><?php echo $this->__("ACTIVE"); ?></span></a>
+                                                        <input type="hidden" id="productId<?php echo $c; ?>"
+                                                               value="<?php echo $_product->getId(); ?>" /></li>
+                                                    <li id="loadingSpace<?php echo $c; ?>" style="margin-right: 36px;position: relative;"></li>
+                                                        </ul>
+                                                    </div>
+                                                    </div>
+                                                    <div class="actions_grid">
+
+                                                        <strong class="action_button">
+                                                            <a class="icon_list" target="_blank" title="<?php echo $this->__('Schedule') ?>"
+                                                               onClick="location.href='<?php echo Mage::getBaseUrl() . "property/property/blockcalendar/"; ?>id/<?php echo $_product->getId(); ?>'">
+                                                              <i class="airhotel-sprite calendar list_option_icon"></i><span class="manage_list_options"><?php echo $this->__('Schedule') ?></span></a>
+                                                        </strong>
+                                                         <strong class="action_button">
+                                                            <a class="icon_list" target="_blank" title="<?php echo $this->__('Photos') ?>"
+                                                               onClick="location.href='<?php echo Mage::helper('airhotels/product')->getimageurl(); ?>id/<?php echo $_product->getId(); ?>'" >
+                                                               <i class="airhotel-sprite film list_option_icon"></i><span class="manage_list_options"><?php echo $this->__('Photos') ?></span></a>
+                                                        </strong>
+                                                        <strong class="action_button">
+                                                            <a class="icon_list" target="_blank" title="<?php echo $this->__('Reviews') ?>"
+                                                               onClick="location.href='<?php echo Mage::getBaseUrl() . "property/general/review/"; ?>id/<?php echo $_product->getId(); ?>'">
+                                                               <i class="airhotel-sprite file-text-o list_option_icon"></i><span class="manage_list_options"><?php echo $this->__('Reviews') ?></span></a>
+                                                        </strong>
+                                                         <strong class="action_button">
+                                                            <a class="icon_list" title="<?php echo $this->__('Edit') ?>" target="_blank"
+                                                               onClick="location.href='<?php echo Mage::helper('airhotels/product')->getediturl(); ?>id/<?php echo $_product->getId(); ?>'">
+                                                               <i class="airhotel-sprite edit list_option_icon"></i><span class="manage_list_options"><?php echo $this->__('Edit') ?></span></a>
+                                                        </strong>
+                                                          <?php $property_delete_option = Mage::getStoreConfig('airhotels/custom_email/property_delete_option');
+                                                            if(empty($property_delete_option)) {
+                                                            ?>
+                                                         <strong class="action_button">
+                                                            <a class="icon_list" title="<?php echo $this->__('Delete') ?>" onclick="return confirm('<?php echo $this->__('Are you sure want to delete').'?'; ?>')"
+                                                               href="<?php echo Mage::getBaseUrl() . "property/general/delete/"; ?>id/<?php echo $_product->getId(); ?>"  >
+                                                               <i class="airhotel-sprite close list_option_icon"></i><span class="manage_list_options"><?php echo $this->__('Delete') ?></span></a>
+                                                        </strong>
+                                                        <?php } ?>
+                                                    </div>
+                                              <?php  if($_product->getImage()=='' || $imageUrlStatusForProperty == 1) { 	?>
+                                                <span style="color: red;font-weight:100; font-size: 12px;padding:0px;margin: 0 0 0 10px; text-align: left; display: block;"><?php echo $this->__("Your property will not display in front end until images uploaded by you"); ?></span>
+                                            <?php } elseif($_product->getPropertyapproved() == 0) {
+                                            	  ?>
+                                            	   <span style="color: red;font-weight:100; font-size: 12px;padding:0px;margin: 0 0 0 10px; text-align: left; display: block;"><?php echo $this->__("Awaiting for admins approval"); ?></span>
+                                            <?php } ?>
+
+                                                    </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="clearfix"></div>
+
+                                        <?php
+                                        $c++;
+                                    }
+                                    echo $this->getPagerHtml("pager");
+                                } else {  ?>
+                                    <div class="norecords">
+                                        <p class="no_transaction_records"><?php echo $this->__('No Records Found'); ?></p>
+                                    </div>
+                                <?php } ?></div>
+
+                        </div>
+                    </div>
+                    <!-- Property List Ends-->
+                    <div class="clear"></div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();
+    function airbnbActivate(pStatus,buttonId,element)
+    {
+        document.getElementById(element).style.display = "none";
+        document.getElementById("active"+buttonId).style.display ="none";
+        document.getElementById("hide"+buttonId).style.display ="none";
+        document.getElementById("loadingSpace"+buttonId).innerHTML = "<img src='<?php echo $this->getSkinUrl('images/ajax-loader-small.gif'); ?>' />";
+        var xmlhttp = getHttp();
+        xmlhttp.onreadystatechange=function()
+        {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200)
+            {
+                window.location.href = "<?php echo Mage::helper('airhotels/productconfiguration')->getyourlisturl() ?>";
+            }
+        }
+        var productId = document.getElementById("productId"+buttonId).value;
+        xmlhttp.open("GET","<?php echo Mage::getBaseUrl() . 'property/general/status/' ?>"+"?status="+pStatus+"&buttonid="+buttonId+"&productid="+productId,true);
+        xmlhttp.send();
+    }
+    function getHttp(){
+        var xmlhttp;
+        if (window.XMLHttpRequest)
+        {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else
+        {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        return xmlhttp;
+    }
+
+    function propertySearch(){
+        var fromDate = jQuery("#propertyfrom").val();
+        var toDate = jQuery("#propertyTo").val();
+        if(fromDate == "" || fromDate == "yyyy-mm-dd" || toDate == "" || toDate == "yyyy-mm-dd"){
+           alert('<?php echo $this->__("Invalid dates, Please kindly check it."); ?>');
+          return false;
+        }
+    }
+    function clearForm(){
+    	jQ("#propertyfrom").attr("value","yyyy-mm-dd");
+    	jQ("#propertyTo").attr("value","yyyy-mm-dd");
+    	jQ("#bookclear").attr("value","1");
+    }
+</script>

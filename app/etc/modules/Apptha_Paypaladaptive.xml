@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Apptha_Paypaladaptive>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Apptha_Paypaladaptive>
+    </modules>
+</config>

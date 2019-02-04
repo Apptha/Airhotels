@@ -1,0 +1,252 @@
+<?php
+/**
+* Apptha
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the EULA
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://www.apptha.com/LICENSE.txt
+*
+* ==============================================================
+*                 MAGENTO EDITION USAGE NOTICE
+* ==============================================================
+* This package designed for Magento COMMUNITY edition
+* Apptha does not guarantee correct work of this extension
+* on any other Magento edition except Magento COMMUNITY edition.
+* Apptha does not provide extension support in case of
+* incorrect edition usage.
+* ==============================================================
+*
+* @category    Apptha
+* @package     Apptha_Airhotels
+* @version     0.2.9
+* @author      Apptha Team <developers@contus.in>
+* @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+* @license     http://www.apptha.com/LICENSE.txt
+*
+*/
+?>
+<?php
+
+
+?>
+
+
+<?php $subscriptionCollection = Mage::getModel ( 'airhotels/subscriptiontype' )->getCollection();?>
+
+<!-- Div for removing custom option -->
+<div style="display:none;">
+	<div id="wrapper_subscription_option_YYY"
+		class="dont-remove option-box apptha_subscription_div">
+		<table id="subscription_option_YYY"
+			class="form-list border subscription_option apptha_product_subscription_table bordertable"
+			cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr>
+					<td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><select id="subscription_type_YYY"
+						class="select select input-text required-entrycc input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+						onchange="changeSubscriptionOption(YYY)"
+						name="subscription_type[]">
+							<option value="0"><?php echo Mage::helper('airhotels')->__('Choose'); ?></option>
+								<?php
+								foreach ( $subscriptionCollection as $subscription ) {
+									?>
+								<option value="<?php echo $subscription->getId()?>"><?php echo $subscription->getTitle()?></option>
+								<?php } ?>
+						 		
+								</select></td>
+				</tr>
+
+				<tr class = "apptha_trial_period_price_row">
+					<td class="label apptha_trial_price"><label
+						for="trial_period_price" id="trial_period_price_label_YYY"><?php echo Mage::helper('airhotels')->__('Price Per Iteration '); ?> <span
+							class="required"> * </span> </label></td>
+					<td class="value"><input id="trial_period_price_YYY"
+						class="input-text required-entrycc validate-number" type="text"
+						value="" name="trial_period_price[]" /></td>
+				</tr>
+
+				
+				<tr>
+					<td class="label"><span></span></td>
+					<td class="editable_buttons">
+						<button id="delete_product_subscription_option_YYY"
+							title="<?php echo 'Remove'; ?>" type="button"
+							class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+							onclick="removeOption(this)">
+							<span><span><?php echo Mage::helper('airhotels')->__('Remove'); ?></span></span>
+						</button>
+						<button
+							class="button scalable add add-product-subscription_option "
+							type="button"
+							onclick="addOption('wrapper_subscription_option_YYY');">
+							<span><span><?php echo Mage::helper('airhotels')->__('Add'); ?></span></span>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!-- Displaying All options list -->
+<div id="add_subscripition_option_list">
+<?php
+
+$collectionCount = 0;
+
+?>
+	<!-- Div for removing custom option -->
+	<div id="wrapper_subscription_option_<?php echo $collectionCount; ?>"
+		class="dont-remove option-box apptha_subscription_div">
+		<table id="subscription_option_<?php echo $collectionCount; ?>"
+			class="form-list border subscription_option apptha_product_subscription_table bordertable"
+			cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr>
+					<td class="label"><label for="subscription_type"><?php echo Mage::helper('airhotels')->__('Subscription Type'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><select
+						id="subscription_type_<?php echo $collectionCount; ?>"
+						class="select select input-text required-entry input-text_pro apptha_subscription_type apptha_product_subscription_type_select"
+						name="subscription_type[]"
+						onchange="changeSubscriptionOption(<?php echo $collectionCount; ?>)">
+							<option value=""><?php echo Mage::helper('airhotels')->__('Choose'); ?></option>
+							<?php
+							foreach ( $subscriptionCollection as $subscription ) {
+								?>
+								<option value="<?php echo $subscription->getId();?>"><?php echo $subscription->getTitle();?></option>
+								<?php } ?>
+						</select></td>
+				</tr>
+
+				
+
+				<tr>
+					<td class="label"><label for="price_per_iteration"><?php echo Mage::helper('airhotels')->__(' Price Per Iteration'); ?><span
+							class="required"> * </span> </label></td>
+					<td class="value"><input
+						id="price_per_iteration_<?php echo $collectionCount; ?>"
+						class="input-text required-entry validate-number" type="text"
+						value=" " name="price_per_iteration[]" /></td>
+				</tr>
+				<tr>
+					<td class="label"><span></span></td>
+					<td class="editable_buttons">
+						<button
+							id="delete_product_subscription_option_<?php echo $collectionCount; ?>"
+							title="<?php echo 'Remove'; ?>" type="button"
+							class="button scalable delete delete-product-subscription_option apptha-product-subscription-remove"
+							onclick="removeOption(this)" style="">
+							<span><span><?php echo 'Remove'; ?></span></span>
+						</button>
+						<button
+							class="button scalable add add-product-subscription_option "
+							type="button"
+							onclick="addOption('wrapper_subscription_option_<?php echo $collectionCount; ?>');">
+							<span><span> <?php echo 'Add'; ?></span></span>
+						</button>
+
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+<?php
+$collectionCount = $collectionCount + 1;
+?>
+</div>
+
+<script type="text/javascript"> 
+
+    var customOptionCount = 1; 
+    var totalSubscriptionTypeCount = <?php echo count($subscriptionCollection); ?>  
+    function addOption(value) {    
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");
+    var classElementCount = classElementArray.length;  
+    if(classElementCount <= totalSubscriptionTypeCount){
+    var html = $("wrapper_subscription_option_YYY").up("div").innerHTML.replace(/YYY/g, customOptionCount); 
+    var replacedDiv = html.replace(/required-entrycc/g, 'required-entry');  
+    $(value).up('div').insert(replacedDiv);  
+	changeSubscriptionOption(customOptionCount);
+    customOptionCount = customOptionCount + 1;	
+    }
+    else{
+    	alert('There are no more subscription types to be subscribed by this product.');
+    }    
+    updateSelectionBoxOption(); 
+    	
+    }
+             
+    function removeOption(value) {
+    var classElementArray = getClassNameCount("apptha_product_subscription_table");   
+    var classElementCount = classElementArray.length;       
+    var rmid= id;        
+    if(classElementCount <= '2')
+    {
+    alert('You cannot remove this.The product should be subscribed to atleast one subscription type.');
+    //$("apptha_product_subscription_table").setAttribute('disabled',true);
+    
+       }
+    else {
+    value.up('div').remove();
+    } 
+    updateSelectionBoxOption(); 
+    
+    }      
+
+	function getClassNameCount(className)
+    {
+    var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
+    var allElements = document.getElementsByTagName("*");
+    var results = [];
+	var element;
+	for (var i = 1; (element = allElements[i]) != null; i++) {
+    var elementClass = element.className;
+    if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass))
+    results.push(element);
+    }     	   	   	   
+    return results;
+    }
+	   	
+    function changeSubscriptionOption(id){	
+	var selectedValue = $('subscription_type_'+id).getValue();		 	
+	
+	updateSelectionBoxOption();
+    }
+    	        
+    Event.observe(window, "load", function(e){
+    
+	if($('subscription_type_0')){
+		changeSubscriptionOption(0);
+	}
+	
+    });
+    
+    function updateSelectionBoxOption() {
+  	d=document;
+  	subscriptionSelectedArray = [];    	
+  	var selectClassElementArray = getClassNameCount("apptha_product_subscription_type_select");    	 
+  	for (h=0;h<customOptionCount;h++) {
+    if(d.getElementById('subscription_type_'+h)){	             
+    subscriptionSelectedArray[h] = d.getElementById('subscription_type_'+h).value;
+    }
+  	}  	  
+  	for (a=0;a<customOptionCount;a++) {
+  	for (b=1;b<totalSubscriptionTypeCount+1;b++) {
+    if(d.getElementById('subscription_type_'+a)){ 
+  	d.getElementById('subscription_type_'+a).options[b].show();
+  	for (c=0;c<customOptionCount;c++) {
+  	if(d.getElementById('subscription_type_'+a).options[b].value == subscriptionSelectedArray[c]) {
+  	d.getElementById('subscription_type_'+a).options[b].hide();	        
+  	}
+  	}
+    } 
+  	}
+  	}
+    }  
+   
+</script>

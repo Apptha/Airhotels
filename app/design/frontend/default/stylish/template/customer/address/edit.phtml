@@ -1,0 +1,140 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Edit customer address template
+ *
+ * @see Mage_Customer_Block_Address_Edit
+ */
+?>
+<div class="my-account">
+<?php if($this->getTitle()): ?>
+<div class="page-title" style="margin:0;"><h1 class="dashboard_leftside_heading"><?php echo $this->getTitle() ?></h1></div>
+<?php endif; ?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<form action="<?php echo $this->getSaveUrl() ?>" method="post" id="form-validate">
+    <div class="profile_container" style="background:#fff;border:1px solid #ccc;border-bottom:none;padding-bottom:0;border-top:none;">
+    <?php echo $this->getBlockHtml('formkey')?>
+    <input type="hidden" name="success_url" value="<?php echo $this->getSuccessUrl() ?>" />
+    <input type="hidden" name="error_url" value="<?php echo $this->getErrorUrl() ?>" />
+        <ul class="form-list">
+            <li><?php echo $this->getNameBlockHtml() ?></li>
+            <li class="wide">
+                <div class="profile_common_label"><label for="company" class="profile_label"><?php echo $this->__('Company') ?></label></div>
+                <div class="profile_input_section"><input type="text" name="company" id="company" title="<?php echo $this->__('Company') ?>" value="<?php echo $this->escapeHtml($this->getAddress()->getCompany()) ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('company') ?>" /></div>
+            </li>
+            <li>
+               <div class="profile_common_label"><label for="telephone" class="profile_label required"><?php echo $this->__('Telephone') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                <div class="profile_input_section"><input type="text" name="telephone" value="<?php echo $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?php echo $this->__('Telephone') ?>" class="profile_input  <?php echo $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="telephone" /></div>
+            </li>        
+             <li>
+               <div class="profile_common_label"> <label for="fax" class="profile_label"><?php echo $this->__('Fax') ?></label></div>
+                <div class="profile_input_section"><input type="text" name="fax" id="fax" title="<?php echo $this->__('Fax') ?>" value="<?php echo $this->escapeHtml($this->getAddress()->getFax()) ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" /></div>
+            </li>
+        </ul>
+        <ul class="form-list">
+        <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
+            <li class="wide">
+                <div class="profile_common_label"><label for="street_1" class="required profile_label"><?php echo $this->__('Street Address') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+               <div class="profile_input_section"> <input type="text" name="street[]" style="margin-bottom: 6px;" value="<?php echo $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" title="<?php echo $this->__('Street Address') ?>" id="street_1" class="profile_input <?php echo $_streetValidationClass ?>" />
+        <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
+        <?php for ($_i = 2, $_n = $this->helper('customer/address')->getStreetLines(); $_i <= $_n; $_i++): ?>
+               <input type="text" name="street[]" value="<?php echo $this->escapeHtml($this->getAddress()->getStreet($_i)) ?>" title="<?php echo $this->__('Street Address %s', $_i) ?>" id="street_<?php echo $_i ?>" class="profile_input <?php echo $_streetValidationClass ?>" /></div>
+            </li>
+        <?php endfor; ?>
+            <?php if ($this->helper('customer/address')->isVatAttributeVisible()) : ?>
+            <li class="wide">
+                  <div class="profile_common_label"> <label for="vat_id" class="profile_label"><?php echo $this->__('VAT Number') ?></label></div>
+                  <div class="profile_input_section"><input type="text" name="vat_id" value="<?php echo $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?php echo $this->__('VAT Number') ?>" id="vat_id" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" /></div>
+            </li>
+            <?php endif; ?>
+            <li>
+               <div class="profile_common_label"> <label for="city" class="required profile_label"><?php echo $this->__('City') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+               <div class="profile_input_section"><input type="text" name="city" value="<?php echo $this->escapeHtml($this->getAddress()->getCity()) ?>"  title="<?php echo $this->__('City') ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city" /></div>
+                </li>
+                <li>
+                <div class="profile_common_label"><label for="region_id" class="required profile_label"><?php echo $this->__('State/Province') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                 <div class="profile_input_section"> 
+                        <select id="region_id" name="region_id" title="<?php echo $this->__('State/Province') ?>" class="validate-select profile_input" style="display:none;">
+                           <option value=""><?php echo $this->__('Please select region, state or province') ?></option>
+                        </select>
+                        <script type="text/javascript">
+                        //<![CDATA[
+                            $('region_id').setAttribute('defaultValue',  "<?php echo $this->getAddress()->getRegionId() ?>");
+                        //]]>
+                        </script>
+                        <input type="text" id="region" name="region" value="<?php echo $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?php echo $this->__('State/Province') ?>" class="profile_input <?php echo $this->helper('customer/address')->getAttributeValidationClass('region') ?>" />
+            			</div>
+            </li>
+            <li>
+                <div class="profile_common_label"><label for="zip" class="required profile_label"><?php echo $this->__('Zip/Postal Code') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+               <div class="profile_input_section"> <input type="text" name="postcode" value="<?php echo $this->escapeHtml($this->getAddress()->getPostcode()) ?>" title="<?php echo $this->__('Zip/Postal Code') ?>" id="zip" class="profile_input validate-zip-international <?php echo $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" /></div>
+                </li>
+            <li><div class="profile_common_label"><label for="country" class="required profile_label"><?php echo $this->__('Country') ?><i class="airhotel-sprite lock profile_madatory"></i></label></div>
+                 <div class="profile_input_section"><div class="edit_address_select"> <?php echo $this->getCountryHtmlSelect() ?></div></div>
+            </li>
+            <li<?php if($this->canSetAsDefaultBilling()) echo ' class="control default_billing_address"' ?>>
+                <?php if($this->isDefaultBilling()): ?>
+                    <strong><?php echo $this->__('Default Billing Address') ?></strong>
+                <?php elseif($this->canSetAsDefaultBilling()): ?>
+                    <input type="checkbox" id="primary_billing" name="default_billing" value="1" title="<?php echo $this->__('Use as My Default Billing Address') ?>" class="checkbox" /><label for="primary_billing"><i class="sprimg"></i><span><?php echo $this->__('Use as my default billing address') ?></span></label>
+                <?php else: ?>
+                    <input type="hidden" name="default_billing" value="1" />
+                <?php endif; ?>
+            </li>   
+        </ul>
+    </div>
+     <div class="buttons-set" style="clear: both;margin:0;padding:0 10px 10px;border-top: none!important;text-align: right;border: 1px solid #ccc;background-color: #fff;">
+        <p class="required "><i class="airhotel-sprite lock profile_madatory" style="margin:0 4px 0 0"></i><span class="rgba(249, 30, 1, 0.6)!important"><?php echo $this->__('Required Fields'); ?></span></p>
+        <a style="float:left" class="import_button" href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>"><?php echo $this->__('<< Back') ?></a>
+        <button type="submit" title="<?php echo $this->__('Save Address') ?>" class="import_button"><?php echo $this->__('Save') ?></button>
+    </div>
+</form>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+    var dataForm = new VarienForm('form-validate', true);
+    new RegionUpdater('country', 'region', 'region_id', <?php echo $this->helper('directory')->getRegionJson() ?>, undefined, 'zip');
+//]]>
+</script>
+
+    <script>
+jQuery(document).ready(function() {
+	jQuery("input:text, textarea, input:password, select").focus(function(){ 		
+		jQuery(this).css('border', '1px solid #5aaee5');
+		jQuery(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)');
+    });
+	jQuery("input:text ,textarea, input:password, select").blur(function(){ 
+		jQuery(this).css('border', '1px solid #dbdbdb');
+		jQuery(this).css('box-shadow', 'none');
+    });
+});
+</script>

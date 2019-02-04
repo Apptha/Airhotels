@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php 
+/**
+ * Get the property Time label
+ */
+$propertyTimeData = $propertyTimeId = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();
+/**
+ * Get the Wishlist
+ */
+$wishList = Mage::getModel('airhotels/customerphoto')->getWishList();
+$twoDiv = 1;
+/**
+ * Get the Currency Symbol
+ */
+$currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+/**
+ * make sure the the value not empty
+ */
+if (count($wishList) != '') {
+?>
+    <ul>
+    <?php
+    /**
+     * Iterating the $wishlist
+     */
+    foreach ($wishList as $product) {
+/**
+ * Check the modulo twoDiv Value
+ */
+    if($twoDiv%2 == 0 ){
+        $divId='extra';
+       echo '<div class="clear"></div>';
+   }else{
+       $divId='normal';
+   }
+    ?>
+        <li class="home-medium-dealbox<?php echo $divId;?> res_list">
+            <div class="popular_2up_listings_view" class="popular_2up_listings_view">
+                <div class="row2-wishlists-list clearfix">
+                    <div class="wishlists2-list-item twospace_list">
+                        <a href="<?php echo Mage::getBaseUrl() . $product['url_path']; ?>" class="matte2-media-box">
+                            <img src="<?php
+                            /**
+                             * Make sure the the Imge name does not have 'no_selection'
+                             */
+                               if ($product->getImage() != 'no_selection') {
+                               /**
+                                * Get the image base url
+                                */
+                               echo Mage::getBaseUrl('media') . 'catalog/product/' . $product->getImage();
+                                } else {
+/**
+  * get the Image Url
+ */
+                                   echo $product->getImageUrl();
+                                }
+                              ?>" 
+                             width ="460px" height="255px" alt="<?php  echo Mage::helper('airhotels/property')->getPropertyName($product->getName()); ?>" 
+                             title="<?php echo Mage::helper('airhotels/property')->getPropertyName($product->getName()); ?>"/>
+                        
+                    </a>
+                        
+                        <div class="feed_item_view">
+                                        <div class="floatleft"> <a href="<?php echo Mage::getBaseUrl() . $product->getUrlPath(); ?>">
+                                                <span class="h4">
+                                                <?php echo Mage::helper('airhotels/property')->getPropertyName($product->getName()); ?>
+                                                </span><span>
+                                            <?php echo $product->getState() . ',' . $product->getCountry(); ?></span>
+                                            </a>
+                                        </div><div class="popular_price">
+                                            <a href="<?php echo Mage::getBaseUrl() . $product->getUrlPath(); ?>">
+                                                <span class="price-tag-price">
+                                                <?php 
+                                                /**
+                                                 * Get the Vurrency Symbol
+                                                 */
+                                                echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($product['Price'], Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0);?>
+                                                </span>
+                                                <?php
+                                                /**
+                                                 * Get the Ptoperty Time value from the $product Collection
+                                                 */
+                         $propertyTime = $product->getPropertyTime();                                   
+                         /**
+                          * make sure the Hourly Enabled
+                          */
+                         $hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot(); 
+                         if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) { ?>
+                         <span class="price-tag-price-pernight"><?php echo $this->__('Per Hour'); ?></span>    
+                         <?php }else{ ?>
+                         <span class="price-tag-price-pernight"><?php echo $this->__('Per Night'); ?></span>   
+                         <?php } ?>   
+                                            </a> 
+                                        </div>
+                                    </div>
+                </div>
+            </div>
+        </div>
+
+        </li>
+    <?php
+        $twoDiv = $twoDiv + 1;
+    }
+} else {
+    echo '<div class="emty_grid" style="height: 221px;">' . $this->__('No Wishlist!') . '</div>';
+}
+    ?>
+</ul>

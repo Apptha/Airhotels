@@ -1,0 +1,98 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/**
+ * Host Navigation Tabs
+ */
+$request 		   = $this->getRequest('');
+$controllerAction  = $request->getActionName();
+$controller 	   = Mage::app()->getRequest()->getControllerName();
+if($controllerAction == "index") {
+	$controllerAction = Mage::app()->getRequest()->getControllerName();
+}
+if($controllerAction == "history" && $controller != "property") {
+	$controllerAction = Mage::app()->getRequest()->getControllerName();
+}
+$inboxArray 	= array("inbox","senditem","propertyrequest");
+$mylistingArray = array("history","show","review");
+$mytripArray 	= array("requesttrips","yourtrip","currenttrip","previoustrip");
+$profileArray 	= array("profile","uploadphoto","edit","address","abouthost","reviewpage","verification","accountverification");
+$accountArray 	= array("payment","notifications","transactionhistory","security","settings");
+?>
+<div class="block block-account">
+    <div class="block-title arrowbubble"></div>
+    <div class="block-content topmenu">
+    	<h5 id="nav_handle_1" style="margin: 0;"></h5>
+		<ul class="navgation clearfix navigation fs-navigation-element fs-navigation-toggle-nav fs-navigation__2" data-navigation-handle="#nav_handle_1">
+		<?php 
+		  /**
+		   * For Hosts             
+		   */?>
+		   	<?php if (Mage::helper('core/url')->getCurrentUrl() == Mage::helper('airhotels/url')->getDashboardUrl()) { ?>
+				<li class="current"><strong><?php echo $this->__('Dashboard') ?></strong></li>
+			<?php } else {?>
+				<li><a href="<?php echo Mage::helper('airhotels/url')->getDashboardUrl(); ?>"> <?php echo $this->__('Dashboard') ?> </a></li>
+			<?php } ?>
+		   	<?php if (in_array($controllerAction,$inboxArray)) { ?>
+				<li class="current"><strong><?php echo $this->__('Inbox') ?></strong></li>
+			<?php } else {?>
+				<li><a href="<?php echo Mage::helper('airhotels/airhotel')->getInboxUrl(); ?>"> <?php echo $this->__('Inbox') ?> </a></li>
+			<?php } ?>
+			<?php if (in_array($controllerAction,$mylistingArray)) { ?>
+				<li class="current"><strong><?php echo $this->__('My Listings'); ?></strong></li>
+			<?php } else { ?>
+				<li><a href="<?php echo Mage::helper('airhotels/product')->getshowlisturl(); ?>"><?php echo $this->__('My Listings'); ?></a></li>
+			<?php } ?>
+			<?php if (in_array($controllerAction,$mytripArray)) { ?>
+				<li class="current"><strong><?php echo $this->__('My Trips') ?></strong></li>
+			<?php } else { ?>
+				<li><a href="<?php echo Mage::helper('airhotels/product')->getyourtripurl(); ?>"> <?php echo $this->__('My Trips') ?> </a></li>
+			<?php } ?>
+			<?php if (in_array($controllerAction,$profileArray)) { ?>
+				<li class="current"><strong><?php echo $this->__('Profile') ?></strong></li>
+			<?php } else {?>
+				<li><a href="<?php echo Mage::helper('airhotels/url')->getProfileUrl(); ?>"> <?php echo $this->__('Profile') ?> </a></li>
+			<?php } ?>
+			<?php if (in_array($controllerAction,$accountArray)) { ?>
+				<li class="current"><strong><?php echo $this->__('Account') ?></strong></li>
+			<?php } else {?>
+				<li><a href="<?php echo $this->getBaseUrl()."airhotels/dashboard/notifications"; ?>"> <?php echo $this->__('Account') ?> </a></li>
+			<?php } ?>
+		</ul>
+	</div>
+</div>
+<div class="blue_bg"><div class="blue_strip_overlay"></div></div>
+<script>
+var jQ = jQuery.noConflict();
+jQ(document).ready(function() {
+	jQ("#nav_handle_1").click(function(){
+		jQ(".fs-navigation-toggle-nav.fs-navigation__2").slideToggle();
+	})
+});
+</script>

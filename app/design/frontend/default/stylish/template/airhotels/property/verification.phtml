@@ -1,0 +1,127 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ * */
+?>
+<?php
+/**
+ * get Current URL
+ */
+$currentUrl = $this->helper('core/url')->getCurrentUrl();
+/**
+ * set session for URLs relink and Link
+ */
+Mage::getSingleton('customer/session')->setLink($currentUrl);
+Mage::getSingleton('core/session')->setReLink($currentUrl);
+/**
+ * Check if social login is enabaled or not
+ */
+$customer 		= Mage::getSingleton('customer/session')->getCustomer();
+$customerId 	= $customer->getId();
+$customerEmail 	= $customer->getEmail();
+$connectCollection = Mage::getModel('airhotels/customerphoto')->load($customerId);
+/**
+* Checking if the base URL is https or not
+*
+* @return string
+*/
+$currentUrl = Mage::helper('core/url')->getCurrentUrl();
+$secureUrl = strstr($currentUrl, "https");
+if ($secureUrl == true) {
+    $siteBaseUrl = Mage::getUrl('', array('_secure' => true));
+} else {
+    $siteBaseUrl = Mage::getBaseUrl();
+}
+?>
+<div class="verification-block">
+    <div class="panel-body">
+        <div class="row row-table">
+            <div class="col-7 col-middle">
+                <p>
+                    <strong><?php echo $this->__('Verify Your ID'); ?></strong>
+                </p>
+                <p>
+                    <?php echo $this->__("Getting your Verified ID is the easiest way to help build trust in the Airhotels community.  We'll verify you by matching information from an online account to an official ID.")?>
+                </p>
+                <p>
+                    <?php echo $this->__('Or, you can choose to only add the verifications you want below.'); ?>
+                </p>
+            </div>
+            <div class="col-5 col-middle text-center">
+                <div class="verify-button-container">
+                  <i class="trust airhotel-sprite"></i>
+                  <a href="<?php echo $siteBaseUrl . 'airhotels/product/accountverification/'?>" class="import_button"><?php echo $this->__('Verify Me'); ?></a>
+                </div>
+            </div>
+        </div>
+        <div class="panel verified-container">
+          <div class="panel-header">
+            <?php echo $this->__('Your Current Verifications'); ?>
+          </div>
+          <div class="panel-body">
+              <ul class="list-layout edit-verifications-list">
+                <li class="edit-verifications-list-item clearfix email verified">
+                  <h4><?php echo $this->__('Email Address'); ?></h4>
+                  <p class="description">
+                     <?php echo $this->__('You have confirmed your email: ');?><b><?php echo $customerEmail; ?></b><?php echo $this->__('.  A confirmed email is important to allow us to securely communicate with you.');?>
+                  </p>
+                </li>
+                <li class="edit-verifications-list-item clearfix phone verified">
+                  <h4><?php echo $this->__('Phone Number');?></h4>          
+                  <p class="description">
+                    <?php echo $this->__('Rest assured, your number is only shared with another Airhotels member once you have a confirmed property.');?>
+                  </p>
+                </li>                 
+              </ul>
+          </div>
+        </div>        
+    </div>
+</div>
+<script type="text/javascript">
+    //<![CDATA[
+    var socialTwitFrm = new VarienForm('social_tiw_login', true);
+    socialTwitFrm.submit = function() {
+        if (this.validator.validate()) {
+            var form = this.form;
+            doSociallogin(form.id, form.action, 'twitter_error', 'progress_image_twitter');
+        }
+    }.bind(socialTwitFrm);
+    //]]>
+</script>
+<div id="fb-root"></div>
+<script>
+var jQ = jQuery.noConflict();
+jQ(document).ready(function() {
+	jQ(".socialpopup-input-box input").focus(function(){ 		
+		jQ(this).css({backgroundColor: '#bee4fd'});
+	});
+	jQ(".socialpopup-input-box input").blur(function(){ 
+		jQ(this).css({backgroundColor: '#f8f8f8'});
+	});
+});
+</script>

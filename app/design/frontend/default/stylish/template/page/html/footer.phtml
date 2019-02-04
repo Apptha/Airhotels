@@ -1,0 +1,97 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+?>
+
+<div class="footer-container">
+    <div class="footer">
+        <div class="row border-bottom">
+			<div class="column">
+			<?php
+			/**
+			 * Modified currency and language switcher drop down code for design purpose
+			 */
+			 echo $this->getLayout()->createBlock('page/switch')->setTemplate('page/switch/languages.phtml')->toHtml();
+			 echo $this->getLayout()->createBlock('directory/currency')->setTemplate('directory/currency.phtml')->toHtml();
+			 ?>
+	        </div>
+	        <div class="column-row clear-r">
+	            <?php echo $this->getChildHtml() ?>
+	            <?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('sociallinks')->toHtml() ?>
+			</div>
+        </div>
+        <div class="bottom-block">
+          	<?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('add-blocks')->toHtml() ?>
+         	<address><?php echo $this->getCopyright() ?></address>
+            <?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('bottom_footer')->toHtml() ?>
+		</div>
+    </div>
+    <script type="text/javascript">
+	var jQ = jQuery.noConflict();
+	jQ(document).ready(function(){
+		jQ("#back-top").hide();
+		// fade in #back-top
+		jQ(function () {
+			jQ(window).scroll(function () {
+				if (jQ(this).scrollTop() > 100) {
+					jQ('#back-top').fadeIn();
+				} else {
+					jQ('#back-top').fadeOut();
+				}
+			});
+
+			// scroll body to 0px on click
+			jQ('#back-top a').click(function () {
+				jQ('body,html').animate({
+					scrollTop: 0
+				}, 800);
+				return false;
+			});
+		});
+		jQ(".messages").fadeOut(9000);
+	});
+	var popupdisplaystatus = '<?php echo Mage::app()->getRequest()->getParam('login'); ?>';
+	jQ(window).load(function () {
+		if(popupdisplaystatus == 1){
+			apptha_sociallogin();
+		}
+	});
+	</script>
+	<script type="text/javascript">
+    var no_query = jQuery.noConflict();
+no_query(function(){
+no_query('div.sort_grid').jqTransform();
+});
+</script>
+
+    <p id="back-top">
+		<a href="#top" class="sprimg"><span><?php echo $this->__('Top'); ?></span><i class="up_arrow sprimg"></i></a>
+	</p>
+</div>

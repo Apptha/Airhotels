@@ -1,0 +1,90 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+$tagId=Mage::registry('current_tag');
+$tagName=Mage::getModel('tag/tag')->load($tagId)->getName();
+$products=Mage::getResourceModel('tag/product_collection')->addTagFilter($tagId);?>
+<h2 class="tag_list_title"><?php echo $this->__('Experiences tagged under ').$tagName; ?></h2>
+<ul id="world-container">
+<?php foreach($products as $product) {?>
+<li>
+<?php
+$loadProduct = Mage::getModel ( 'catalog/product' )->load ( $product->getId());
+$customerData = Mage::getModel ( 'airhotels/product' )->getCustomerPictureById ( $loadProduct->getUserid () );
+$customer = Mage::getModel ( 'customer/customer' )->load ( $loadProduct->getUserid () );
+$currencySymbol = Mage::app ()->getLocale ()->currency ( Mage::app ()->getStore ()->getCurrentCurrencyCode () )->getSymbol ();
+$verifiedTags=Mage::getModel ( 'airhotels/verifyhost' )->getCollection ()
+->addFieldToFilter('host_id',array('eq'=>$loadProduct->getUserid()))
+->addFieldToFilter('host_tags',array('eq'=>1));
+$popularpdct = $this->helper ( 'catalog/image' )->init ( $loadProduct, 'image' )->constrainOnly ( TRUE )->keepAspectRatio ( FALSE )->keepFrame ( FALSE )->resize ( 308, 315 );
+?>
+ <a
+				href="<?php echo Mage::getBaseUrl() . $loadProduct->getUrlPath(); ?>" style="background-image: url(
+					  <?php if ($loadProduct->getImage () != 'no_selection') {
+							echo Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_MEDIA ).'catalog/product/'.$loadProduct->getImage ();
+						} else {
+							echo $loadProduct->getImageUrl ();
+						}
+						?>)"> <span class="world-info m-top admin">
+ <?php if (!empty($customerData[0]["imagename"])): ?>   
+ <img
+						src="<?php echo Mage::getBaseUrl('media') . "catalog/customer/thumbs/" . $customerData[0]["imagename"] ?>"
+						height="38"
+						alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>"
+						title="">
+ <?php else: ?> 
+ <img src="<?php echo $this->getSkinUrl('images/no_user.jpg'); ?>"
+						height="38"
+						alt="<?php echo Mage::helper('airhotels/property')->getPropertyName($loadProduct->getName()); ?>"
+						title=""> <?php endif; ?>
+    <?php echo $customer->getName(); ?>
+ <span class="citie_s"><?php echo $loadProduct->getCity();?></span>
+				</span> <span class="price"> <span class="price-tag-price">
+                         <?php
+						echo $currencySymbol . round ( Mage::helper ( 'directory' )->currencyConvert ( $loadProduct->getPrice (), Mage::app ()->getStore ()->getBaseCurrencyCode (), Mage::app ()->getStore ()->getCurrentCurrencyCode () ), 0 );
+						?>
+                        </span>
+                         <?php
+						$propertyTime = $loadProduct->getPropertyTime ();
+						$hourlyEnabledOrNot = Mage::helper ( 'airhotels' )->getHourlyEnabledOrNot ();
+						if ($propertyTime == $propertyTimeData && $hourlyEnabledOrNot == 0) {
+							?>    
+                        <span class="price-tag-price-pernight"><?php echo $this->__('Per Hour'); ?></span>    
+                         <?php }else{ ?>    
+                        <span class="price-tag-price-pernight"><?php echo $this->__('Per Night'); ?></span>
+                         <?php } ?>
+               </span>
+                <?php if(count($verifiedTags)>0) {?>
+                    <span class="verified"> <i></i><span>Verified</span></span>
+				<?php } ?>
+			</a>
+			</li>
+<?php }?>
+</ul>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">  
+    <paypaladaptiveadmin_adminhtml_paymentdetails_index>
+        <reference name="content">
+            <block type="paypaladaptive/adminhtml_paymentdetails" name="paymentdetails" />
+        </reference>
+    </paypaladaptiveadmin_adminhtml_paymentdetails_index> 
+     <paypaladaptiveadmin_adminhtml_refunddetails_index>
+        <reference name="content">
+            <block type="paypaladaptive/adminhtml_refunddetails" name="refunddetails" />
+        </reference>
+    </paypaladaptiveadmin_adminhtml_refunddetails_index> 
+        <paypaladaptiveadmin_adminhtml_preapprovaldetails_index>
+        <reference name="content">
+            <block type="paypaladaptive/adminhtml_preapprovaldetails" name="preapprovaldetails" />
+        </reference>
+    </paypaladaptiveadmin_adminhtml_preapprovaldetails_index> 
+</layout>

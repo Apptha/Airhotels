@@ -1,0 +1,122 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magento.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magento.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php /** @var $this Mage_Sales_Block_Order_Info */ ?>
+<?php $_order = $this->getOrder() ?>
+<?php echo $this->getMessagesBlock()->toHtml() ?>
+<div class="page-title title-buttons">
+    <h1><?php echo $this->__('Booking #%s - %s', $_order->getRealOrderId(), $_order->getStatusLabel()) ?></h1>
+    <?php echo $this->getChildHtml('buttons') ?>
+</div>
+<?php echo $this->getStatusHistoryRssUrl($_order) ?>
+<dl class="order-info">
+    <dt><?php echo $this->__('About This Booking:') ?></dt>
+    <dd>        
+        <ul id="order-info-tabs">
+        	<li class="current"><?php echo $this->__('Booking Information'); ?></li>           
+        </ul>        
+    </dd>
+</dl>
+<p class="order-date"><?php echo $this->__('Booking Date: %s', $this->formatDate($_order->getCreatedAtStoreDate(), 'long')) ?></p>
+<?php if (!$_order->getIsVirtual()): ?>
+<div class="col2-set order-info-box">
+    <div class="col-1">
+        <div class="box">
+            <div class="box-title">
+                <h2><?php echo $this->__('Shipping Address') ?></h2>
+            </div>
+            <div class="box-content">
+                <address><?php echo $_order->getShippingAddress()->format('html') ?></address>
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="box">
+            <div class="box-title">
+                <h2><?php echo $this->__('Shipping Method') ?></h2>
+            </div>
+            <div class="box-content">
+                <?php if ($_order->getShippingDescription()): ?>
+                    <?php echo $this->escapeHtml($_order->getShippingDescription()) ?>
+                <?php else: ?>
+                    <p><?php echo $this->helper('sales')->__('No shipping information available'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+<div class="col2-set order-info-box">
+    <div class="col-1">
+        <div class="box">
+            <div class="box-title">
+                <h2><?php echo $this->__('Billing Address') ?></h2>
+            </div>
+            <div class="box-content">
+                <address><?php //echo $_order->getBillingAddress()->format('html')
+					/**
+					 * Display customer billing address
+					 * Name
+					 * Street
+					 * city
+					 * postcode
+					 * region
+					 * telephone number
+					 *
+					 */
+					$biladdr_entity_id = $_order['billing_address_id']; 
+					$billingaddress = Mage::getModel('sales/order_address');
+					$billingaddress->load($biladdr_entity_id);
+					$billaddgetdat = $billingaddress->getData();
+					echo '<span>'.$billaddgetdat['firstname'] . ' ' . $billaddgetdat['lastname'] . '</span>';
+					echo '<span>'.$billaddgetdat['street'] . '</span>';
+					echo '<span>'.$billaddgetdat['city'] . ', </span>';
+					echo '<span>'.$billaddgetdat['postcode']  . '</span>';
+					if($billaddgetdat['region'] != '-'){
+						echo '<span>'.$billaddgetdat['region'] . '</span>';
+					}
+					$countryName = Mage::getModel('directory/country')->load($billaddgetdat['country_id'])->getName();
+					if( $countryName != '-'){
+						echo '<span>'.$countryName. '</span>';
+					}
+					echo '<span>'.'T:' . ' ' . $billaddgetdat['telephone'] . '</span>';
+					echo '<span>'.'F:' . ' ' . $billaddgetdat['fax'] . '</span>';
+					?>
+				</address>
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="box box-payment">
+            <div class="box-title">
+                <h2><?php echo $this->__('Payment Method') ?></h2>
+            </div>
+            <div class="box-content">
+                <?php echo $this->getPaymentInfoHtml() ?>
+            </div>
+        </div>
+    </div>
+</div>

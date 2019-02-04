@@ -1,0 +1,190 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */ 
+$contacts = $this->getinvitefriends(); ?>
+<div class="appenddiv"></div>
+<form name="myform" action="<?php echo Mage::getBaseUrl() . "property/property/invitefriendsemail" ?>" method="post">
+  	<ul class="invite_friend_section clearfix">
+	  <?php 
+	      $inc = 1;
+	      foreach($contacts as $contact) { ?>   
+	          <li class="friend" id="checkboxes">
+	          		<input type="checkbox" name="option" class="option invite_checkbox" value="<?php echo $contact['email'] ?>" onClick="checkboxes();" />
+	           		<i class="sprimg"></i>
+		            <input type="hidden" name="friendsname" class="friendsname" value="<?php echo $contact['name']; ?>"/>
+		            <label class="invite_friends_select" id="checkedboxprop">	             
+	              	<div class="individual email-id">           
+	                  <div class="invite_friends_image"> 
+	                      <?php             
+	                      if($contact['image'] == 'Photo not found'){
+	                        $imgData = Mage::getBaseUrl ( Mage_Core_Model_Store::URL_TYPE_SKIN ).'frontend/default/stylish/images/home_no_user.jpg';?>
+	                        <img src="<?php echo $imgData; ?>" />              
+	                        <?php 
+	                      }else{
+	                        $imgData = base64_encode($contact['image']);?>
+	                        <img src="data:image/jpeg;base64,<?php echo $imgData; ?>" /><?php            
+	                      } ?>              
+	                  </div>            
+	                  <div class="invite_friends_name">
+	                    <span class="name"><?php echo $contact['name']; ?></span>   
+	                    <span class="email"><?php echo $contact['email']; ?></span>
+	                  </div>          
+	              </div> 
+	            </label>                   
+	          </li>
+	          <?php   
+	          $inc++;
+	       } ?>
+	</ul>
+<div>
+	<div class="invite_friends_actionbuttons">
+		<p class="invite_checkallbutton"><i class="fa fa-group invite_btn_icon"></i><input style="cursor:pointer" id="checkallinvite_friends" type="button" name="Check_All" value="Check All" onClick="Check(document.myform.option)"></p>
+		<p class="invite_sendbutton"><i class="fa fa-send invite_btn_icon"></i><input style="cursor:pointer" type="button" name="submit" id="submit" value="Send 0 Invitations"/></p>
+	</div>
+</div>
+<div id="output"></div>
+<div id="overlay" class="web_dialog_overlay">
+	<div style="display: table-cell;vertical-align:middle;">     
+		<div id="dialog" class="web_dialog">   
+		   <div class="phone_verify_close" id="popupclosesection"><span class="btnClose closebutton" id="btnClose"><i class="airhotel-sprite close close_icon_btn"></i></span></div>  
+		    <div class="invitefriends_content">
+		        <h3 style="margin-bottom:10px;color:#0a263c;" class="verify_phone_number_title"><?php echo $this->__('Message'); ?></h3>
+		        <div><textarea style="margin-bottom:10px;width:97%;" rows="8" id="message" name="message" style="color: #000;border:1px solid #A8A5A5" value=""></textarea></div>      
+		    </div>        
+		    <div class="invite_popup_send">
+		    	<span>
+		    	<i class="fa fa-send" style="margin:0 0 0 4px;"></i>
+		        <input style="cursor:pointer;" type="button" class="blue" id="inboxMessageSubmitButton" value="<?php echo $this->__("Send Email") ?>" />
+		        </span>
+		    </div>    
+		</div>
+	</div>
+</div>
+</form>
+<script>
+jQ = jQuery.noConflict();
+function checkboxes(){
+ var inputElems = document.getElementsByTagName("input"),
+  count = 0;
+  for (var i=0; i<inputElems.length; i++) {       
+     if (inputElems[i].type == "checkbox" && inputElems[i].checked == true){
+        count++;
+        document.getElementById('submit').value = 'Send '+count+' Invitations';      
+     }
+  }
+}
+function Check(chk){
+  count = 0;
+  if(document.myform.Check_All.value=="Check All"){
+    for (var i = 0; i < chk.length; i++){    
+    chk[i].checked = true ;    
+    document.myform.Check_All.value="UnCheck All";
+    document.getElementById('submit').value = 'Send '+chk.length+' Invitations';
+    }
+  }else{  
+    for (var i = 0; i < chk.length; i++){    
+    chk[i].checked = false ;    
+    document.myform.Check_All.value="Check All";
+    document.getElementById('submit').value = 'Send '+count+' Invitations'; 
+    }
+  }
+}
+jQ(document).ready(function (){
+   jQ("#submit").click(function (e){	      
+       ShowDialog(true);
+       e.preventDefault();
+    });
+    jQ("#btnClose").click(function (e){
+       HideDialog();
+       e.preventDefault();
+    });               
+});
+function ShowDialog(modal){
+	jQ("#overlay").show().attr('style','display: table');
+   jQ("#dialog").fadeIn(300);
+   if (modal){
+      jQ("#overlay").unbind("click");
+   }else{
+      jQ("#overlay").click(function (e){
+         HideDialog();
+      });
+   }
+}
+function HideDialog(){
+	jQ("#overlay").hide().attr('style','');
+   jQ("#dialog").fadeOut(300);
+}
+jQ(document).ready(function() {
+  var emailArray = [];
+  var nameArray = [];
+  jQ('#inboxMessageSubmitButton').click(function() {  	  
+  	  jQ(".option:checked").each(function(){      	
+        	emailArray.push(jQ(this).val());
+        	nameArray.push($jQ(this).siblings('input.friendsname').val());    
+        });
+  	  var message = jQ("#message").val();
+  	  jQ.ajax({ 
+  		data: {email:emailArray,name:nameArray},// ajax call starts
+        url: "<?php echo Mage::getBaseUrl() . 'property/property/invitefriendsemail/message/'?>"+message,          
+        type: "POST",
+        success: function(data){ 
+        	emailArray=[];
+        	nameArray=[];     	
+        	HideDialog();
+        	window.location.href = "<?php echo Mage::getBaseUrl().'property/invitefriends/invite'?>";
+          }
+      });
+      
+  });
+});
+</script>
+<script>
+jQ(function () {
+	jQ('.invite_checkbox').click(function () { 
+    	if(jQ(this).is(':checked')){     	  
+    	    jQ(this).parent('li').find('.invite_friends_select').addClass('checkall_invite');
+    	}else{    		
+    		jQ(this).parent('li').find('.invite_friends_select').removeClass('checkall_invite');
+    		
+        }
+    });
+});
+</script>
+<script>
+jQ(function () {
+	jQ('#checkallinvite_friends').click(function () { 
+    	var checkVal = jQ(this).val();
+    	if(checkVal == 'UnCheck All'){
+    		jQ('.invite_friends_select').addClass('checkall_invite');
+        }else{
+        	jQ('.invite_friends_select').removeClass('checkall_invite');
+        }
+    });
+});
+</script>

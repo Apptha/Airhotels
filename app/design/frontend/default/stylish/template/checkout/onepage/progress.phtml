@@ -1,0 +1,57 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<div class="block block-progress opc-block-progress">
+    <div class="block-title">
+        <strong><span class="checkout-title-ab"><?php echo $this->__('Your Checkout Progress') ?></span></strong>
+    </div>
+    <div class="block-content">
+        <dl>
+            <?php if ($this->getCheckout()->getStepData('billing', 'is_show')): ?>
+            <div id="billing-progress-opcheckout"><?php echo $this->getChildHtml('billing.progress') ?>
+            </div><?php endif; ?>
+
+            <?php if ($this->getCheckout()->getStepData('shipping', 'is_show')): ?>
+            <div id="shipping-progress-opcheckout"><?php echo $this->getChildHtml('shipping.progress') ?>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($this->getCheckout()->getStepData('shipping_method', 'is_show')): ?>
+            <div id="shipping_method-progress-opcheckout">
+                <?php echo $this->getChildHtml('shippingmethod.progress') ?></div>
+            <?php endif; ?>
+
+            <?php if ($this->getCheckout()->getStepData('payment', 'is_show')): ?>
+            <div id="payment-progress-opcheckout">
+                <?php echo $this->getChildHtml('payment.progress') ?>
+            </div><?php endif; ?>
+        </dl>
+    </div>
+</div>

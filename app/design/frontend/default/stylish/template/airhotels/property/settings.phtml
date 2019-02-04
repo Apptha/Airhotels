@@ -1,0 +1,155 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$baseUrl = $this->getBaseUrl();
+$skinUrl = $this->getSkinUrl();
+$hostId = Mage::getSingleton('customer/session')->getId();
+$host = Mage::getSingleton('customer/session')->getCustomer();
+/**
+ * First Name
+ */
+$hostFirstName = $host->getFirstname();
+$customerData = Mage::getModel('airhotels/product')->getCustomerPictureById($hostId);
+?>
+<div class="my-account">
+<div class="personal-info">
+    <div class="page-title" style="margin:0;">
+    <h1 class="dashboard_leftside_heading"><?php echo $this->__('Country of Residence') ?></h1>
+</div>
+<div class="profile_information_body">
+<form action="<?php echo Mage::getBaseUrl()."property/dashboard/residencesave" ?>" method="post" id="form-validate" role="form" enctype="multipart/form-data">
+    <div class="profile_container" style="border-top:none">
+        <div class="clear"></div>
+        <ul class="form-list profile_info">
+        	<li>
+            	 <div id="host_firstName" class="form-space">
+             		<div class="profile_common_label"><label class="profile_label"><?php echo $this->__('Country of Residence') ?></label></div>
+             		 <div class="profile_input_section">
+             		<?php
+                    $_countries = Mage::getResourceModel('directory/country_collection')
+                            ->loadData()
+                            ->toOptionArray(false);
+                    	if (count($_countries) > 0) { ?>
+                        <select name="host_country" id="host_country" class="validate-select profile_input">
+                            <?php foreach ($_countries as $_country) { ?>
+                                <option value="<?php echo $_country['value']; ?>" <?php echo $customerData[0]['country'] == $_country['value'] ? ' selected="selected"' : ''; ?>>
+                            <?php echo $_country['label'] ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    <?php } ?>
+                    <p class="profile_hint_text"><?php echo $this->__("Click to save 'Country of Residence' to confirm.");?></p>
+              		</div>
+             	</div>
+        	</li>
+            <li>
+                <button style="float:right;" type="submit" title="<?php echo $this->__('Save Country of Residence') ?>" class="import_button"><?php echo $this->__('Save Country of Residence') ?></button>
+            </li>
+            </ul>
+            </div>
+            <div class="profile_container" style="padding:0;margin:30px 0 0 0">
+            <h1 class="dashboard_leftside_heading" style="border-top:none;border-right:none;border-left:none;">Cancel Account</h1>
+            <ul class="form-list profile_info">
+        	<li style="padding:10px;">
+            	 <div id="host_firstName" class="form-space">
+            	 <p class="profile_hint_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+            	 Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a
+            	 galley of type and scrambled it to make a type specimen book.</p>
+            	 <p style="text-align:right;margin:10px 0"><input type="button" id="btnShowModal" class="verify_profile_no" value="<?php echo $this->__("Cancel Account"); ?>"/></p>
+            	 </div>
+            </li>
+
+        </ul>
+    </div>
+
+    </form></div>
+    </div></div>
+    <div id="output"></div>
+	<div id="overlay" class="web_dialog_overlay">
+	<div style="display: table-cell;vertical-align:middle;">
+	<div id="dialog" class="web_dialog">
+	<div class="phone_verify_close" id="popupclosesection"><span class="btnClose closebutton" id="btnClose"><i class="airhotel-sprite close close_icon_btn" style="right:-6px"></i></span></div>
+		<div class="phonenumber-error"></div>
+		<div class="phone_container">
+			<h3 style="margin-bottom:10px;" class="verify_phone_number_title"><?php echo $this->__("Cancel My Account");?></h3>
+    		<form class="form-verify phone_number_verify" role="form" id="message_form" method="POST" action="<?php echo Mage::getBaseUrl() . 'property/dashboard/cancelaccount/'?>">
+    			<div class="clearfix choose_number">
+    			<span for="phonenumber" class="label_phonenumber"><?php echo $this->__("Send request to admin with your message");?><em>*</em></span>
+    			<input type="hidden" name="hostId" value="<?php echo $hostId;?>"/>
+    			<textarea rows="10" id="cancel_message" name="message" class="required-entry" style="resize: none;"></textarea>
+       			</div>
+       			<span class="form_verify_error" id="form_verify_error" style="display:none;"></span>
+       			<span id="verify_form_loader" class="verify_form_loader"></span>
+       			<div class="popup_verify_button"><button style="width: 100%	;height: auto;box-sizing: border-box;font-size: 18PX;font-family: 'Droid Sans', 'Belgrano', sans-serif;border-radius: 3px;float: none;text-align: center;" class="btn btn-lg btn-primary btn-block" type="submit" id="verify_form_submit"><?php echo $this->__("Send Request");?></button></div>
+    		</form>
+		</div> <!-- /container -->
+		<div class="confirmation-code" style="display:none;">
+  			<h3 class="form-verify-heading"><?php echo $this->__("Confirm Your Code");?></h3><span class="" id="current_phone_number" style="display:block;margin:0 0 20px;"></span>
+  			<input style="box-sizing: border-box;margin-bottom: 28px;" name="code" id="code" type="text" class="form-control" placeholder="Confirm code" required autofocus><span class="form_verify_error" id="code_verify_error" style="display:none;">
+  			</span>
+  			<span id="confirm_form_loader" class="confirm_form_loader">
+  			</span>
+  			<button class="btn btn-lg btn-primary btn-block" id="confirm_form_submit" type="button" onclick="codeverification();"><?php echo $this->__("Confirm");?>
+  			</button><div class="alert alert-info" id="confirm_alert" role="alert" style="display:none";>
+     	 	</div>
+		</div>
+	</div>
+	</div>
+    </div>
+		<script type="text/javascript">
+		$jQ = jQuery.noConflict();
+		var formValidate = new VarienForm('form-validate', true);
+		var messageForm = new VarienForm('message_form', true);
+		$jQ(document).ready(function () {
+  		$jQ("#btnShowSimple").click(function (e) {
+  			ShowDialog(false);
+  			e.preventDefault();
+  		});
+		$jQ("#btnShowModal").click(function (e)	{
+  			ShowDialog(true);
+  			e.preventDefault();
+  		});
+  		$jQ("#btnClose").click(function (e)	{
+  			HideDialog();
+  			e.preventDefault();
+  		});
+		});
+  		function ShowDialog(modal) {
+  		$jQ("#overlay").show().attr('style','display: table');
+  		$jQ("#dialog").fadeIn(300);
+  			if (modal){  $jQ("#overlay").unbind("click");  }
+  			else{
+  			   	$jQ("#overlay").click(function (e){   HideDialog();    });
+  			}
+   	   	}
+  		function HideDialog(){
+  				$jQ('.phone_container').show();
+				$jQ('.confirmation-code').hide();  $jQ("#overlay").hide().attr('style','');   $jQ("#dialog").fadeOut(300);
+  		  	}
+  </script>

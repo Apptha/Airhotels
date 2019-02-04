@@ -1,0 +1,109 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ * 
+ */
+?>
+<?php 
+/**
+ * This list.phtml page has been used for the customer reviews 
+ */
+?>
+<?php 
+/**
+ * Get Reviews Collection for getItems
+ */
+ $_items = $this->getReviewsCollection()->getItems();?>
+<div class="box-collateral box-reviews" id="customer-reviews">
+    <?php 
+    /**
+     * Get the items from the Colletion
+     */
+    if (count($_items)):?>
+        <h2><?php echo $this->__('Customer Reviews') ?></h2>
+        <?php echo $this->getChildHtml('toolbar') ?>
+        <dl>
+        <?php
+        /**
+         * Itearating the loop
+         */
+         foreach ($_items as $_review):?>
+            <dt>
+                <a href="#customer-reviews"><?php echo $this->htmlEscape($_review->getTitle()) ?></a> 
+                <?php echo $this->__('Review by <span>%s</span>', $this->htmlEscape($_review->getNickname())) ?>
+            </dt>
+            <dd>
+                <?php 
+                /**
+                 * Assign the Vlauer to $votes
+                 */
+                $_votes = $_review->getRatingVotes(); ?>
+                <?php if (count($_votes)): ?>
+                <table class="ratings-table">
+                    <col width="1" />
+                    <col />
+                    <tbody>
+                        <?php foreach ($_votes as $_vote): ?>
+                        <tr>
+                            <th><?php 
+                            /**
+                             * escaping the Html Value
+                             */
+                            echo $this->escapeHtml($_vote->getRatingCode()) ?></th>
+                            <td>
+                                <div class="rating-box">
+                                    <div class="rating" style="width:<?php echo $_vote->getPercent() ?>%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php endif; ?>
+                <?php 
+                /**
+                 * Escaping the HTML Value
+                 */
+                echo nl2br($this->htmlEscape($_review->getDetail())) ?>
+                <small class="date"><?php echo $this->__('(Posted on %s)', $this->formatDate($_review->getCreatedAt()), 'long') ?></small>
+            </dd>
+        <?php endforeach; ?>
+        </dl>
+        
+        <?php 
+        /**
+         *
+         * Get the ChildHtml Value for 'reviews'
+         */
+        echo $this->getChildHtml('toolbar') ?>
+    <?php endif;?>
+    <?php 
+    /**
+     * Get the ChildHtml Value for 'reviews'
+     */
+    echo $this->getChildHtml('review_form') ?>
+</div>

@@ -1,0 +1,109 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php global $taxIter; 
+  $taxIter++; ?>
+  <!-- Calculating tax starts -->
+<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue()!=0): ?>
+<?php $isTop = 1; ?>
+            <?php 
+            /**
+             * Iterating loop
+             */
+            
+            foreach ($this->getTotal()->getFullInfo() as $info): ?>
+                <?php if (isset($info['hidden']) && $info['hidden']){
+                continue; 
+                }?>
+                <?php 
+                /**
+                    Getting percent
+                 */
+                $percent = $info['percent']; ?>
+                <?php
+                    /**
+                    getting amount
+                    */
+                
+                $amount = $info['amount']; ?>
+                <?php 
+                /**
+                Getting rates
+                 */
+                
+                $rates = $info['rates']; ?>
+                <?php $isFirst = 1; ?>
+
+                <?php foreach ($rates as $rate): ?>
+                <tr class="summary-details-<?php echo $taxIter; ?> 
+                summary-details<?php if ($isTop): 
+                echo ' summary-details-first'; 
+                endif; ?>" style="display:none;">
+                    <td class="a-right" style="<?php echo $this->getTotal()->getStyle() ?>" 
+                    colspan="<?php echo $this->getColspan(); ?>">
+                        <?php echo $rate['title']; ?>
+                        <?php if (!is_null($rate['percent'])): ?>
+                            (<?php echo (float)$rate['percent']; ?>%)
+                        <?php endif; ?>
+                        <br />
+                    </td>
+                    <!-- calculate the total Checkout Value  -->
+                    <?php if ($isFirst): ?>
+                        <td rowspan="<?php echo count($rates); ?>" class="a-right" 
+                        style="<?php echo $this->getTotal()->getStyle() ?>">
+                            <?php echo $this->helper('checkout')->formatPrice($amount); ?>
+                        </td>
+                    <?php endif; ?>
+                </tr>
+                <?php $isFirst = 0; ?>
+                <?php $isTop = 0; ?>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+<?php endif;?>
+<!--  tax total-->
+<tr<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue()!=0): ?> 
+class="summary-total" onclick="expandDetails(this, '.summary-details-<?php echo $taxIter;?>')"<?php endif; ?>>
+    <td class="a-right" colspan="<?php echo $this->getColspan(); ?>" 
+     style="<?php echo $this->getTotal()->getStyle() ?>">
+        <?php if ($this->helper('tax')->displayFullSummary()): ?>
+            <div class="summary-collapse"><?php echo $this->getTotal()->getTitle() ?></div>
+        <?php else: ?>
+            <?php echo $this->getTotal()->getTitle() ?>
+        <?php endif;?>
+    </td>
+    <td class="a-right" style="<?php
+/**
+ * Displaying total
+ */
+    echo $this->getTotal()->getStyle() ?>">
+        <strong><?php echo $this->helper('checkout')->formatPrice($this->getTotal()->getValue()) ?></strong>
+    </td>
+</tr>
+<!-- Calculating tax ends -->

@@ -1,0 +1,177 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+
+<?php
+/**
+Getting Product Id
+ */
+
+$productId = Mage::getSingleton('core/session')->getHourlyProductId();
+/**
+ * For hourly wise property
+ */  
+$propertyTime = Mage::getModel('catalog/product')->load($productId)->getPropertyTime();
+$propertyTimeData = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId(); 
+/**
+Getting number of accomodates
+ */
+$seats = (int) Mage::getSingleton('core/session')->getAccomodate();
+?>
+
+<?php echo $this->getChildHtml('items_before'); ?>
+<div id="checkout-review-table-wrapper">
+    <table class="data-table" id="checkout-review-table">
+        <?php if ($this->helper('tax')->displayCartBothPrices()): 
+        $colspan = $rowspan = 2; 
+        else: 
+        $colspan = $rowspan = 1; 
+        endif; ?>
+        <col />
+        <col width="1" /><col width="1" /><col width="1" />
+        <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
+        <col width="1" /><col width="1" />
+        <?php endif; ?>
+        <thead>
+            <tr>
+                <th rowspan="1">
+                        <h3 class="product-name"  ><?php echo $this->__('Name') ?>
+                    <?php  
+                    /**
+                        Getting Id
+                     */
+                   $subId = Mage::getSingleton('core/session')->getSubId();
+                    ?>
+   </h3>
+                            
+                </th>
+                <?php 
+                /**
+                 * Displaying checkin
+                 * checkout
+                 * accomodates
+                 * no of hours
+                 * overnigh fee
+                 * no of days
+                 */
+                
+                
+                ?>
+                <th><?php echo $this->__('Check In') ?></th>         
+                <th><?php echo $this->__('Check Out') ?></th> 
+                <?php if($seats > 0){ ?>
+                <th><?php echo $this->__('Accomodate(s)') ?></th>
+                <?php } ?>
+                <?php if($propertyTime == $propertyTimeData){
+                $hourlyNightFee = Mage::getSingleton('core/session')->getHourlyNightFee(); ?>
+                <th colspan="<?php echo $colspan ?>" class="a-center">
+                <?php echo $this->__('No. of hour(s)') ?></th>
+                <?php if(!(empty($hourlyNightFee))  &&  ($hourlyNightFee >= 1) ){  ?>
+                <th colspan="<?php echo $colspan ?>" class="a-center">
+                <?php echo $this->__('Overnight Fee') ?><br />
+                <?php echo '('.$this->__('Per Night').')'; ?></th>
+                <?php } ?>                               
+                <?php }else{ ?>
+                <th colspan="<?php echo $colspan ?>" class="a-center">
+                <?php echo $this->__('No. of day(s)') ?>
+                
+                </th>                
+                <?php } ?>
+                <th class="a-center" colspan="<?php echo $colspan ?>" >
+                <?php echo $this->__('Price'); echo '<br/>';
+                if($subId != 0){
+                ?>
+                     <?php echo $this->__('(per Itearation)') ?></th> 
+                  <?php  } ?>
+
+                </th>
+                <th colspan="<?php echo $colspan ?>" class="a-center">
+                <?php echo $this->__('Subtotal') ?></th></tr>
+            <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
+                <tr>
+                    <th class="a-right">
+                    <?php echo $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
+                    <th><?php echo $this->helper('tax')->getIncExcTaxLabel(true) ?>
+                    </th>
+                    <th class="a-right"><?php echo $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
+                    <th><?php echo $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
+                </tr>
+            <?php endif; ?></thead>
+        <?php echo $this->getChildHtml('totals'); ?>
+        <tbody>
+        <?php foreach($this->getItems() as $_item): ?>
+            <?php echo $this->getItemHtml($_item)?>
+        <?php endforeach ?>
+        </tbody>
+    </table>
+</div>
+<?php echo $this->getChildHtml('items_after'); ?>
+<script type="text/javascript">
+//<![CDATA[
+    decorateTable('checkout-review-table');
+    truncateOptions();
+//]]>
+</script>
+<div id="checkout-review-submit">
+    <?php echo $this->getChildHtml('agreements') ?>
+    <div class="buttons-set" id="review-buttons-container">
+        <p class="f-left"> <a href="<?php echo $this->getUrl('checkout/cart') ?>"></a></p>
+        <?php echo $this->getChildHtml('button') ?>
+        <span class="please-wait" id="review-please-wait" style="display:none;">
+            <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" 
+            alt="<?php echo $this->__('Submitting booking information...') ?>" 
+            title="<?php echo $this->__('Submitting booking information...') ?>" class="v-middle" /> 
+            <?php echo $this->__('Submitting booking information...') ?>
+        </span>
+    </div>
+  
+    <?php
+    /**
+     * Checking magento version for form key concept
+     */    
+    if(version_compare(Mage::getVersion(), '1.8.0.0', '<=')){
+            /**
+                Defining redriect URL
+            */
+    $orderUrl = $this->getUrl('checkout/onepage/saveOrder');    
+    }else{
+    $orderUrl = $this->getUrl('checkout/onepage/saveOrder', array('form_key' => Mage::getSingleton('core/session')->getFormKey()));   
+    }
+    /**
+     * End if for form key concept
+     */  
+    ?>
+    <script type="text/javascript">
+    //<![CDATA[
+        review = new Review('<?php echo $orderUrl;  ?>', 
+                '<?php echo $this->getUrl('checkout/onepage/success') ?>', $('checkout-agreements'));
+    //]]>    
+    </script>
+</div>

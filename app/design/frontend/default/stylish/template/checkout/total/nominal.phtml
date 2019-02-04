@@ -1,0 +1,63 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * @see Mage_Checkout_Block_Total_Nominal
+ */
+?>
+<tr>
+    <th colspan="<?php echo $this->getColspan() + 1; ?>" 
+    style="<?php echo $this->getTotalStyle() ?>" class="a-right">
+        <?php echo sprintf(($this->getRenderingArea() == $this->getTotalArea()) ? '<strong>%s</strong>' : '%s', $this->escapeHtml($this->getTotalTitle())) ?>
+    </th>
+</tr>
+<?php foreach ($this->getTotalItems() as $i => $item): ?>
+<?php foreach ($this->getTotalItemDetails($item) as $j => $row):?>
+<tr class="summary-details <?php echo "summary-details-nominal-{$i}" . (0 == $j ? ' summary-details-first' : '') . ($this->getItemDetailsRowIsCompounded($row) ? '' : ' summary-details-excluded')?>" style="display:none;">
+    <td colspan="<?php echo $this->getColspan(); ?>" 
+    style="<?php echo $this->getTotalStyle() ?>" class="a-right">
+        <?php echo $this->escapeHtml($this->getItemDetailsRowLabel($row)) ?>
+    </td>
+    <td class="a-right">
+        <?php echo $this->formatPrice($this->getItemDetailsRowAmount($row)) ?>
+    </td>
+</tr>
+<?php endforeach; ?>
+<tr class="summary-total" onclick="expandDetails(this, '<?php echo ".summary-details-nominal-{$i}"?>')">
+    <td colspan="<?php echo $this->getColspan(); ?>"
+     style="<?php echo $this->getTotalStyle() ?>">
+        <div class="summary-collapse"><?php echo $this->escapeHtml($this->getItemName($item)); ?></div>
+    </td>
+    <td class="a-right">
+        <?php echo $this->helper('checkout')->formatPrice($this->getItemRowTotal($item)) ?>
+    </td>
+</tr>
+<?php endforeach; ?>

@@ -1,0 +1,337 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/**
+ * This file is used to display the Order Details
+ */
+/**
+ * Get order id from the params.
+ */
+$orderId = $this->getRequest()->getParam('order_id');
+/**
+ * Get the order details.
+ */
+$orderDetails = Mage::getModel('sales/order')->load($orderId);
+$checkOrderStatusArr = array();
+
+/**
+ * Get the customer session.
+ */
+$customerData = Mage::getSingleton('customer/session')->getCustomer();
+$loggedInCustomerId = $customerData->getId();
+
+/**
+ * Getting order product ids
+ */
+/**
+ * Checking manage order enable for seller
+ */
+$orderStatusFlag = Mage::getStoreConfig('airhotels/custom_group/order_manage');
+
+
+
+$orderPrdouctId = Mage::helper('airhotels/vieworder')->getOrderProductIds(Mage::getSingleton('customer/session')->getId(),$orderId);
+
+/**
+ * Getting canceled product ids
+ */
+
+$invoiceStatus = $invoiceId =  0;
+/**
+ * Get order invoice collection.
+ */
+foreach ($orderDetails->getInvoiceCollection() as $invoice){
+foreach($invoice->getAllItems() as $item){	
+$itemProductId = $item->getProductId();
+
+if(in_array($itemProductId,$orderPrdouctId)){
+$invoiceId = $invoice->getId();
+$invoiceStatus = 1;
+break 2; 	
+}			
+}
+}
+
+$shipmentStatus = $shipmentId =  0;
+
+/**
+ * Get order created date.
+ */
+$statusCancelRequest = 0;
+$created_date = date('M j, Y', strtotime($orderDetails['created_at']));
+?>
+
+<div class="page-title sellers_store">
+    <h1><?php echo $this->__('Order Id #') . $orderDetails['increment_id'];
+   
+    /**
+     * Get all product details from the order.
+     */
+    foreach($orderDetails->getAllItems() as $item){
+    	$itemProductId = $item->getProductId();
+    	$orderItem = $item;
+    }  
+    
+    /**
+     * Check ordfer cancel count.
+     * 
+     * if count is grater than zero show order status as cancelled.
+     */
+    	echo ' '.$orderDetails->getStatusLabel();
+    ?>       
+</h1>
+</div>
+<?php
+/**
+ * Display Billing Address
+ */
+?>
+<div class="col2-set order-info-box">
+    <div class="col-1">
+        <div class="box">
+            <div class="box-title">
+                <h4><?php echo $this->__('Customer Billing Address'); ?></h4>
+            </div>
+            <div class="box-content">
+                <?php
+                /**
+                 * Display customer billing address
+                 * Name
+                 * Street
+                 * city
+                 * postcode
+                 * region
+                 * telephone number
+                 * 
+                 */
+                $biladdr_entity_id = $orderDetails['billing_address_id'];
+                $billingaddress = Mage::getModel('sales/order_address');
+                $billingaddress->load($biladdr_entity_id);
+                $billaddgetdat = $billingaddress->getData();
+                echo '<span>'.$billaddgetdat['firstname'] . ' ' . $billaddgetdat['lastname'] . '</span>';
+                echo '<span>'.$billaddgetdat['street'] . '</span>';
+                echo '<span>'.$billaddgetdat['city'] . ', </span>';
+                echo '<span>'.$billaddgetdat['postcode']  . '</span>';
+                if($billaddgetdat['region'] != '-'){
+                echo '<span>'.$billaddgetdat['region'] . '</span>';
+                }
+                $countryName = Mage::getModel('directory/country')->load($billaddgetdat['country_id'])->getName();
+                if( $countryName != '-'){
+                	echo '<span>'.$countryName. '</span>';
+                }
+                echo '<span>'.'T:' . ' ' . $billaddgetdat['telephone'] . '</span>';
+                echo '<span>'.'F:' . ' ' . $billaddgetdat['fax'] . '</span>';
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php
+    /**
+     * Display Payment Method
+     */
+    ?>   
+    <div class="col-2">
+        <div class="box box-payment">
+            <div class="box-title">
+                <h4><?php echo $this->__('Payment Method'); ?></h4>
+            </div>
+            <div class="box-content">
+                <?php echo $orderDetails->getPayment()->getMethodInstance()->getTitle();
+                $paymentCode = $orderDetails->getPayment()->getMethodInstance()->getCode(); 
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php 
+/**
+ * Get the seller shipping enabled status
+ */
+$sellerShippingEnabled = Mage::getStoreConfig ( 'carriers/apptha/active' );
+?>
+<?php
+/**
+ * Display Items Ordered
+ */
+?>  
+<h2><?php echo $this->__('Items Ordered'); ?></h2><p class="order-date"><?php echo $this->__('Order Date:') . $created_date; ?></p>
+<?php 
+/**
+ * Checking for virtual or paid
+ */
+$flagForUpdateShipping = $flagForUpdateInvoice = 0;
+?>
+<form id="shippment_update_info" method="POST" action="<?php echo $this->getShipPostUrl($orderId); ?>">
+	<input type="hidden" name="order_id" value="<?php echo $orderId; ?>" >
+	<table class="data-table" id="my-orders-table" summary="<?php echo $this->__('Items Ordered') ?>">    
+	    <thead>
+	        <tr>
+	            <th width="40%"><?php echo $this->__('Property Details') ?></th>    
+	            <th class="a-center"><?php echo $this->__('SKU') ?></th>
+	            <th class="a-center"><?php echo $this->__('Price') ?></th>
+	            <th class="a-center"><?php echo $this->__('Amount') ?>
+	            <p style="text-transform: capitalize;font-size: 11px;">(Excl.commission fee)</p></th> 
+	            <?php 
+	            $sellerOrderData =  Mage::helper('airhotels/vieworder')->getPropertyOrderStatus($orderId);
+	            $cancelRequestStatus = $sellerOrderData['cancel_request_status'];
+
+	            if($orderStatusFlag == 1){          	
+	            	if($cancelRequestStatus > 0){?>      
+	            <th class="a-center vieworder-action"><?php echo $this->__('Action') ?></th>
+	            <?php }
+	            } ?>	            	              
+	        </tr>
+	    </thead>            
+	    <tbody> 
+	    <?php 
+	    $totalAmount = 0;
+	    $i = 0;
+	    /**
+	     * Display all items in the order.
+	     */
+	    foreach($orderDetails->getAllItems() as $item){
+            $attributeValue = $parentId = "";
+	        $itemProductId = $item->getProductId();
+			if(in_array($itemProductId,$orderPrdouctId)){
+		
+		   /**
+			* Checking for create shipping
+			*/
+			$orderItem = $item;?>	     	
+			<tr>
+			<td><h3><?php echo $this->htmlEscape($item->getName()); ?></h3>
+				<div><!--  Check in Property  -->
+				<strong><?php 
+				$checkIn = $sellerOrderData['checkin_time'];
+				$checkOut = $sellerOrderData['checkout_time'];
+				echo Mage::helper('airhotels')->__('Check In') ?> : </strong>
+				<?php 
+				if($checkIn == NULL){
+					echo date('m/d/Y', strtotime($sellerOrderData['fromdate']));
+				}else{
+					echo date('m/d/Y', strtotime($sellerOrderData['checkin_time']));
+											
+					$propertyServiceFrom = date('h a', strtotime($sellerOrderData['checkin_time']));
+											
+					/**
+					 * check propertyServiceFrom, propertyServiceFromPeriod is empty
+					 */
+					if(isset($propertyServiceFrom)){
+					/**
+					* Echoing the value of '$propertyServiceFrom', '$propertyServiceFromPeriod';
+					*/
+					echo ' - '.$propertyServiceFrom;
+					} 
+				}?>
+				</div><div>
+				<!--  Check out Property  -->
+				<strong><?php echo Mage::helper('airhotels')->__('Check Out') ?> : </strong>
+				<?php 
+				if($checkOut == NULL){
+					echo date('m/d/Y', strtotime($sellerOrderData['todate']));
+				}else{
+					echo date('m/d/Y', strtotime($sellerOrderData['checkout_time']));
+					$propertyServiceTo = date('h a', strtotime($sellerOrderData['checkout_time']));
+					/**
+					* check propertyServiceFrom, propertyServiceFromPeriod is not an empty,
+					* and print the values
+					*/
+					if(isset($propertyServiceTo)){
+					echo ' - '.$propertyServiceTo;
+					} 
+				}?>
+				</div>
+				</td>
+				<td class="a-center">
+				<?php echo $item->getSku(); ?>
+				</td>
+				<td class="a-center"><?php echo Mage::helper('core')->currency($orderDetails->getGrandTotal(), true, false); ?></td>
+				<td class="a-center"><?php echo Mage::helper('core')->currency(($orderDetails->getGrandTotal())-($sellerOrderData['host_fee']) - ($sellerOrderData['service_fee']) , true, false); ?></td>  
+				<?php
+				if($orderStatusFlag == '1'){ 
+				if($cancelRequestStatus > 0){?>
+				<td class="a-center vieworder-action">
+					<?php if($cancelRequestStatus == '1'){ ?>
+						<a onclick="return confirm('<?php echo $this->__('Are you sure want to send refund request?'); ?>');" href="<?php echo Mage::getUrl('airhotels/order/cancel').'id/'.$orderId ?>"><?php echo $this->__('Cancel'); ?></a>
+					<?php  }elseif($cancelRequestStatus == 2){
+					    echo $this->__('Canceled');
+					}elseif($cancelRequestStatus == 3){
+					    echo $this->__('Closed');
+					}
+					?></td><?php 
+				}?>   
+				<?php } ?>	  
+					     	         
+				</tr>  
+				<?php  }
+	     $i++;
+} ?>   
+	    </tbody>
+	</table>
+
+    <div class="shipment_update_total_orders">
+    <?php 
+    /**
+     * Display order total.
+     */
+    ?>
+	<span><b><?php //echo Mage::helper('Airhotels')->__('Order Total'); ?></b></span>
+	<span><b><?php //echo Mage::helper('core')->currency($totalAmount, true, false); ?></b></span>
+	
+		<?php
+/**
+ * Check whether seller order refunded or not
+ */
+if($orderStatusFlag == 1 && $cancelRequestStatus == 0){
+	
+	$invIncrementIDs = array();
+	foreach ($orderDetails->getInvoiceCollection() as $inv) {
+		$invIncrementIDs[] = $inv->getIncrementId();
+	}
+	
+?>	
+<div class="product_track_buttons">
+<?php
+/**
+ * Generate invoice button.
+ */
+if(empty($invIncrementIDs) && $orderStatusFlag == 1){ ?>
+<a class="button" href="<?php echo Mage::getUrl('airhotels/order/invoice').'id/'.$orderId; ?>"><?php echo $this->__('Invoice'); ?></a>
+<?php }else{ ?>
+<span class="hide_effect_button">
+<?php echo $this->__('Invoice'); ?>
+</span>
+<?php }?>
+
+</div>
+<?php } ?>	
+	
+	</div>
+</form>
+<div class="buttons-set mp_view_order_back"><a href="<?php echo Mage::getUrl('property/product/history'); ?>"><small><< </small><?php echo $this->__('Back to Orders'); ?> </a></div>

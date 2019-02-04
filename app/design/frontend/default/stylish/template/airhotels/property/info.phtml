@@ -1,0 +1,77 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+?>
+<html>
+<head>    
+<script type="text/javascript">
+var jQ = jQuery.noConflict();
+jQ(window).load(function() {
+jQ('.flexslider').flexslider();
+});
+</script>
+<script type="text/javascript">
+function showUser(from,to) {
+if (to==""){
+  document.getElementById("txtHint").innerHTML="";
+  return;
+} 
+if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+	xmlhttp=new XMLHttpRequest();
+}else {// code for IE6, IE5
+	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+}
+xmlhttp.onreadystatechange=function() {
+	if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+		document.getElementById("txtHint").innerHTML=xmlhttp.responseText;
+	}
+}
+var url = "date1.php";
+url=url+"?from="+from;
+url=url+"&to="+to;
+xmlhttp.open("GET",url,true);
+xmlhttp.send();
+}
+</script>
+</head>
+<body>
+	<form>
+		<div class="demo">
+			<label for="from"><?php echo  $this->__('From'); ?></label>
+			<input type="text" id="from" name="from"/>
+			<label for="to"><?php echo  $this->__('to'); ?></label>
+			<input type="text" id="to" name="to"/>   
+		</div>
+		<input type="button" value="submit" onClick="showUser(from.value,to.value)">
+	</form>
+	<br />
+	<div id="txtHint"></div>
+</body>
+</html>

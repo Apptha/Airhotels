@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * @see Mage_Adminhtml_Block_Sales_Items_Column_Name
+ */
+
+ if ($_item = $this->getItem()): 
+    $details = unserialize($_item['product_options']);    
+     foreach($details as $det){
+        $checkInValue = $det['fromdate'];
+        $checkOutValue= $det['todate'];
+        $serviceFeeValue = $det['serviceFee']; 
+        $accomodateValue = (int) $det['accomodate'];
+        $overalldays = $det['qty'];
+        $product = $det['product'];
+        if(isset($det['property_service_from'])&&isset($det['property_service_from_period'])&&isset($det['property_service_to'])&&isset($det['property_service_to_period'])&&isset($det['overall_total_hours'])){
+        $propertyServiceFromValue = $det['property_service_from'];    
+        $propertyServiceFromPeriodValue = $det['property_service_from_period'];
+        $propertyServiceToValue = $det['property_service_to'];
+        $propertyServiceToPeriodValue = $det['property_service_to_period']; 
+        $overallTotalHoursValue =  $det['overall_total_hours']; 
+        $hourlyNightFeeValue =  $det['hourly_night_fee'];        
+        if(isset($det['per_hour_night_fee'])){
+        $perHourNightFeeValue = $det['per_hour_night_fee'];
+        }
+        }        
+     }
+     $productType = Mage::getModel('catalog/product')->load($product);
+     $optionLabel = $productType->getAttributeText('property_time');
+     $baseCurrencyCode = Mage::app()->getLocale()->currency( Mage::app()->getStore()->getBaseCurrencyCode() )->getSymbol();
+     
+    ?>
+    <h5 class="title"><span id="order_item_<?php echo $_item->getId() ?>_title"><?php echo $this->htmlEscape($_item->getName()) ?></span></h5>
+    <div><strong><?php echo $this->helper('sales')->__('Experience Id') ?>:</strong> <?php echo implode('<br />', Mage::helper('catalog')->splitSku($this->htmlEscape($this->getSku()))); ?></div>
+    <div><strong><?php echo $this->helper('sales')->__('CheckIn') ?>:</strong> <?php echo str_replace('@','/', $checkInValue); if(isset($propertyServiceFromValue) && isset($propertyServiceFromPeriodValue)){ echo ' - '.$propertyServiceFromValue.' '.$propertyServiceFromPeriodValue; } ?></div>
+
+    <div><strong><?php echo $this->helper('sales')->__('CheckOut') ?>:</strong> <?php echo str_replace('@','/', $checkOutValue);  if(isset($propertyServiceToValue) && isset($propertyServiceToPeriodValue)){ echo ' - '.$propertyServiceToValue.' '.$propertyServiceToPeriodValue; } ?></div>
+<?php if(strtolower($optionLabel) == 'hourly'){ ?>
+<div><strong><?php echo Mage::helper('airhotels')->__('Duration') ?> : </strong> <?php echo 'For '.$overallTotalHoursValue.' Hour(s)';?></div>
+<?php }else{ ?>
+  <div><strong><?php echo Mage::helper('airhotels')->__('Duration') ?> : </strong> <?php echo 'For '.$overallTotalHoursValue.' Day(s)';?></div>  
+<?php } ?>
+    
+    <?php if($accomodateValue > 0){ ?>
+    <div><strong><?php echo $this->helper('airhotels')->__('People(s)') ?>:</strong> <?php echo $accomodateValue;?></div>
+    <?php } ?>
+    <div><strong><?php echo $this->helper('sales')->__('Processing Fee') ?>:</strong> <?php echo $baseCurrencyCode.$serviceFeeValue;?></div>
+    <?php if ($this->getOrderOptions()): ?>
+        <dl class="item-options">
+        <?php foreach ($this->getOrderOptions() as $_option): ?>
+            <dt><?php echo $_option['label'] ?></dt>
+            <dd>
+            <?php if (isset($_option['custom_view']) && $_option['custom_view']): ?>
+                <?php echo $this->getCustomizedOptionValue($_option); ?>
+            <?php else: ?>
+                <?php $_option = $this->getFormattedOption($_option['value']); ?>
+                <?php echo $_option['value']; ?><?php if (isset($_option['remainder']) && $_option['remainder']): ?><span id="<?php echo $_dots = 'dots' . uniqid()?>"> ...</span><span id="<?php echo $_id = 'id' . uniqid()?>"><?php echo $_option['remainder'] ?></span>
+                    <script type="text/javascript">
+                    $('<?php echo $_id ?>').hide();
+                    $('<?php echo $_id ?>').up().observe('mouseover', function(){$('<?php echo $_id ?>').show();});
+                    $('<?php echo $_id ?>').up().observe('mouseover', function(){$('<?php echo $_dots?>').hide();});
+                    $('<?php echo $_id ?>').up().observe('mouseout',  function(){$('<?php echo $_id ?>').hide();});
+                    $('<?php echo $_id ?>').up().observe('mouseout',  function(){$('<?php echo $_dots ?>').show();});
+                    </script>
+                <?php endif; ?>
+            <?php endif; ?>
+            </dd>
+        <?php endforeach; ?>
+        </dl>
+    <?php endif; ?>
+    <?php echo $this->htmlEscape($_item->getDescription()) ?>
+<?php endif; ?>

@@ -1,0 +1,57 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/* @var $this Mage_Wishlist_Block_Share_Email_Items */
+?>
+<?php $l = $this->getWishlistItemsCount() ?>
+<div style="border:1px solid #E0E0E0; padding:15px; background:#F9F9F9;">
+<table cellspacing="0" cellpadding="0" border="0" width="650">
+    <tr>
+    <?php $i = 0; foreach ($this->getWishlistItems() as $item): $i++ ?>
+        <td width="32%">
+            <p align="center" style="font-size:12px;"><a href="<?php echo $this->getProductUrl($item) ?>"><img src="<?php echo $this->helper('catalog/image')->init($item->getProduct(), 'small_image')->resize(135); ?>" style="border:1px solid #ccc;" width="135" height="135" alt="" /></a></p>
+            <p align="center" style="font-size:12px;"><a href="<?php echo $this->getProductUrl($item) ?>" style="color:#203548;"><strong><?php echo $this->htmlEscape($item->getName()) ?></strong></a></p>
+            <?php if($this->hasDescription($item)): ?><p align="center" style="font-size:12px;"><?php echo $this->__('Comment') ?>:<br /><?php echo $this->getEscapedDescription($item) ?></p><?php endif; ?>
+            <p align="center" style="font-size:12px;"><a href="<?php echo $this->getProductUrl($item) ?>" style="color:#1E7EC8;"><?php echo $this->__('View Product') ?></a> <small>
+            <?php if ($item->getIsSalable()): ?>|</small> <a href="<?php echo $this->getAddToCartUrl($item) ?>" style="color:#1E7EC8;"><strong><?php echo $this->__('Add to Cart') ?></strong></a><?php endif;?>
+            </p></td>
+        <?php if ($i%3!=0): ?>
+            <td width="2%"></td>
+        <?php else: ?>
+           </tr>
+            <tr>
+                <td colspan="5">&nbsp;</td>
+            </tr>
+            <?php if ($i<$l): ?>
+               <tr>
+            <?php endif ?>
+        <?php endif ?>
+    <?php endforeach ?>
+</table>
+</div>

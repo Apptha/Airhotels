@@ -1,0 +1,149 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+?>
+<?php
+/**
+ * Get the Search Collection
+ */
+$search_values = $this->search();
+/**
+ * Explode the  $search_values array
+ */
+$search_text = explode(',', $search_values[searchTextField]);
+/**
+ * Reverse the array Value
+ */
+$values = array_reverse($search_text);
+/**
+ * Set the Country Value
+ */
+$country = $values[0]; 
+/**
+ * Set the State Value
+ */
+$state = $values[1];
+/**
+ * Set the City Value
+ */
+$city = $values[2];
+/**
+ * Set the from Value
+ */
+$fromdate = $search_values['from'];
+/**
+ * Set the to Value
+ */
+$todate = $search_values['to'];
+/**
+ * Set the Guest Value
+ */
+$guest = $search_values[number_of_guests];
+/**
+ * Get hte Search Colletion with Property
+ */
+$SearchCollection = Mage::getModel('airhotels/search')->searchproperty($country,$state,$city,$fromdate,$todate);
+
+/**
+ * Get baseurl for image
+ */
+
+$baseurl = Mage::getBaseUrl('media'); 
+/**
+ * Currewncy Sybmol Value.
+ */
+$currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+
+
+?>
+<h1 class="searchtopic"><?php echo  $this->__('Search Results') ?>:</h1>
+<h3 class="searchtopic"><?php echo  $this->__('Your search based on'); ?> 
+'<?php echo $search_values[searchTextField]; ?>'</h3>
+<div id="searchinnerpage">
+<?php 
+/**
+ * Check the Search Colletion value
+ */
+if (count($SearchCollection)){
+?>
+    <ul id="results">
+    <?php 
+       foreach ($SearchCollection as $_product){
+
+?>
+<li class="search_result">
+           <a class="name" href="<?php echo Mage::getBaseUrl().$_product->getUrlPath();?>"> <img src="<?php 
+           /**
+            * Product Imge URl Value
+            */
+           if($_product->getImage()){
+           echo $baseurl .'/catalog/product/'.$_product->getImage();
+           }
+           else {
+     echo  $_product->getImageUrl();
+     }
+           ?>" style="width: 272px !important; height: 182px !important" alt=""></a>
+            <div class="room_details">
+                <h2 class="room_title"><a class="name" href="<?php echo Mage::getBaseUrl().$_product->getUrlPath();?>">
+                <?php echo Mage::helper('airhotels/property')->getPropertyName($_product->getName());     ?></a></h2>
+               <p class="address">
+                <?php echo $_product->getPropertyadd();?>
+               </p>
+            </div>
+               <div class="price ">
+                   <div class="price_data">
+                       <div class="currency_with_sup">
+                          <?php echo $currencySymbol.number_format($_product[Price],2) ;?>
+                       </div>
+                   </div>
+                   <div class="price_modifier"> <?php echo  $this->__('Per night'); ?></div>
+               </div>
+               </li>
+               <?php 
+
+}
+?>
+  </ul>
+   
+            <?php 
+   
+}
+else {?>
+<h1 style="font-family: abel;font-size: 23px;font-weight: bold;color: #1E7EC8;text-align: center;"><?php echo $this->__('No Records') ;?></h1>
+<?php
+}   
+
+
+?></div>
+
+           
+        
+
+

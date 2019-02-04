@@ -1,0 +1,80 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php if($this->getProductData()->getId()): ?>
+<div class="product-review">
+    <div class="page-title">
+        <h1><?php echo $this->__('Review Details') ?></h1>
+    </div>
+    <div class="product-img-box">
+        <a href="<?php echo $this->getProductData()->getProductUrl() ?>" 
+        title="<?php echo $this->htmlEscape($this->getProductData()->getName()) ?>" class="product-image">
+        <img src="<?php echo $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(125, 125); ?>" height="125" width="125" 
+        alt="<?php echo $this->htmlEscape($this->getProductData()->getName()) ?>" /></a>
+        <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
+             <p class="label"><?php echo $this->__('Average Customer Rating') ?>:</p>
+             <?php echo $this->getReviewsSummaryHtml($this->getProductData()) ?>
+        <?php endif; ?>
+    </div>
+    <div class="product-details">
+        <h2 class="product-name"><?php echo $this->htmlEscape($this->getProductData()->getName()) ?></h2>
+        <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
+            <h3><?php echo $this->__('Product Rating:') ?></h3>
+            <table class="ratings-table">
+            <?php foreach ($this->getRating() as $_rating): ?>
+                <?php if($_rating->getPercent()): ?>
+                    <tr>
+                        <th><?php echo $this->__($this->escapeHtml($_rating->getRatingCode())) ?></th>
+                        <td>
+                            <div class="rating-box">
+                                <div class="rating" style="width:<?php echo ceil($_rating->getPercent()) ?>%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            </table>
+            </dl>
+        <?php endif; ?>
+        <dl>
+            <dt>
+                <?php echo $this->__('Product Review (submitted on %s):', $this->dateFormat($this->getReviewData()->getCreatedAt())) ?>
+            </dt>
+            <dd>
+                <?php echo nl2br($this->htmlEscape($this->getReviewData()->getDetail())) ?>
+            </dd>
+        </dl>
+    </div>
+    <div class="buttons-set">
+        <p class="back-link"><a href="<?php echo $this->getBackUrl() ?>"><small>&laquo; </small>
+        <?php echo $this->__('Back to Product Reviews') ?></a></p>
+    </div>
+</div>
+<?php endif; ?>

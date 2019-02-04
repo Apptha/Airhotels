@@ -1,0 +1,90 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<?php
+/**
+ * Temlate for Mage_Customer_Block_Address_Book block
+ * @var $test Mage_Customer_Block_Address_Book
+ */
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="my-account">
+<div class="page-title" style="margin:0"><h1 class="dashboard_leftside_heading"><?php echo $this->__('Address Book') ?></h1>   </div>
+<p class="inbox_action_buttons">
+    <button type="button" title="<?php echo $this->__('Add New Address') ?>" class="inbox_delete_checkall" onclick="window.location='<?php echo $this->getAddAddressUrl() ?>';">
+    <?php echo $this->__('Add New Address') ?></button></p>
+<div class="col2-set addresses-list" style="border-bottom:none;">
+    <div class="addresses-primary">
+        <h2 style="color:#545454"><?php echo $this->__('Default Addresses') ?></h2>
+        <ol>
+        <?php if($_pAddsses = Mage::getSingleton('customer/session')->getCustomer()->getDefaultBilling()): ?>
+            <li class="item"><h3 style="color:#545454"><?php echo $this->__('Default Billing Address') ?></h3>
+                <address><?php echo $this->getAddressHtml(Mage::getSingleton('customer/session')->getCustomer()->getAddressById($_pAddsses)) ?></address>
+                <p><a href="<?php echo $this->getAddressEditUrl(Mage::getSingleton('customer/session')->getCustomer()->getAddressById($_pAddsses)) ?>"><?php echo $this->__('Change Billing Address') ?></a></p>
+           </li>
+        <?php else: ?>
+            <li class="item"><h3><?php echo $this->__('Default Billing Address') ?></h3>
+                <?php echo $this->__('You have no default billing address in your address book.') ?>
+            </li>
+        <?php endif ?>
+        </ol>
+    </div>
+    <div class="addresses-additional">
+        <h2 style="color:#545454"><?php echo $this->__('Additional Address Entries') ?></h2>
+        <ol>
+        <?php if($_pAddsses = $this->getAdditionalAddresses()): ?>
+            <?php foreach($_pAddsses as $_address): ?>
+            <li class="item"><address><?php echo $this->getAddressHtml($_address) ?></address>
+             <p><a href="<?php echo $this->getUrl('customer/address/edit', array('id'=>$_address->getId())) ?>"><?php echo $this->__('Edit Address') ?></a> <span class="separator">|</span> <a href="#" class="link-remove" onclick="return deleteAddress('<?php echo $_address->getId() ?>');"><?php echo $this->__('Delete Address') ?></a></p>
+            </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li class="item empty">
+                <p style="font-size:13px;font-weight:100"><?php echo $this->__('You have no additional address entries in your address book.') ?></p>
+            </li>
+        <?php endif ?>
+        </ol>
+    </div>
+</div>
+<div class="buttons-set" style="clear: both;margin:0;padding:10px;border-top: none!important;text-align: right;border: 1px solid #ccc;background-color: #fff;">
+    <a style="float:left" class="import_button" href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>"><?php echo $this->__('<< Back') ?></a>
+</div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+    $.noConflict();
+    function deleteAddress(addressId) {
+        if(confirm('<?php echo $this->__('Are you sure you want to delete this address?') ?>')) {
+            window.location='<?php echo $this->getDeleteUrl() ?>id/'+addressId;
+        }
+        return false;
+    }
+//]]>
+</script>

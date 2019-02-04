@@ -1,0 +1,90 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<!--begin custom header content for this example-->
+<!--begin custom header content for this example-->
+<?php 
+/**
+ *Multimedia is usually recorded and played, displayed, or accessed 
+ *by information content processing devices, such as computerized and 
+ *electronic devices, but can also be part of a live performance. 
+ *Multimedia devices are electronic media devices used to store and experience multimedia content. 
+ *Multimedia is distinguished from mixed media in fine art; by including audio, for example, 
+ *it has a broader scope. The term "rich media" is synonymous for interactive multimedia. 
+ *Hypermedia can be considered one particular multimedia application.
+ */
+?>
+
+<!--end custom header content for this example-->
+<?php
+/**
+ * get the Product url
+ */
+    $_product = $this->getProduct();
+    /**
+     * Call the helper file of the 'catalog/Product'
+     */
+    $_helper = $this->helper('catalog/output');
+?>
+<script>
+var jq = jQuery.noConflict();
+jq(document).ready(function(){
+
+jq("a[rel='product-image']").colorbox({transition:"fade",slideshow:true});
+
+});
+</script>
+
+<?php
+/**
+ * Displaing the Gallery images for the COlletion
+ */
+ if (count($this->getGalleryImages()) > 0): ?>
+<div class="more-views media-images">
+    
+    <ul>
+    <?php 
+    foreach ($this->getGalleryImages() as $_image): ?>
+        <li>
+            <a href="<?php echo $this->helper('catalog/image')->init($this->getProduct(), 'image', $_image->getFile()); ?>" rel="product-image"  
+            title="<?php echo $this->htmlEscape($_image->getLabel()) ?>">
+            <img src="<?php echo $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(80); ?>" width="80" height="80"
+             alt="<?php echo $this->htmlEscape($_image->getLabel()) ?>" /></a>
+        </li>
+    <?php endforeach;
+
+    ?>
+    </ul>
+</div>
+<?php 
+else: ?>
+<span><?php echo  $this->__('No images available') ?></span>
+<?php 
+endif; ?>

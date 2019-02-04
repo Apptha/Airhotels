@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+$currentUrl = Mage::helper('core/url')->getCurrentUrl();
+$request = $this->getRequest('step');
+$controllerAction = $request->getActionName();
+$action = $this->getRequest()->getParam('step');
+$currentExperienceId = Mage::getSingleton('customer/session')->getCurrentExperienceId();
+$bookingApproved = "";
+if($currentExperienceId){
+	$_product = Mage::getModel ( 'catalog/product' )->load ($currentExperienceId);
+	$bookingApproved = $_product->getBookingapproved();
+}
+?>
+<form id="publish_form" class="list_an_experience_forms wizard clearfix" name="publish_form" method="post" action="<?php echo Mage::getBaseUrl() . 'airhotels/multistep/publishsave/' ?>" enctype="multipart/form-data">
+	<div class="content clearfix"><h3 class="title current"><?php echo $this->__('Publish')?></h3>
+		<fieldset class="body current contentcontainer">
+			<?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('publish_content')->toHtml() ?>
+		</fieldset>
+		<input type="hidden" name="selected_tab" id="selected_tab" value=""/>
+	</div>
+	<?php if(!$bookingApproved) { ?>
+		<div class="form_next_button_section"><button style="background-color: #29B6F6;" type="button" class="profile_submit form_next_button" onclick="return select_tab('profile');"><span class="form_next_btn_style"><< Previous</span></button><button type="submit" class="publish_submit form_next_button" id="publish_submit" value="Next"><span class="form_next_btn_style">Publish</span></button></div>
+	<?php } else { ?>
+		<div class="form_next_button_section">
+		<button type="button" class="profile_submit form_next_button" onclick="return select_tab('profile');"><span class="form_next_btn_style"><< Previous</span></button></div>
+	<?php } ?>
+</form>			

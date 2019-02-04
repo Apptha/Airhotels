@@ -1,0 +1,88 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * Checking whether invite friends enabled or not
+ */
+Mage::getSingleton("core/session")->setCurrentCustomerDiscountedAmount(0);
+$sessionCustomer 				= Mage::getSingleton("customer/session");
+$getDiscountAmountForInvitee 	= Mage::getSingleton("core/session")->getDiscountAmountForInvitee();
+if($sessionCustomer->isLoggedIn()) {
+	$customerId 			= $sessionCustomer->getId();
+	$customerCreditAmount 	= Mage::helper('airhotels/invitefriends')->getCustomerCreditAmount($customerId);
+	$inviteFriendsStatus 	= Mage::helper('airhotels/invitefriends')->getInviteFriendsEnabledOrNot();
+	$discountStatus 		= Mage::getSingleton("core/session")->getDiscountAmountForInviteeStatus();
+	if($inviteFriendsStatus == 0){
+		$currencySymbol = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+	?>	
+	    <div class="discount">
+	        <h2><?php echo Mage::helper('airhotels')->__('Friends Referral Discount') ?></h2>
+	        <div>
+		        <?php echo Mage::helper('airhotels')->__('You have').' '; ?>
+		        <?php echo $currencySymbol . round(Mage::helper('directory')->currencyConvert($customerCreditAmount, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 2); ?>
+		        <?php echo ' '.Mage::helper('airhotels')->__('discount amount available.');  ?>
+	        </div>
+	        <div>
+	        <?php if($customerCreditAmount >=1){ ?>
+			        <div><span><?php echo Mage::helper('airhotels')->__('Enter your discount amount'); ?></span>
+			        <input class="input-text validate-greater-than-zero" id="discount_amount" name="discount_amount" value="">
+			        <div id="discount-required" style="color: red;display:none;">This is a required field.</div>
+			        <input type="hidden" name="remove_discount" id="remove_discount" value=" <?php if($discountStatus == 0){ echo '1'; }else{ echo '0'; } ?>">
+			        </div>
+			        <div class="discount_apply_div">
+			        <a href="javascript:void(0)" onclick="submitDiscount();" class="import_button">Apply</a>
+			        </div>
+			        <?php if(!empty($getDiscountAmountForInvitee)){ ?>
+			        	<div class="discount_cancel_div"><a href="<?php echo Mage::getUrl().'property/invitefriends/addDiscount/';?>">Cancel</a></div>
+		        	<?php }
+				} ?>
+	        </div>
+	    </div>	
+	<script type="text/javascript">
+    //< ![CDATA[
+        var discountForm = new VarienForm('invitee_discount_form');
+    //]]>
+	function submitDiscount(){
+		var discountAmount = document.getElementById('discount_amount').value ;
+		if(discountAmount != ''  && (isNaN(discountAmount))){
+			document.getElementById("discount-required").style.display = "none";
+			alert('Enter Integer value');
+			return false;
+		}
+		if(discountAmount > 0){
+        	var redirectUrl = '<?php echo Mage::getUrl().'property/invitefriends/addDiscount/';?>'+'discount_amount/'+discountAmount;
+        	window.location.href = redirectUrl;
+		}else{
+			document.getElementById("discount-required").style.display = "block";
+		}
+	}
+	</script>
+<?php }
+} ?>

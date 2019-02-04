@@ -1,0 +1,209 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+    <script type="text/javascript" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS);?>airhotels/jquery.min.js"></script>
+    <?php
+
+$_order = $this->getOrder ();
+
+/**
+ * For whether checking hourly based or not
+ */
+$hourlyFlag = $hourlyNightFee = 0;
+$incrementId = $_order->getIncrementId ();
+$orderData = Mage::getModel ( 'sales/order' )->loadByIncrementId ( $incrementId );
+$items = $orderData->getAllItems ();
+foreach ( $items as $item ) {
+	$_options = $item->getProductOptions ();
+	break;
+}
+foreach ( $_options as $_option ) {
+
+	if (! empty ( $_option ['hourly_night_fee'] )) {
+		$hourlyNightFee = $_option ['hourly_night_fee'];
+	}
+	if (! empty ( $_option ['hourly_product_id'] ) && ! empty ( $_option ['property_service_from'] ) && ! empty ( $_option ['property_service_from_period'] ) && ! empty ( $_option ['property_service_to'] ) && ! empty ( $_option ['property_service_to_period'] ) && ! empty ( $_option ['overall_total_hours'] )) {
+		$hourlyFlag = 1;
+	}
+	break;
+}
+
+/**
+ * Getting Order Collection
+ */
+$itemCollection = $_order->getItemsCollection ();
+/**
+ * Iteration Loop
+ */
+foreach ( $itemCollection as $item ) {
+	$orderId = $item ['order_id'];
+	/**
+	 * Getting Product Options
+	 */
+	$details = unserialize ( $item ['product_options'] );
+	/**
+	 * Iteration Loop
+	 */
+	foreach ( $details as $det ) {
+		/**
+		 * Get the Value of ServiceFee
+		 */
+		$securityFee = $det ['securityFee'];
+		$productId = $det ['product'];
+		/**
+		 * Get the Value of ServiceFee
+		 */
+		$serviceFee = $det ['serviceFee'];
+	}
+}
+
+$getSecurityEnabledOrNot = Mage::helper ( 'airhotels/product' )->getSecurityEnabledOrNot ();
+$product = Mage::getModel ( 'catalog/product' )->load ( $productId );
+?>
+        <h1><?php echo $this->__('Booking #%s', $_order->getRealOrderId()) ?></h1>
+        <p class="order-date">
+            <?php echo $this->__('Booking Date: %s', $this->formatDate($_order->getCreatedAtStoreDate(), 'long')) ?>
+        </p>
+        <div class="col2-set">
+            <?php if (!$_order->getIsVirtual()): ?>
+                <div class="col-1">
+                    <h2><?php echo $this->__('Shipping Address') ?></h2>
+                    <address><?php echo $_order->getShippingAddress()->format('html') ?></address>
+                </div>
+                <div class="col-2">
+                    <?php else: ?>
+                        <div class="col-1">
+                            <?php endif; ?>
+                                <h2><?php echo $this->__('Billing Address') ?></h2>
+                                <address><?php echo $_order->getBillingAddress()->format('html') ?></address>
+                        </div>
+                        <?php if (!$_order->getIsVirtual()): ?>
+                </div>
+                <div class="col2-set">
+                    <div class="col-1">
+                        <h2><?php echo $this->__('Shipping Method') ?></h2>
+                        <?php echo $_order->getShippingDescription()?>
+                    </div>
+                    <?php endif; ?>
+                        <div class="col-2">
+                            <h2><?php echo $this->__('Payment Method') ?></h2>
+                            <?php echo $this->getPaymentInfoHtml()?>
+                        </div>
+                </div>
+                <h2><?php echo $this->__('Property Booked') ?></h2>
+                <table class="data-table" id="my-orders-table">
+                    <col />
+                    <col width="1" />
+                    <col width="1" />
+                    <col width="1" />
+                    <col width="1" />
+                    <thead>
+                        <tr>
+                            <th>
+                                <?php echo $this->__('Property Details') ?>
+                            </th>
+                            <th style="text-align: right">
+                                <?php echo $this->__('SKU') ?>
+                            </th>
+                            <th class="a-right" style="text-align: right">
+                                <?php echo $this->__('Price') ?>
+                            </th>
+                            <th class="a-center">
+                                <?php
+
+												if ($hourlyFlag == 0) {
+													echo $this->__ ( 'No. of day(s)' );
+												} else {
+													echo $this->__ ( 'No. of hour(s)' );
+												}
+												?>
+                            </th>
+                            <th colspan="2" class="a-right" style="text-align: right">
+                                <?php echo $this->__('Subtotal'); ?>
+                            </th>
+                            <th class="a-center"><?php echo $this->__('Action'); ?></th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <?php echo $this->getChildHtml('order_totals')?>
+                    </tfoot>
+                    <?php $_items = $_order->getItemsCollection(); ?>
+                        <?php $_count = $_items->count(); ?>
+                            <?php foreach ($_items as $_item): ?>
+                                <?php if ($_item->getParentItem()) continue; ?>
+                                    <tbody>
+                                        <?php echo $this->getItemHtml($_item)?>
+                                    </tbody>
+                                    <?php
+
+				endforeach;
+				$order = Mage::getResourceModel ( 'sales/order_collection' )->addFieldToFilter ( 'entity_id', $orderId );
+				foreach ( $order as $orderVal ) {
+					$orderCurrencyCode = $orderVal ['order_currency_code'];
+				}
+				$orderCurrencySymbol = Mage::app ()->getLocale ()->currency ( $orderCurrencyCode )->getSymbol ();
+				?>
+                </table>
+                <?php
+$subscriptionOrder = Mage::getResourceModel('paypaladaptive/preapprovaldetails_collection') ->addFieldToFilter('order_id', $orderId)->getData();
+?>
+                    <script type="text/javascript">                        
+
+                        function securityFee() {
+                            <?php
+if (($getSecurityEnabledOrNot == 0 || $securityFee == 0) && !$subscriptionOrder) {
+	$allOptions = $product->getOptions ();
+	if ($allOptions) {
+		foreach ( $allOptions as $option ) {
+			foreach ( $option->getValues () as $key => $value ) {			  
+				?>
+
+				jQuery('.subtotal').after('<tr class="invoice_<?php echo strtolower($value->getDefaultTitle ()); ?>_fee"><td colspan="5" class="a-right"><?php echo $this->__($value->getDefaultTitle ().'Fee '); ?></td><td class="last a-right"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$value->getPrice (), 2, '.', '');?></span></td></tr>');
+                            <?php
+			}
+		}
+	}
+}
+?>
+jQuery('.subtotal').after('<tr class="invoice_processing_fee"><td colspan="5" class="a-right">Processing Fee</td><td class="last a-right"><span class="price"><?php echo $orderCurrencySymbol.  number_format((float)$serviceFee, 2, '.', '');?></span></td></tr>');
+                        }
+                    </script>                    
+                    <script type="text/javascript">
+                    jQuery( document ).ready(function() {                        
+                        securityFee();
+                        window.print();
+                    });
+                    </script>
+                    <script type="text/javascript">
+                        decorateTable('my-orders-table', {
+                            'tbody': ['odd', 'even']
+                            , 'tbody tr': ['first', 'last']
+                        })
+                    </script>

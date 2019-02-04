@@ -1,0 +1,536 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Anybooking
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+
+/**
+ * Initilizing Experience data
+ */
+$currentUrl 	= Mage::helper('core/url')->getCurrentUrl();
+$request 		= $this->getRequest('step');
+$controllerAction 		= $request->getActionName();
+$action			= $this->getRequest()->getParam('step');
+$currentExperienceId 	= Mage::getSingleton('customer/session')->getCurrentExperienceId();
+$_gallery 	= Mage::getModel('catalog/product')->load($currentExperienceId)->getMediaGalleryImages();
+$imageCount = Mage::getModel('catalog/product')->load($currentExperienceId)->getMediaGalleryImages()->count();
+$imageLimit = Mage::getStoreConfig('airhotels/experience_gallery_image_configuration/image_limit_value');
+/**
+ * if admin configuration value is empty then assign the image limit is one for the experience
+ */
+if(empty($imageLimit)){
+	$imageLimit = '1';
+}
+$remainigImage 	= $imageLimit-$imageCount;
+$customer 		= Mage::getSingleton('customer/session')->getCustomer();
+$ExperienceId 	= $entityId = $currentExperienceId;
+$products 		= Mage::getModel('catalog/product')->load($ExperienceId);
+$name 			= $imageUrl = '';
+$name 			=  $products->getName();
+$imageUrl 		= $products->getImage();
+$videoUrl 		= $products->getVideoUrl();
+$videoType 		= $products->getVideoType();
+?>
+       	<form id="photos_form" class="list_an_experience_forms wizard clearfix" name="photos_form" method="post" action="<?php echo Mage::getBaseUrl() . 'property/multistep/photosave/' ?>" enctype="multipart/form-data">
+		<div class="content clearfix">
+		<h3 class="title current"><?php echo $this->__('Photos'); ?></h3>
+			<fieldset class="body current contentcontainer" style="padding:0 0 20px">
+				<div id="dragAndDropFiles" class="uploadArea">
+						<div class="drag_left_side">
+						<ul class="form-list" style="list-style:none;">
+							<li class="fields" style="list-style:none;">
+							<p class="validation-advice" id="multiple_upload_error" style="color: red;display:none"> <?php echo $this->__("You can't upload more than $imageLimit images.Now you can upload ".$remainigImage." image.");?> </p>
+							<p class="validation-advice" id="image_upload_error" style="color: red;display:none"> <?php echo $this->__('Please upload image and select one image for album cover');?> </p>
+								<div id="gallery_image_list"></div>
+								<?php
+								if($imageCount < $imageLimit){ ?>
+								<div id="swfupload-control" class="clearfix">
+									<p><?php echo $this->__('Now make your listing beautifull') ?></p>
+									<input type="button" id="button" />
+								<div id="mulitplefileuploader" style="display:none;"><span><?php echo $this->__('Add Image') ?></span></div>
+									<p id="queuestatus"></p>
+									<ol id="log"></ol>
+								</div>
+								<?php } else { ?>
+								<div id="swfupload-control" style="display:none;">
+								<input type="button" id="button" style="display:none;"/>
+								</div>
+								<p class="validation-advice" style="color: red;"><?php echo $this->__("You can't upload more than  $imageLimit images.");?></p>
+								<?php } ?>
+							</li>
+						</ul>
+					</div>
+					<div class="drag_right_side">
+						<ul>
+							<li><p>Add up to <?php echo $imageLimit; ?> high quality photos of your experience. The bigger the better but not more than 2MB and minimum 1000px width each.</p></li>
+							<li><p>The first photo is your cover photo. To make a different photo the cover photo. Having a	selected one is cover photo will make your experience stand out!</p></li>
+						</ul>
+					</div>
+				<?php
+				if($imageCount != 0): ?>
+				<div class="my-account clearfix">
+				<div class="more-views">
+				<table style="border: none; float: left !important;">
+				<?php
+				$count = 0;
+				/**
+				 * set the default variable false for selected album image
+				 */
+				$default="false";
+				foreach ($_gallery as $_image ):
+				if($imageUrl == $_image->getFile() )
+				echo "<tr class='grid_img grid_img_albumcover'> ";
+				else
+				echo '<tr class="grid_img">';
+				?>
+					<td style="display: inline; border: none; float: left !important; padding: 10px;">
+						<div class="experiencegallery">
+						<?php if(empty($imageUrl) && $count==0){$default="true";}?>
+						<span id="album_remove_path_<?php echo $count; ?>" name="imageCollection[]" class="remove-check-box remove_album"
+						onclick="deleteImage('<?php echo $_image->value_id;?>','<?php if($imageUrl == $_image->getFile()) { echo "yes";}else{ echo "no";}?>');">
+						<i class="fa fa-times album_close"></i>
+						</span>
+						<img  src="<?php echo $this->helper('catalog/image')->init($products, 'thumbnail', $_image->getFile())->resize(100, 100); ?>"
+						alt="<?php echo $this->htmlEscape($_image->getLabel()) ?>"
+						title="<?php echo $this->htmlEscape($_image->getLabel()) ?>"
+					width="100" height="100" />
+						<input type="hidden" value="<?php echo $currentExperienceId; ?>" name="entity_id" id="entity_id">
+						<p style="margin:10px 0 0" class="photouploadimgsection">
+						<input style="margin:0;vertical-align:middle;" type="radio"	value="<?php echo $_image->getfile();?>" name="album_path"
+						id="album_path_<?php echo $count; ?>"
+						<?php
+						if($imageUrl == $_image->getFile()){
+						echo " checked='checked' ";
+						}
+						if(empty($imageUrl) && $count==0){ echo " checked='checked' "; $default="true";} ?> onchange="contentChanges(),selectAlbum('<?php echo $count; ?>')"/>
+						<label class="albumphoto_label" for="album_path_<?php echo $count; ?>"><i class="sprimg"></i><span class="video_type_label" style="letter-spacing: -0.5px;"><?php echo $this->__('Album Cover'); ?></span></label>
+						</p>
+						</div>
+					</td>
+				<?php
+				echo '</tr>';
+				$count++;
+				/**
+				 * set the default variable false for selected album image
+				 */
+				$default="false";
+				endforeach;
+				?>
+			</table>
+			</div>
+
+			</div>
+			<?php endif; ?>
+				</div>
+				<!-- Video section  -->
+				<?php
+				if(Mage::getStoreConfig ( 'airhotels/custom_email/enable_videolink' )) {?>
+					<div class="video_section">
+						<h3 class="video_title"><?php echo $this->__('Videos')?></h3>
+						<?php $attribute_code = "video_type";
+	            		$attribute_details = Mage::getSingleton("eav/config")->getAttribute("catalog_product", $attribute_code);
+						$options = $attribute_details->getSource()->getAllOptions(false); ?>
+						<div class="inner_video_type clearfix">
+						<div class="video_type">
+						<h3><?php  echo $this->__('Video Type :');?></h3>
+						<ul class="clearfix videotypelist">
+						<?php
+						$increment = 0;
+						$video_typye = 0;
+	                 	Foreach($options as $option){ ?>
+	                    	<li class="video_types">
+	                    	<input style="outline:none;" id="video_type_<?php echo $option["value"];?>" <?php if($videoType){ if($videoType==$option["value"]) { echo 'checked="true"'; $video_typye = $option["value"];} } else { if($increment == 0) {echo "checked='true'";$video_typye = $option["value"];}}?> onclick="changeVideoType(<?php echo $video_typye;?>,<?php echo $option["value"];?>,'<?php echo $videoUrl; ?>')" name="video_type" type="radio" title ="<?php echo $this->__($option["label"]);?>" value="<?php echo $option["value"]; ?>">
+	                    	<label class="videohead_label" for="video_type_<?php echo $option["value"];?>"><i class="sprimg"></i><span class="video_type_label"><?php echo $this->__($option["label"]); if($option["label"] == "Videourl"){ echo " (mp4 or webm or ogg)";}?></span></label>
+	                    	</li>
+	                  	<?php  $increment++; } ?>
+	                  	</ul>
+	                  	</div>
+	                  	</div>
+						<div class="inner_video">
+						<p style="margin: 0 0 20px 0;line-height:20px;">Videos are worth a billion words. Make your experience stand out
+							by adding a link to a Youtube or Youku or Vimeo or Tencent video or Videourl</p>
+							<input name="video_url" id="video_url" value="<?php echo $videoUrl;?>" class="input_width" type="text" placeholder="Link to video (Youtube or Youku or Vimeo or Tencent)(Optional)" onchange="contentChanges(),videoUrlChange()"/>
+							<input type="hidden" id="current_video_url" value="<?php echo $videoUrl;?>"/>
+							<input type="hidden" name="confirm_video_url" id="confirm_video_url" value="0" />
+							<input type="button" id="save_video_url" name="save_video_url" value="Validate" onclick="saveVideoUrl();" onmousedown="contentChanges();"/>
+							<span id="video_url_msg" style="display:none;"></span>
+							<input type="hidden" name="selected_tab" id="selected_tab" value=""/>
+							<?php if($videoUrl != ''){?><div id="remove_link" class="remove_link" style="display: block;" ><input type="checkbox" id="remove_url" name="remove_url" value="1"><span>Remove video url</span></div><?php } ?>
+						</div>
+					</div>
+				<?php } ?>
+				<div class="progressBar">
+					<div class="status"></div>
+				</div>
+			</fieldset>
+			</div>
+			<div class="form_next_button_section">
+			<button type="button" class="profile_submit form_next_button" onclick="return select_tab('basic');"><span class="form_next_btn_style"><< Previous</span></button>
+			<button type="submit" class="profile_submit form_next_button" id="photos_submit" value="Next" onclick="return albumCover()"><span class="form_next_btn_style">Next >></span></button>
+			</div>
+		</form>
+<script type="text/javascript">
+    jQ = jQuery.noConflict();
+    function imageDelete(){
+        if(jQ(".more-views input:checkbox:checked").length ){
+            if(confirm('<?php echo $this->__('Are you sure want to remove'); ?> ?') ){
+                return true;
+            }
+            else{
+                jQ(".remove-check-box").attr('checked', false);
+                jQ("#remove_image").val("");
+                return false;
+            }
+        }
+        else{
+            alert("<?php echo $this->__('Please select at least one image from the gallery'); ?>");
+            return false;
+        }
+    }
+    function albumCover(){
+         if(jQ("[name='album_path']:checked").length ==0 && jQ(".more-views input:checkbox:checked").length == 0){
+        	 jQ("#image_upload_error").show();
+           return false;
+        }
+        if(jQ(".more-views input:checkbox:checked").length != 0){
+            var removeLength =  jQ(".more-views input:checkbox:checked").length;
+            jQ("#remove_image").val(removeLength);
+            imageDelete();
+    	}
+        var videoUrl=jQ("#video_url").val();
+        var currentVideoUrl=jQ("#current_video_url").val();
+        var confirmVideoUrl=jQ("#confirm_video_url").val();
+        if(videoUrl!="" && currentVideoUrl=="" && confirmVideoUrl==0) {
+        	jQ("#video_url_msg").html("Please save your video url.");
+			jQ("#video_url_msg").addClass("video_url_error");
+			jQ("#video_url_msg").removeClass("video_url_success");
+			jQ("#video_url_msg").show().fadeOut(5000);
+			return false;
+        }
+  	}
+    function videoUrlChange() {
+    	jQ("#current_video_url").val("");
+    }
+    function disableImageButtonSaveAction(){
+    jQ('#gallery_images_save_submit').attr('disabled','disabled');
+    }
+</script>
+<script type="text/javascript">
+
+var totalQueues;
+var fileUploadLimit=parseInt(<?php echo $imageLimit;?>)-parseInt(<?php echo $imageCount;?>);
+var QueueCountApptha = 0;
+$jq = jQuery.noConflict();
+$jq(function(){
+	var nav = window.navigator,
+	ua = window.navigator.userAgent.toLowerCase();
+	if(ua.match(/windows/i) !== null ) {
+		if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {	
+			$jq('#button').hide();		
+			var settings = {
+				    url: "<?php echo  Mage::getBaseUrl().'property/general/imageupload/?id='.$currentExperienceId;?>",
+				    dragDrop:false,
+				    fileName: "uploadfile",
+				    allowedTypes:"jpg,png,gif,jpeg",
+				    returnType:"json",
+				    showProgress: true,
+				    multiple: false,
+				    showStatusAfterError: false,
+				    onSuccess:function(files,data,xhr) {
+				    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				    },
+				    onError: function(files,status,errMsg) {
+				    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				    },
+				    onComplete: function(){
+					},
+				    showDelete:false,
+				    showDone: false,
+				    showPreview: false
+			}
+			var uploadObj = $jq("#mulitplefileuploader").uploadFile(settings,function(){
+				window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				});
+
+			}
+		else if ((navigator.userAgent.indexOf('Mozilla') != -1) && navigator.userAgent.indexOf('Chrome') == -1) {
+			$jq('#button').hide();
+			var settings = {
+				    url: "<?php echo  Mage::getBaseUrl().'property/general/imageupload/?id='.$currentExperienceId;?>",
+				    dragDrop:false,
+				    fileName: "uploadfile",
+				    allowedTypes:"jpg,png,gif,jpeg",
+				    returnType:"json",
+				    showProgress: true,
+				    multiple: true,
+				    showStatusAfterError: false,
+				    onSuccess:function(files,data,xhr) {
+				    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				    },
+				    onError: function(files,status,errMsg) {
+				    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				    },
+				    onComplete: function(){
+					},
+				    showDelete:false,
+				    showDone: false,
+				    showPreview: false
+			}
+			var uploadObj = $jq("#mulitplefileuploader").uploadFile(settings,function(){
+				window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				});
+
+        	}
+    	else {
+	     $jq('#swfupload-control').swfupload({
+			upload_url: '<?php echo  Mage::getBaseUrl().'property/general/imageupload/?id='.$currentExperienceId;?>',
+			file_post_name: 'uploadfile',
+			file_size_limit : "2048",
+			file_types : "*.jpg;*.png;*.gif",
+			file_types_description : "Image files",
+			file_upload_limit : fileUploadLimit,
+			flash_url : "<?php echo str_replace("/index.php", "", Mage::getBaseUrl()).'skin/frontend/default/stylish/swfupload/swfupload.swf' ?>",
+			button_image_url : '<?php echo $this->getSkinUrl('images/wdp_buttons_upload_114x29.png');?>',
+            button_text : '<span class="flash_text" style="">Add Image</span>',
+	        button_text_style : '.flash_text{font-size: 14pt; color: #FFFFFF;font-weight:700;text-align:left;cursor:pointer}',
+            button_text_top_padding: 6,
+            button_text_right_padding: 2,
+            button_text_bottom_padding: 6,
+            button_text_left_padding: 20,
+            button_width : 114,
+            button_height : 36,
+            "Super User":"42",
+            button_placeholder : $jq('#button')[0],
+			debug: false
+		})
+
+		.bind('fileQueued', function(event, file){
+			var listitem='<li id="'+file.id+'" >'+
+				'File: <em>'+file.name+'</em> ('+Math.floor(file.size/1024)+' KB) <span class="progressvalue" ></span>'+
+				'<div class="progressbar" ><div class="progress" ></div></div>'+
+				'<p class="status" >Pending</p>'+
+				'<span class="cancel" >&nbsp;</span>'+
+				'</li>';
+			$jq('#log').append(listitem);
+			$jq('li#'+file.id+' .cancel').bind('click', function(){
+				var swfu = $jq.swfupload.getInstance('#swfupload-control');
+				swfu.cancelUpload(file.id);
+				$jq('li#'+file.id).slideUp('fast');
+			});
+			// start the upload since it's queued
+			$jq(this).swfupload('startUpload');
+
+		})
+		.bind('fileQueueError', function(event, file, errorCode, message){
+			if(errorCode==-100)//error code = -100 which mean upload image limit is exceed.
+			{
+				$jq("#multiple_upload_error").show().fadeOut(5000); // fadeOut(5000)- in this text will hide after 5 seconds.
+				return false;
+			}
+			alert('Size of the file'+file.name+' is greater than limit ');
+		})
+		.bind('fileDialogComplete', function(event, numFilesSelected, numFilesQueued){
+			totalQueues  = numFilesQueued;
+			$jq('#queuestatus').text('Files Selected: '+numFilesSelected+' / Queued Files: '+QueueCountApptha);
+		})
+		.bind('uploadStart', function(event, file){
+			$jq('#log li#'+file.id).find('p.status').text('Uploading...');
+			$jq('#log li#'+file.id).find('span.progressvalue').text('0%');
+			$jq('#log li#'+file.id).find('span.cancel').hide();
+		})
+		.bind('uploadProgress', function(event, file, bytesLoaded){
+			//Show Progress
+			var percentage=Math.floor((bytesLoaded/file.size)*100);
+                        if(percentage>=100)
+                         {
+                             percentage=100;
+                         }
+			$jq('#log li#'+file.id).find('div.progress').css('width', (percentage)+'%');
+			$jq('#log li#'+file.id).find('span.progressvalue').text( (percentage) +'%');
+		})
+		.bind('uploadSuccess', function(event, file, serverData){
+			appendHtmlfile(serverData,file);
+			var item=$jq('#log li#'+file.id);
+			QueueCountApptha++;
+			item.find('div.progress').css('width', '100%');
+			item.find('span.progressvalue').text('100%');
+			var pathtofile='<a href="<?php echo Mage::getBaseUrl().'/media/catalog/product/'?>'+file.name+'" target="_blank" >view &raquo;</a>';
+			item.addClass('success').find('p.status').html('Done!!! ');
+			$jq('#queuestatus').text('Files Selected: '+totalQueues+' / Queued Files: '+QueueCountApptha);
+			if(totalQueues == QueueCountApptha ){
+				window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+                        }
+		})
+		.bind('uploadComplete', function(event, file){
+			// upload has completed, try the next one in the queue
+			$jq(this).swfupload('startUpload');
+		})
+
+    	}
+
+    } else {
+        $jq('#button').hide();
+		var settings = {
+				 url: "<?php echo  Mage::getBaseUrl().'property/general/imageupload/?id='.$currentExperienceId;?>",
+			    dragDrop:false,
+			    fileName: "uploadfile",
+			    allowedTypes:"jpg,png,gif,jpeg",
+			    returnType:"json",
+			    showProgress: true,
+			    showStatusAfterError: false,
+			    multiple: true,
+			    onSuccess:function(files,data,xhr) {
+			    },
+			    onError: function(files,status,errMsg) {
+			    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+			    },
+			    afterUploadAll: function(){
+			    	window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+				},
+			    showDelete:false,
+			    showDone: false,
+			    showPreview: false
+		}
+		var uploadObj = $jq("#mulitplefileuploader").uploadFile(settings,function(){
+			window.location.href='<?php echo $this->helper('core/url')->getCurrentUrl(); ?>';
+			});
+    }
+		});
+var fileCount = 0;
+function appendHtmlfile(serverData,file){
+	var filename =  file.name.split(".");
+	var html = "<fieldset id='"+file.id+fileCount+"' ><legend>"+file.name+"</legend><div align='right' style='cursor:pointer' ></div>";
+	fileCount ++;
+}
+function showUploader(value){
+	if(value!="0"){
+		jQ("#swfupload-control").show();
+	}
+	else{
+		jQ("#swfupload-control").hide();
+	}
+}
+function removeFieldSet(id){
+	jQ("#"+id).remove();
+}
+function deleteImage(imageId,albumCover) {
+	var entityId = "<?php echo $currentExperienceId; ?>";
+	if(confirm('<?php echo $this->__('Are you sure want to remove'); ?> ?') ){
+       window.location = "<?php echo $this->getBaseUrl();?>property/multistep/photoDelete/image_id/"+imageId+"/entity_id/"+entityId+"/albumCover/"+albumCover;
+    }
+}
+</script>
+<script type="text/javascript">
+/*---------  Save video ---------- */
+function saveVideoUrl() {
+	var video_url	= document.getElementById("video_url").value;
+	var video_type 	= jQ('input[name=video_type]:checked').val();
+	var video_label = jQ( "input[name=video_type]:checked" ).attr( "title" );
+	if(video_url!="" && video_type!=""){
+		var youtubematches 	= video_url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/);
+		var youkumatches 	= video_url.match(/[^.\/_]+(?=\.\w+$)/g);
+		var vimeomatches 	= video_url.match(/vimeo.com/);
+		var tencentmatches 	= video_url.match('static\|v\.video\|\.qq\.com/');
+		video_url = video_url.replace(/\/$/, "");
+		var videourlmatches 	= video_url.match('^(http:\/\/|https:\/\/|www\.).*(\.mp4|\.webm|\.ogg|\.mp4\|\.webm\|\.ogg\)$');
+		if(video_label == 'Youtube' && youtubematches){
+					document.getElementById("confirm_video_url").value = "1";//video url is valid means set as int 1
+					document.getElementById("video_url").readonly=true;
+					jQ("#video_url_msg").html("Youtube Video url have been saved");
+					jQ("#video_url_msg").addClass("video_url_success");
+					jQ("#video_url_msg").removeClass("video_url_error");
+					jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+
+		} else if(video_label == 'Youku' && youkumatches){
+					document.getElementById("confirm_video_url").value = "1";//video url is valid means set as int 1
+					document.getElementById("video_url").readonly=true;
+					jQ("#video_url_msg").html("Youku Video url have been saved");
+					jQ("#video_url_msg").addClass("video_url_success");
+					jQ("#video_url_msg").removeClass("video_url_error");
+					jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+
+		} else if(video_label == 'Vimeo' && vimeomatches){
+					document.getElementById("confirm_video_url").value = "1";//video url is valid means set as int 1
+					document.getElementById("video_url").readonly=true;
+					jQ("#video_url_msg").html("Vimeo Video url have been saved");
+					jQ("#video_url_msg").addClass("video_url_success");
+					jQ("#video_url_msg").removeClass("video_url_error");
+					jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+
+		} else if(video_label == 'Tencent' && tencentmatches){
+					document.getElementById("confirm_video_url").value = "1";//video url is valid means set as int 1
+					document.getElementById("video_url").readonly=true;
+					jQ("#video_url_msg").html("Tencent Video url have been saved");
+					jQ("#video_url_msg").addClass("video_url_success");
+					jQ("#video_url_msg").removeClass("video_url_error");
+					jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+
+		} else if(video_label == 'Videourl' && videourlmatches){
+			document.getElementById("confirm_video_url").value = "1";//video url is valid means set as int 1
+			document.getElementById("video_url").readonly=true;
+			jQ("#video_url_msg").html("Web url have been saved");
+			jQ("#video_url_msg").addClass("video_url_success");
+			jQ("#video_url_msg").removeClass("video_url_error");
+			jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+
+		} else {
+			document.getElementById("confirm_video_url").value = "0";// video url is invalid means set as int 0
+			jQ("#video_url_msg").html("isn't a link to a video that we recognize.");
+			jQ("#video_url_msg").addClass("video_url_error");
+			jQ("#video_url_msg").removeClass("video_url_success");
+			jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+		}
+	}else{
+		document.getElementById("confirm_video_url").value = "1";//video url is empty means set as int 0
+		jQ("#video_url_msg").html("Please enter the video url.");
+		jQ("#video_url_msg").addClass("video_url_error");
+		jQ("#video_url_msg").removeClass("video_url_success");
+		jQ("#video_url_msg").show().fadeOut(5000); //fadeOut(5000)- in this text will hide after 5 seconds.
+	}
+}
+
+function changeVideoType(checked,selctedOtion,url){
+	if(checked == selctedOtion){
+		jQ("#video_url").val(url);
+		jQ("#remove_link").css("display","block");
+		
+	}else{
+		jQ('#remove_url').prop('checked', false);
+		jQ("#remove_link").css("display","none");
+		jQ("#video_url").val('');
+		
+		
+	}
+	
+}
+</script>
+<script>
+jQ(document).ready(function() {
+	jQ("input:text, textarea, select, input:password").focus(function(){ jQ(this).css('border', '1px solid #5aaee5');jQ(this).css('box-shadow', '0px 0px 10px rgba(90,157,229,0.5)'); });
+	jQ("input:text, textarea, select, input:password").blur(function(){  jQ(this).css('border', '1px solid #b1b3b3');jQ(this).css('box-shadow', 'none'); });
+});
+</script>

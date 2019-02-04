@@ -1,0 +1,216 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/**
+ * One page checkout payment methods
+ *
+ * @see Mage_Checkout_Block_Onepage_Payment_Methods
+ */
+$paymentmethods = Mage::getStoreConfig('onestepcheckout/general/default_payment_method');
+$api = $this->helper('onestepcheckout')->license();
+if($api): ?>
+	<dl class="sp-methods clearfix" id="checkout-payment-method-load">
+	<?php foreach ($this->getMethods() as $_method): $_code = $_method->getCode() ?>
+	    <dt>
+	    <?php if( sizeof($this->getMethods()) > 1 ): ?>
+	        <input id="p_method_<?php echo $_code ?>" value="<?php echo $_code ?>" type="radio" name="payment[method]" title="<?php echo $this->htmlEscape($_method->getTitle()) ?>" onclick="overwrite('<?php echo $_code; ?>'),payment.switchMethod('<?php echo $_code ?>')"<?php if($_code==$paymentmethods): ?> checked="checked" <?php endif; ?>  class="radio validate-one-required-by-name radio-input" />
+	    <?php else: ?>
+	        <input id="p_method_<?php echo $_code ?>" value="<?php echo $_code ?>" type="radio" name="payment[method]" onclick="payment.switchMethod('<?php echo $_code ?>')"<?php if($_code): ?> checked="checked"<?php endif; ?>  class="radio radio-input" />
+	    <?php endif; ?>
+	        <label class="radio-label "for="p_method_<?php echo $_code ?>"><?php echo $this->getMethodTitle($_method) ?> <?php echo $this->getMethodLabelAfterHtml($_method) ?></label>
+	    </dt>
+	    <?php if ($html = $this->getPaymentMethodFormHtml($_method)): ?>
+	    <dd id="container_payment_method_<?php echo $_code; ?>" class="payment-method">
+	        <?php echo $html; ?>
+	    </dd>
+	    <?php endif; ?>
+	<?php endforeach; ?>
+	</dl>
+	<?php echo $this->getChildChildHtml('additional'); ?>
+<?php endif;?>
+<script type="text/javascript">
+var paymentMethod;
+//<![CDATA[
+<?php  
+if(sizeof($this->getMethods()) ==1 || isset($paymentmethods)) { ?>
+	paymentMethod = "<?php echo $paymentmethods ?>"; 
+	payment.switchMethod('<?php echo $paymentmethods ?>');
+	<?php }?>    
+	//]]>  
+	window.onload = function() { 
+	//<![CDATA[
+	<?php  if(sizeof($this->getMethods()) ==1 || isset($paymentmethods)) { ?>
+	payment.currentMethod = "<?php echo $paymentmethods ?>"; 
+	payment.switchMethod('<?php echo $paymentmethods ?>') <?php }?>    
+	<?php echo $this->getChildChildHtml('scripts'); ?>
+	//]]>  
+}
+$$('#checkout-payment-method-load dt input').invoke('observe', 'click', function(e) {
+    var element = e.element();
+    var name = 'payment_form_' + element.getValue();
+    payment.currentMethod = element.getValue();
+    /* Hide all other forms */
+    $$('dd.payment-method').invoke('hide');
+
+    if(element.checked) {
+        var form = $(name);
+        var container = $('container_payment_method_' + element.getValue());
+
+        if(element !== null && container !== null)    {
+            container.show();
+            $(name).show();
+        }
+    }
+});
+/// cvv number
+function toggleToolTip(event){
+	if($('payment-tool-tip')){
+    	$('payment-tool-tip').setStyle({
+        	top: (Event.pointerY(event)-560)+'px'//,
+                //left: (Event.pointerX(event)+100)+'px'
+            })
+            $('payment-tool-tip').toggle();
+	}
+    Event.stop(event);
+}
+if($('payment-tool-tip-close')){
+	Event.observe($('payment-tool-tip-close'), 'click', toggleToolTip);
+}
+$$('.cvv-what-is-this').each(function(element) {
+	element.href="javascript:void(0);";
+	element.observe('click', respond);
+	function respond(){
+		document.getElementById('payment-tool-tip').style.display="block";
+		document.getElementById('payment-tool-tip').style.top="450px";
+	}
+});
+function overwrite(payment) {
+	$$('.payment-method input').each(function(c){
+		$(c).disabled=true;
+	});
+	$$('.payment-method select').each(function(c){
+		$(c).disabled=true;
+	});
+}
+</script>
+<?php 
+$coupon_enabled=Mage::getStoreConfig('onestepcheckout/general/Activate_apptha_discount');
+if($coupon_enabled): ?>
+	<div class="onestepcheckout-coupons">
+    	<div id="coupon-notice" style="display: none;"></div>
+        	<?php $couponcode = $this->getQuote()->getCouponCode(); ?>
+            <label style="font-weight:bold;"><?php echo $this->__('Coupon code:'); ?></label><br/>
+            <div class="input-box">
+	            <input class="input-text" type="text" name="couponcode" id="couponcode" onfocus="coupon_code_focus();" value="<?php echo $couponcode; ?>" />
+	            <div id="coupon_err_msg"  class="validation-advice" style="display:none;clear: both;"><?php echo $this->__('Please enter a coupon code.'); ?></div>
+            </div>
+            <button  type="button" class="button" onclick="coupon_code()">
+            <span><span><?php echo $this->__('Apply Coupon');?></span></span></button>            
+            <button type="button" class="button" id="coupon_remove" onclick="couponremove();" style="<?php if($couponcode =='') { echo 'display: none;'; } ?>">
+            <span><span><?php echo $this->__('Cancel Coupon'); ?></span></span></button>            
+            <script type="text/javascript">
+               function coupon_code_focus() {
+               		$('coupon_err_msg').hide();
+               }
+               function coupon_code() {
+                    var coupon = $('couponcode').getValue();
+                    var couponMessage = $('coupon-notice');
+                    couponMessage.hide();
+                    if(coupon == '') {
+                       $('coupon_err_msg').show();
+                      //  alert('<?php echo $this->__('Please enter a coupon code.'); ?>');
+                        return;
+                    }
+                    var url = '<?php echo $this->getUrl('onestepcheckout/index/couponcode', array('_secure'=>true)); ?>';
+                    var parameters = {code: coupon};
+                    var summary = $('checkout-review-load');
+                    summary.update('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+                    new Ajax.Request(url, {
+                        method: 'post',
+                        parameters: parameters,
+                        onSuccess: function(transport) {
+                            if(transport.status == 200) {
+                                var response = transport.responseText.evalJSON();
+                                if(response.success) {                                   
+                                    checkout.reloadReviewBlock();
+                                    couponMessage.update(response.message);
+                                    couponMessage.removeClassName('error-msg');
+                                    couponMessage.addClassName('success-msg');
+                                    couponMessage.show();
+                                    /* Show remove button */
+                                    $('coupon_remove').show();
+                                }
+                                else    {
+                                    //summary.update(response.summary);
+                                    checkout.reloadReviewBlock();
+                                    couponMessage.update(response.message);
+                                    couponMessage.removeClassName('success-msg');
+                                    couponMessage.addClassName('error-msg');
+                                    couponMessage.show();
+                                    /* Hide remove button */
+                                    $('coupon_remove').hide();
+                                }
+                            }
+                        }
+                	});
+				}
+             	function couponremove() {
+                    var coupon = $('couponcode').getValue();
+                    var couponNotice = $('coupon-notice');
+                    couponNotice.hide();
+                    var url = '<?php echo $this->getUrl('onestepcheckout/index/couponcode', array('_secure'=>true)); ?>';
+                    var parameters = {code: coupon, remove: '1'};
+                    var summary = $('checkout-review-load');
+                    summary.update('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+                    new Ajax.Request(url, {
+                        method: 'post',
+                        parameters: parameters,
+                        onSuccess: function(transport)  {
+                            if(transport.status == 200) {
+                                var response = transport.responseText.evalJSON();
+                                if(response.success){
+                                    $('couponcode').setValue('')
+                                    $('coupon_remove').hide();
+                                }
+                                var summary = $('checkout-review-load');                          
+                             	checkout.reloadReviewBlock();                              
+                                couponNotice.hide();
+                                couponNotice.update(response.message);
+                                couponNotice.removeClassName('error-msg');
+                                couponNotice.addClassName('success-msg');
+                                couponNotice.show();
+                            }
+                        }
+                   });
+             	}
+            </script>
+        </div>
+<?php endif; 
+
+echo $this->getChildHtml('invite_friends_discount') ?>

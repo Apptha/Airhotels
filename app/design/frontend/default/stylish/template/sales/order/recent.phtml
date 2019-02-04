@@ -1,0 +1,84 @@
+<?php 
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<div class="box-account box-recent">
+<?php $_orders = $this->getOrders(); ?>
+    <div class="box-head">
+        <h2><?php echo $this->__('Recent Bookings') ?></h2>
+        <?php if( sizeof($_orders->getItems()) > 0 ): ?>
+        <a href="<?php echo $this->getUrl('sales/order/history') ?>">
+        <?php echo $this->__('View All') ?></a><?php endif; ?>
+    </div>
+<?php if( sizeof($_orders->getItems()) > 0 ): ?>
+    <table class="data-table" id="my-orders-table">
+    <col width="1" />
+    <col width="1" />
+    <col />
+    <col width="1" />
+    <col width="1" />
+    <col width="1" />
+        <thead>
+            <tr>
+                <th style=" width: 22%; "><?php echo $this->__('Booking #') ?></th>
+                <th style=" width: 22%; "><?php echo $this->__('Date') ?></th>
+               
+                <th style=" width: 22%; "><span class="nobr"><?php echo $this->__('Booking Total') ?></span></th>
+                <th style=" width: 22%; "><?php echo $this->__('Status') ?></th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($_orders as $_order): ?>
+                <tr>
+                    <td><?php echo $_order->getRealOrderId() ?></td>
+                    <td><span class="nobr"><?php echo $this->formatDate($_order->getCreatedAtStoreDate()) ?></span></td>
+                   
+                    <td><?php echo $_order->formatPrice($_order->getGrandTotal()) ?></td>
+                    <td><em><?php echo $_order->getStatusLabel() ?></em></td>
+                    <td class="a-center">
+                        <span class="nobr">
+                        <a href="<?php echo $this->getViewUrl($_order) ?>">
+                        <?php echo $this->__('View Booking') ?></a>
+                        <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>
+                            <span class="separator">|</span> 
+                            <a href="<?php echo $this->getReorderUrl($_order) ?>" class="link-reorder">
+                            <?php echo $this->__('Rebooking') ?></a>
+                        <?php endif ?>
+                        </span>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <script type="text/javascript">decorateTable('my-orders-table')</script>
+<?php else: ?>
+    <p><?php echo $this->__('You have placed no bookings.'); ?></p>
+<?php endif; ?>
+</div>

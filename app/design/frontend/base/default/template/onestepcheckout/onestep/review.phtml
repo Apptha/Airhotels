@@ -1,0 +1,128 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+?>
+<!---Title  of the page -->
+<div class="page-title" style="margin:0">
+  <span class="review-bg"></span>  <h2><?php echo $this->__('Order Review') ?></h2>
+</div>
+<!---End of Title -->
+<!---start of order information -->
+<div class="order-review" id="checkout-review-load" style="padding:0"></div>
+<?php
+// Feed back drop down
+if(Mage::getStoreConfig('onestepcheckout/feedback/enable_feedback')==1) {
+	$feedbackValues = unserialize(Mage::getStoreConfig('onestepcheckout/feedback/feedback_values')); ?>
+    <div class="onestepcheckout-feedback" id="">
+    	<label for="id_feedback" style="padding-right: 45px;"><?php echo $this->__('How did you hear about us?'); ?></label>
+        <div style="clear: both;"></div>
+        <select style="" name="onestepcheckout_feedback" id="id_feedback" defaultvalue="">
+        	<option value=""><?php echo $this->__('Please choose'); ?></option>
+            <?php foreach($feedbackValues as $value => $label): ?>
+				<option value="<?php echo $label['value'];?>"><?php echo $label['value']?></option>
+            <?php endforeach;
+            //For other text
+            if(Mage::getStoreConfig('onestepcheckout/feedback/enable_feedback_freetext')==1) { ?>
+                    <option value="freetext"><?php echo $this->__('Other'); ?></option>
+            <?php } ?>
+        </select>
+	</div>
+<?php
+}
+// For other text
+if(Mage::getStoreConfig('onestepcheckout/feedback/enable_feedback_freetext')==1) { ?>
+	<script type="text/javascript">
+    	$('id_feedback').observe('change', function (event){
+	        if(this.getValue() == 'freetext'){
+	        	$('id_feedback_freetext_div').show();
+			} else {
+	        	$('id_feedback_freetext_div').hide();
+			}
+		});
+	</script>
+	<div id='id_feedback_freetext_div' class="onestepcheckout-feedback-freetext"  style="display:none;">
+    	<label for="id_feedback_freetext"><?php echo $this->__('Please specify:'); ?></label><br/>
+        <textarea id="id_feedback_freetext" name="onestepcheckout_feedback_freetext"></textarea>
+	</div>
+<?php }
+$comments_enable = Mage::getStoreConfig('onestepcheckout/display_option/display_comments');
+if($comments_enable == 1): ?>
+	<div class="onestepcheckout-comments">
+    	<label for="id_comments"><?php echo $this->__('Comments:'); ?></label><br/>
+        <textarea id="id_comments" name="onestepcheckout_comments"><?php if(isset($_POST['onestepcheckout_comments'])) { echo $_POST['onestepcheckout_comments']; } ?></textarea>
+	</div>
+<?php endif; ?>
+<!---End of order information -->
+<script type="text/javascript">
+    //<![CDATA[
+       var review = new Review('co-form','<?php echo $this->getUrl('onestepcheckout/index/saveOrder', array('_secure'=>true)) ?>','<?php echo $this->getUrl('checkout/onepage/success', array('_secure'=>true)) ?>', $('checkout-agreements'));
+    //]]>
+</script>
+<div id="product-details"></div>
+<?php
+$terms_enable = Mage::getStoreConfig('onestepcheckout/terms/enable_terms');
+$terms_title = Mage::getStoreConfig('onestepcheckout/terms/terms_title');
+$terms_contents = Mage::getStoreConfig('onestepcheckout/terms/terms_contents');
+if($terms_enable == 1): ?>
+<div id="terms-condition" >
+    <div class="onestepcheckout-terms-popup">
+        <div class="onestepcheckout-popup-wrapper-inner">
+        <a href="javascript:closeLink()" class="close onesteploginclose"><i class="airhotel-sprite onestepclosebutton"></i></a>
+            <h2 class="onepagetitle"><?php echo $terms_title; ?></h2>
+            <div class="onestepcheckout-toc-terms">
+                <?php echo $terms_contents; ?>
+            </div>
+        </div>
+    </div>
+    <div class="onestepcheckout-popup-footer">&nbsp;</div>
+</div>
+<?php endif; 
+if($terms_enable == 1): ?>
+	<div class="onestepcheckout-enable-terms onestepagreements">
+    	<input class="required-entry" type="checkbox" id="id_accept_terms" name="accept_terms" value="1" />
+        <label for="id_accept_terms" class="agreements_label"><i class="sprimg"></i><p class="accept_terms"><?php echo $this->__('I accept the') ?> <a href="javascript:lightboxAction('terms-condition')" id="lightboxLink" title="<?php echo $this->__('Terms and Conditions'); ?>"><?php echo $this->__('Terms and Conditions'); ?></a><i class="fa fa-star mandatory_star"></i></p></label>
+    </div>
+<?php endif; ?>
+<div id="checkout-review-submit">
+    <?php echo $this->getChildHtml('agreements'); ?>
+    <div class="onestep_button_place" id="review-buttons-container">
+	    <button type="button" id="review-btn" title="<?php echo $this->__('Place Order') ?>" class="import_button" onclick="review.save();"><?php echo $this->__('Place Order') ?></button>
+	   	<div class="wait" id="review-please"></div>
+	</div>
+</div>
+<script type="text/javascript">
+var test1;
+function lightboxAction(Id) {
+    test1 = new Lightbox_apptha(Id);
+    test1.open();
+}
+function closeLink() {
+    test1.close();
+}
+</script>

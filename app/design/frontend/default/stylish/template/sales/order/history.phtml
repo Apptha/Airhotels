@@ -1,0 +1,75 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<?php $_orders = $this->getOrders(); ?>
+<div class="page-title" style="margin:0;">
+    <h1 class="dashboard_leftside_heading"><?php echo $this->__('My Bookings') ?></h1>
+</div><div class="myorders_container" style="border-bottom:none;">
+<?php //echo $this->getPagerHtml(); ?>
+<?php if($_orders->getSize()): ?>
+<div class="booking_history_responsivetable">
+<table class="data-table" id="my-orders-table">
+   
+    <thead>
+        <tr>
+            <th style="width:20%"><?php echo $this->__('Booking #') ?></th>
+            <th style="width:18%"><?php echo $this->__('Date') ?></th>
+           
+            <th style="width:18%"><span class="nobr"><?php echo $this->__('Booking Total') ?></span></th>
+            <th style="width:12%"><span class="nobr"><?php echo $this->__('Booking Status') ?></span></th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php $_odd = ''; ?>
+        <?php foreach ($_orders as $_order): ?>
+        <tr>
+            <td><?php echo $_order->getRealOrderId() ?></td>
+            <td><span class="nobr"><?php echo $this->formatDate($_order->getCreatedAtStoreDate()) ?></span></td>
+           
+            <td><?php echo $_order->formatPrice($_order->getGrandTotal()) ?></td>
+            <td><em class="order-status-em"><?php echo $_order->getStatusLabel() ?></em></td>
+            <td class="a-center">
+                <span class="nobr"><a href="<?php echo $this->getViewUrl($_order) ?>"><?php echo $this->__('View Booking') ?></a>
+                    <?php /*<span class="separator">|</span><a href="<?php echo $this->getTrackUrl($_order) ?>"><?php echo $this->__('Track Order') ?></a>&nbsp;*/ ?>
+                    <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>                    
+                <?php endif ?>
+                </span>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table></div>
+<?php echo $this->getPagerHtml(); ?>
+</div>
+  
+<script type="text/javascript">decorateTable('my-orders-table');</script>
+
+<?php else: ?>
+    <p class="list_text_center" style="margin:0;padding:20px 0"><?php echo $this->__('You have placed no Bookings.'); ?></p></div>
+<?php endif ?>
+

@@ -1,0 +1,309 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */ ?>
+<?php
+$customerId 	= $this->getRequest()->get('cid');
+$customer_data 	= Mage::getModel('customer/customer')->load($customerId);
+$productId 		= $this->getRequest()->get('pid');
+/**
+ * Getting product model
+ */
+$model 			= Mage::getModel('catalog/product');
+$_product 		= $model->load($productId);
+$accommodate 	= $_product->getPeopleMax();
+$baseUrl 		= $this->getBaseUrl();
+$skinUrl 		= $this->getSkinUrl();
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+
+$propertyTime 	  = $_product->getPropertyTime();
+$propertyTimeData = Mage::helper('airhotels/airhotel')->getPropertyTimeLabelByOptionId();
+?>
+<div class="sendMessage">
+    <h2> <?php echo $this->__("Send Message to ") . ucfirst($customer_data->getFirstname()); ?> </h2>
+</div><?php
+$currentDate 	= Mage::getModel('core/date')->date('m/d/Y');
+$schedule 		= Mage::getModel("airhotels/calendar")->getCollection()
+				->addFieldToFilter('product_id',$productId)
+ 				->distinct(true);
+$scheduleData   = $schedule->getData();	?>
+<div id='timepicker-data' style='display: none;'>
+	<?php if($scheduleData) {
+  			foreach($scheduleData as $scheduleData) {
+				$getScheduleTime = Mage::getModel("airhotels/calendar")->getCollection()
+				->addFieldToFilter('product_id',$productId)->getData();
+				if($getScheduleTime){
+						echo "<ul id='book-datas'>";
+						foreach($getScheduleTime as $getScheduleTime) {
+
+						if(isset($getScheduleTime['schedule_class'])){
+							$scheduleClass 			 = $getScheduleTime['schedule_class'];
+							$scheduleToTime 		 = $getScheduleTime['to_time'];
+							$scheduleToTime 		 = date('h:i a', strtotime($scheduleToTime));
+							$scheduleFromTime 		 = $getScheduleTime['from_time'];
+							$scheduleFromTimeInstant = strtotime("+30 minutes", strtotime($scheduleFromTime));
+							$scheduleFromTimeInstant = date('h:i a', $scheduleFromTimeInstant);
+							$scheduleFromTime 		 = date('h:i a', strtotime($scheduleFromTime));
+
+								if($scheduleClass == "busy") {
+									echo "<li class='property-time blackout' data-end='$scheduleToTime' data-start='$scheduleFromTime'></li>";
+								} else {
+									echo "<li class='property-time blackout' data-end='$scheduleFromTimeInstant' data-start='$scheduleFromTime'></li>";
+								}
+							}
+
+						}
+					}
+					echo "</ul>";
+			}
+ 	} ?>
+</div>
+<form id="contact_form" class="popup_form" action="<?php echo Mage::getBaseUrl() . "property/property/saveinbox" ?>" method="post" onsubmit="return validateForm();">
+    <div id="search_options" class="clearfix">
+    	<?php if ($hourlyEnabledOrNot == 0 && $propertyTime == $propertyTimeData) { ?>
+        <div class="search_date popupcheckindate">
+            <div class="checkinDate"><?php echo $this->__('Check in'); ?> <em>*</em></div>
+            <input type="text" placeholder="dd-mm-yy" id="checkinDate" name="from" readonly >
+            <div id="checkinDateError" class="Error"></div>
+            <div class="sort_grid"><select id="property_service_from" name="property_service_from" onchange="propertyTimeChange()">
+            <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                <option value="<?php echo $inc; ?>" <?php if(!empty($serviceFrom)){if($serviceFrom == $inc){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromData)){if($propertyServiceFromData==$inc){echo 'selected="selected"';}}} ?>><?php echo $inc; ?></option>
+            <?php } ?>
+            </select></div>
+            <div class="sort_grid"><select id="property_service_from_period" name="property_service_from_period" onchange="propertyTimeChange()">
+                <option value="AM" <?php if(!empty($serviceFromPeriod)){if($serviceFromPeriod=='AM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromPeriodData)){if($propertyServiceFromPeriodData=='AM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('AM'); ?></option>
+                <option value="PM" <?php if(!empty($serviceFromPeriod)){if($serviceFromPeriod=='PM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceFromPeriodData)){if($propertyServiceFromPeriodData=='PM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('PM'); ?></option>
+            </select></div>
+        </div>        
+        <?php }else{ ?>
+            <div class="search_date popupcheckindate">
+            <div class="checkinDate"><?php echo $this->__('Check in'); ?> <em>*</em></div>
+                <input type="text" placeholder="dd-mm-yy" id="checkinDate" name="from" readonly >
+                <div id="checkinDateError" class="Error"></div>
+            </div>
+        <?php }?>
+        <?php if ($hourlyEnabledOrNot == 0 && $propertyTime == $propertyTimeData) { ?>
+       	<div class="search_date popupcheckindate">
+            <div class="checkinDate"><?php echo $this->__('Check out'); ?><em>*</em></div>
+            <div><input type="text" placeholder="dd-mm-yy" autocomplete="off"  id="checkinTo"  name="to"  readonly></div>
+            <div id="checkinToErr" class="Error"></div>
+            <div class="sort_grid"><select id="property_service_to" name="property_service_to" onchange="propertyTimeChange()">
+            <?php for ($inc = 1; $inc <= 12; $inc++) { ?>
+                    <option value="<?php echo $inc; ?>" <?php if(!empty($serviceTo)){if($serviceTo==$inc){echo 'selected="selected"';}}else{if(!empty($propertyServiceToData)){if($propertyServiceToData==$inc){echo 'selected="selected"';}}} ?>><?php echo $inc; ?></option>
+                <?php } ?>
+            </select></div>
+            <div class="sort_grid"><select id="property_service_to_period" name="property_service_to_period" onchange="propertyTimeChange()">
+                <option value="AM" <?php if(!empty($serviceToPeriod)){if($serviceToPeriod=='AM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceToPeriodData)){if($propertyServiceToPeriodData=='AM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('AM'); ?></option>
+                <option value="PM" <?php if(!empty($serviceToPeriod)){if($serviceToPeriod=='PM'){echo 'selected="selected"';}}else{if(!empty($propertyServiceToPeriodData)){if($propertyServiceToPeriodData=='PM'){echo 'selected="selected"';}}} ?>><?php echo $this->__('PM'); ?></option>
+            </select></div>
+        </div>        
+        <?php } else { ?>
+        	<div class="search_date popupcheckindate">
+                <div class="checkinDate"><?php echo $this->__('Check out'); ?><em>*</em></div>
+                <div><input type="text" placeholder="dd-mm-yy" autocomplete="off"  id="checkinTo"  name="to"  readonly></div>
+                <div id="checkinToErr" class="Error"></div>
+        	</div>
+        <?php }?>
+
+        <?php if($accommodate >=1 ){ ?>
+        <div class="search_guest popupcheckindate">
+            <div class="checkinDate"><?php echo $this->__('Peoples'); ?></div>
+            <select id="number_of_guests" name="number_of_guests">
+                <?php for ($i = 1; $i <= $accommodate; $i++) { ?>
+                <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                <?php } ?>
+            </select>
+        </div>
+        <?php } ?>
+    </div>
+    <div class="contact_form">
+        <p>
+            <?php echo $this->__('Tell') ?> <?php echo ucfirst($customer_data->getFirstname()); ?>, <?php echo $this->__('what do you like about his tour, what matters the most about your trip, or ask him questions.'); ?>
+        <em>*</em></p>
+        <div>
+            <textarea name="mailSubject" id="mailSubject" style="resize:none;"></textarea>
+            <div id="mailSubjectError" class="Error"></div>
+        </div>
+    </div>
+    <div <?php
+	   	$phoneNoEnable =(int) Mage::getStoreConfig('airhotels/custom_email/enable_contactme');
+	    if($phoneNoEnable != 0){ echo 'style="display:none"'; } ?>>
+	    <div style="margin: 10px 0 0">
+	        <h1 style="font-size: 12px;font-weight: bold;"><?php echo $this->__('Can this host call you about your inquiry?'); ?></h1>
+	        <div ><input type="radio" name="hostCall" id="hostCallYes" value="1" id="popup_radio" checked="true"/><label for="hostCallYes" style="padding-left: 5px;"><?php echo $this->__('Yes') ?></label>
+	            <span style="padding-left: 20px;"> <input type="radio" name="hostCall" id="hostCallNo" value="0" /><label for="hostCallNo" style="padding-left: 5px;"><?php echo $this->__('No') ?></label></span></div>
+	    </div>
+	    <p class="time_zone">
+	        <?php echo $this->__("Your number won't be revealed. They can only call from 9am to 9pm in your time zone.") ?>
+	    <em>*</em></p>
+	    <div>
+	        <select id="guest_preferences_time_zone" name="guest_preferences">
+				<?php $className 	= Mage::getConfig()->getBlockClassName('Apptha_Airhotels_Block_Property_Form');
+						$block 		= new $className();
+						$timeZones 	= $block->getTimezone();
+	         			echo $timeZones; ?>
+	        </select>
+	        <div id="timeZoneError" class="Error"></div>
+	    </div>
+	    <div>
+	        <p class="time_zone">
+	            <?php echo $this->__("Telephone Number") ?>
+	            <input type="text" name="mobileNo" class="contact_mobileno" id="mobileNo"/>
+	            <div id="MobileError" class="Error"></div>
+	        </p>
+	    </div>
+    </div>
+    <input type="hidden" name="hostId" id="hostId" value="<?php echo $customerId ?>" />
+    <input type="hidden" name="experienceId" id="experienceId" value="<?php echo $productId; ?>" />
+    <div class="sendmsg" style="margin: 10px 0px 0px 10px">
+        <input type="submit" class="import_button" id="inboxMessageSubmitButton" value="<?php echo $this->__("Send Message") ?>" />
+    </div>
+</form>
+<div class="popup_overlay"></div>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();
+    jQ(function() {
+    	 jQ('.popup').bind('mousewheel', function(e){
+    	       jQ(".ui-timepicker-wrapper").css("display","none");
+    	  });
+        var dates = jQ("#checkinDate, #checkinTo").datepicker({
+            changeMonth: true,
+            numberOfMonths: 1,
+            minDate: '0',
+            onSelect: function(selectedDate) {var option = this.id == "checkinDate" ? "minDate" : "maxDate",
+                        instance = jQ(this).data("datepicker"),
+                        date = jQ.datepicker.parseDate(
+                        instance.settings.dateFormat || jQ.datepicker._defaults.dateFormat,selectedDate, instance.settings);
+                dates.not(this).datepicker("option", option, date);
+                jQ("#checkinDate").datepicker("option", "maxDate", "");
+
+                if (this.id == "checkinDate") {instance = jQ(this).data("datepicker");
+                    var depart = jQ.datepicker.parseDate(jQ.datepicker._defaults.dateFormat, selectedDate);
+                    depart.setDate(depart.getDate());jQ("#checkinTo").datepicker("option", "minDate", depart);
+
+                }
+            }
+        });
+        var today 	= new Date();
+        var dd 		= today.getDate();
+        var mm 		= today.getMonth()+1;
+        var yyyy 	= today.getFullYear();
+        if(dd<10){
+            dd ='0'+dd
+        }
+        if(mm<10){
+            mm ='0'+mm
+        }
+        var today = mm+'/'+dd+'/'+yyyy;
+    });
+    function validateForm() {
+        var errorFlag = false;
+        jQ(".Error").html("");
+        jQ("#mailSubject").css("border","");
+        jQ("#guest_preferences_time_zone").css("border","");
+        jQ("#mobileNo").css("border","");
+        jQ("#checkinDate").css("border","");
+        jQ("#checkinTo").css("border","");
+        var checkinDate 	= jQ.trim(jQ("#checkinDate").val());
+        var checkinTo 		= jQ.trim(jQ("#checkinTo").val());
+        var mailSubject 	= jQ.trim(jQ("#mailSubject").val());
+        var timeZone 		= jQ("#guest_preferences_time_zone").val();
+        var mobileNo 		= jQ("#mobileNo").val();
+        if (checkinDate == "") {
+            jQ("#checkinDateError").html("<?php echo $this->__('Select Check in'); ?>");
+            jQ("#checkinDate").css("border","1px red solid");
+            errorFlag = true;
+        }
+        if (checkinTo == "") {
+            jQ("#checkinToErr").html("<?php echo $this->__('Select Check out'); ?>");
+            jQ("#checkinTo").css("border","1px red solid");
+            errFlag = true;
+        }
+        if (mailSubject == "") {
+            jQ("#mailSubjectError").html("<?php echo $this->__('Please fill your message'); ?>");
+            jQ("#mailSubject").css("border","1px red solid");
+            errorFlag = true;
+        }
+        if (timeZone == "" || timeZone == 0) {
+            jQ("#timeZoneError").html("<?php echo $this->__('Please Select your timezone'); ?>");
+            jQ("#guest_preferences_time_zone").css("border","1px red solid");
+            errorFlag = true;
+        }
+        if(mobileNo != "") {
+        	 var filter = /^[0-9-+]+$/;
+        	    if (!filter.test(mobileNo)) {
+        	    	jQ("#MobileError").html("<?php echo $this->__('Please enter valid mobile number'); ?>");
+        	    	jQ("#mobileNo").css("border","1px red solid");
+        	    	errorFlag = true;
+        	    }
+		}
+        if(mailSubject != ''){
+	        var rehttp 			= /(ftp|http|https):\/\//i;
+	        var rewww 			= /www\.\w+/i;
+	        var redomainext 	= /\w+\.(com|net|org|biz|ws|name)/i;
+	        var rephonenumber 	= /([0-9]{3,9}[\- ]?){3,9}/;
+	        var rephoneword 	= /((zero|one|two|three|four|five|six|seven|eight|nine)\W+){6,100}/i;
+	        var reemail 		= /\w+(\.\w+){0,1}(@)[\w|\-]+(\.|\W{1,3}dot\W{1,3})\w+/;
+	        var reemaildomain 	= /( aol|gmail|hotmail|msn|yahoo)(\.com){0,1}/i;
+	        var iswebsite 		= (rehttp.test(mailSubject) || rewww.test(mailSubject) || redomainext.test(mailSubject));
+	        var isphone 		= (rephonenumber.test(mailSubject) || rephoneword.test(mailSubject));
+	        var isemail 		= (reemail.test(mailSubject) || reemaildomain.test(mailSubject));
+	        if (iswebsite || isphone || isemail) {
+	            alert("<?php echo $this->__('Warning: It looks like you may be trying to send contact information.'); ?>");
+	            return false;
+	        }
+        }
+        if (errorFlag) {
+            return false;
+        }	else{
+            document.getElementById("inboxMessageSubmitButton").disabled=true;
+            return true;
+        }
+    }
+    function ajaxLoadCalendar(pUrl){
+        document.getElementById("calendarWrapper").innerHTML = '<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>';
+        var xmlhttp = getHttp();
+        xmlhttp.onreadystatechange = function(){
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
+                document.getElementById("calendarWrapper").innerHTML = xmlhttp.responseText;
+            }
+        }
+        xmlhttp.open("GET", pUrl + "&ajax", true);
+        xmlhttp.send();
+    }
+    function getHttp() {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        } else {// code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        return xmlhttp;
+    }
+
+</script>

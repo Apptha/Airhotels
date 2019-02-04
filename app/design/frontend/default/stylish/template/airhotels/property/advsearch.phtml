@@ -1,0 +1,547 @@
+<?php
+/**
+ * Apptha
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apptha.com/LICENSE.txt
+ *
+ * ==============================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * ==============================================================
+ * This package designed for Magento COMMUNITY edition
+ * Apptha does not guarantee correct work of this extension
+ * on any other Magento edition except Magento COMMUNITY edition.
+ * Apptha does not provide extension support in case of
+ * incorrect edition usage.
+ * ==============================================================
+ *
+ * @category    Apptha
+ * @package     Apptha_Airhotels
+ * @version     0.2.9
+ * @author      Apptha Team <developers@contus.in>
+ * @copyright   Copyright (c) 2014 Apptha. (http://www.apptha.com)
+ * @license     http://www.apptha.com/LICENSE.txt
+ *
+ */
+/**
+ * Checking whether hourly property enabled or not
+ */
+$hourlyEnabledOrNot = Mage::helper('airhotels/product')->getHourlyEnabledOrNot();
+$currencySymbol 	= Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
+$priceSlider 		= Mage::getStoreConfig('airhotels/max_min');
+$minValue = "";
+$maxValue = "";
+$rangeValue = "";
+$minValue 	= $priceSlider['min_value'];
+if ($minValue == "" || $minValue <= 0) {
+    $minValue = 0;
+}
+$maxValue 	= $priceSlider['max_value'];
+if ($maxValue == "" || $maxValue <= 0) {
+    $maxValue = 5000;
+}
+$rangeValue = $priceSlider['range_value'];
+if ($rangeValue != "" && ($rangeValue-50) >= $minValue) {
+    $rangeValue = $rangeValue;
+}
+else{
+    $rangeValue = $maxValue;
+}
+$propertyServiceFromData 		= $this->getRequest()->getParam('property_service_from');
+$propertyServiceToData 			= $this->getRequest()->getParam('property_service_to');
+$propertyServiceFromPeriodData 	= $this->getRequest()->getParam('property_service_from_period');
+$propertyServiceToPeriodData 	= $this->getRequest()->getParam('property_service_to_period');
+?>
+<input type="hidden" name="searchAddress"  id="searchAddress" value="<?php echo $this->getRequest()->getParam('searchTextField'); ?>">
+<?php $geoCode = Mage::helper('airhotels/url')->getGeocodeDatas($this->getRequest()->getParam('searchTextField')); ?>
+<script type="text/javascript">
+	var jQ = jQuery.noConflict();   
+    jQ(document).ready(function(){
+        jQ("#number_of_guests").val("<?php echo $this->getRequest()->getParam('number_of_guests') ?>");
+        	var dates = jQ("#fromcheckin,#tocheckin").datepicker({
+            changeMonth: false,
+            minDate: '0',
+            numberOfMonths: 1,
+            monthNames:["January","February","March","April","May","June","July","August","September","October","November","December"],
+            onSelect: function( selectedDate ) {
+                var option = this.id == "fromcheckin" ? "minDate" : "maxDate", instance = jQ( this ).data( "datepicker" ),
+                date = jQ.datepicker.parseDate(
+                instance.settings.dateFormat ||
+                jQ.datepicker._defaults.dateFormat,
+                selectedDate, instance.settings );dates.not( this ).datepicker( "option", option, date );
+                jQ("#fromcheckin" ).datepicker("option","maxDate","");
+                if(this.id == "fromcheckin"){ ajaxSearchResult('','','');
+                    instance = jQ( this ).data( "datepicker" )
+                    var depart = jQ.datepicker.parseDate(jQ.datepicker._defaults.dateFormat, selectedDate);                    
+                    depart.setDate(depart.getDate());                                    
+                    jQ("#tocheckin" ).datepicker(  "option", "minDate", depart );
+                }else{
+                	ajaxSearchResult('','','');
+                }
+            }
+        });   
+        jQ("#pricePernight").slider({
+        	range: true,
+            value:0,
+            min:<?php echo round(Mage::helper('directory')->currencyConvert($minValue, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>,
+            max: <?php echo round(Mage::helper('directory')->currencyConvert($maxValue, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>,
+            step: <?php echo round(Mage::helper('directory')->currencyConvert("50", Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>,
+            values: [0, <?php echo round(Mage::helper('directory')->currencyConvert($rangeValue, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?> ],
+            change: function( event, ui ) {                            
+            	if(parseInt(ui.values[0]) < parseInt(ui.values[1]) ){
+                	startsPriceValueForSlider = parseInt(ui.values[0]);  
+                	endssPriceValueForSlider = parseInt(ui.values[1]);                
+                    jQ( "#amountMin" ).val( "<?php echo $currencySymbol ?>" + ui.values[ 0 ] );
+                    jQ( "#amountMax" ).val( "<?php echo $currencySymbol; ?>" + ui.values[ 1 ] ); 
+                    jQ( "#pricepernightval" ).val(  ui.values[ 0 ] + "-" + ui.values[ 1 ] );
+                    ajaxSearchResult('','','');
+                }
+                else{
+                	   jQ("#pricePernight").slider({values:[startsPriceValueForSlider,endssPriceValueForSlider]});
+                    return false;
+                }       
+            }             			
+        });
+        function datechange(){
+        	 ajaxSearchResult('','','');
+        }     
+        jQ( "#amountMin" ).val( "<?php echo $currencySymbol ?>" + jQ( "#pricePernight" ).slider( "values", 0 ));
+        jQ( "#amountMax" ).val( "<?php echo $currencySymbol ?>" + jQ( "#pricePernight" ).slider( "values", 1) );
+        jQ( "#pricepernightval" ).val(  jQ( "#pricePernight" ).slider( "values", 0 ) +"-" + jQ( "#pricePernight" ).slider( "values", 1) );
+        var textBack = jQ("#expandAmenity").html();
+        var texthide = jQ("#amenityHide").val();
+        jQ("#expandAmenity").toggle(     
+        	function show(){
+            	jQ("#searchAmenity").css({"height":"140px", });jQ("#expandAmenity").html(jQ("#amenityHide").val())
+            },
+        	function hide(){jQ("#expandAmenity").html(jQ("#expandAmenity1").val())}
+    	);        
+        var textBack = jQ("#expandProprType").html();  
+        var texthide = jQ("#propertytypeHide1").val();
+        jQ("#expandProprType").toggle(
+      		  function show(){jQ("#searchPropertytype").css({"height":"106px"});jQ("#expandProprType").html(texthide)},
+    	      function hide(){jQ("#searchPropertytype").css({"height":"11px"});jQ("#expandProprType").html(textBack)}    
+  		);
+        var textBack = jQ("#expandSpot").html();
+        var texthide = jQ("#spotTypeHide1").val();
+        jQ("#expandSpot").toggle( 
+        		function show(){jQ("#searchSpotType").css({"height":"106px"});jQ("#expandSpot").html(texthide)},
+     	        function hide(){jQ("#searchSpotType").css({"height":"11px"});jQ("#expandSpot").html(textBack)} 
+     	);
+		/**
+		 * Expand the location and hide it.
+		 */
+    	var textBackVal = jQ("#expandLocation").html();
+        var texthideVal = jQ("#locationHide").val();
+        jQ("#expandLocation").toggle( 
+        		 function show(){jQ("#searchLocation").css({"height":"106px"});jQ("#expandLocation").html(texthideVal)},
+     	        function hide(){jQ("#searchLocation").css({"height":"11px"});jQ("#expandLocation").html(textBackVal)} 
+      	);
+        var textBack = jQ("#expandLocation").html();var texthide = jQ("#locationHide").val();
+        jQ("#expandLocation").toggle( 
+        		function show(){jQ("#searchLocation").css({"height":"106px"});jQ("#expandLocation").html(texthide)},
+     	        function hide(){jQ("#searchLocation").css({"height":"11px"});jQ("#expandLocation").html(textBack)} 
+      	);
+        var textBack = jQ("#expandWater").html();var texthide = jQ("#waterHide").val();
+        jQ("#expandWater").toggle( 
+        		function show(){
+            		jQ("#searchWater").css({"height":"106px"});jQ("#expandWater").html(texthide)
+            		},
+     	        function hide(){
+             	        jQ("#searchWater").css({"height":"11px"});jQ("#expandWater").html(textBack)
+             	        } 
+      	);
+        var textBackValue = jQ("#expandBestWind").html();
+        var texthideValue = jQ("#bestwindHide").val();
+        jQ("#expandBestWind").toggle( 
+        		 function show(){jQ("#searchBestWind").css({"height":"106px"});jQ("#expandBestWind").html(texthideValue)},
+     	        function hide(){jQ("#searchBestWind").css({"height":"11px"});jQ("#expandBestWind").html(textBackValue)} 
+      	); 
+        var textBak = jQ("#expandWindDir").html();
+        var texthid = jQ("#winddirHide").val();
+        jQ("#expandWindDir").toggle( 
+        		 function show(){jQ("#searchWindDir").css({"height":"106px"});jQ("#expandWindDir").html(texthid)},
+     	        function hide(){jQ("#searchWindDir").css({"height":"11px"});jQ("#expandWindDir").html(textBak)} 
+      	);       	   
+        jQ("#expandFilter").toggle(function show(){
+            jQ(".hideelements").hide();
+            jQ("#expandFilter").html("<?php echo $this->__('Show filters') ?>");
+            if(jQ(window).width() < 1024){
+				 jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+			}else{
+            	jQ('.searchform-container #searchinnerpage').css({'margin-top':'13em'});
+			}
+        },
+        function hide(){
+            jQ(".hideelements").show();
+            jQ("#expandFilter").html("<?php echo $this->__('Hide filters') ?>");
+            if(jQ(window).width() < 1024){
+				 jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+			}else{
+            jQ('.searchform-container #searchinnerpage').css({'margin-top':'24em'});
+			}
+        }
+    )
+        jQ(":checkbox").click(function(){
+            getCheckboxVal();
+            ajaxSearchResult('','','');
+        });
+    });
+    var roomtypeVal ;
+    var amenityVal ;
+    var spotVal;
+    var waterVal;      
+    function getCheckboxVal(){
+    	proptypeVal="";
+    	 jQ("[name='pro_type']:checked").each(function(){
+             proptypeVal += jQ(this).val() +"," ;
+         })         
+         if(proptypeVal.length)
+             proptypeVal = proptypeVal.substr(0,proptypeVal.length-1);         
+         roomtypeVal = "";
+        jQ("[name='room_type']:checked").each(function(){
+            roomtypeVal += jQ(this).val() +"," ;
+        })        
+        if(roomtypeVal.length)
+            roomtypeVal = roomtypeVal.substr(0,roomtypeVal.length-1);
+        amenityVal = "";
+        jQ("[name='amenity']:checked").each(function(){
+            amenityVal += jQ(this).val() +"," ;
+        })
+        if(amenityVal.length)
+            amenityVal = amenityVal.substr(0,amenityVal.length-1);    
+    	spotVal = "";
+	    jQ("[name='spot']:checked").each(function(){
+	    	spotVal += jQ(this).val() +"," ;
+	    })
+	    if(spotVal.length)
+	    	spotVal = spotVal.substr(0,spotVal.length-1);
+	
+	    waterVal = "";
+	    jQ("[name='water']:checked").each(function(){
+	    	waterVal += jQ(this).val() +"," ;
+	    })
+	    if(waterVal.length)
+	    	waterVal = waterVal.substr(0,waterVal.length-1);
+	
+	    locationVal = "";
+	    jQ("[name='location']:checked").each(function(){
+	    	locationVal += jQ(this).val() +"," ;
+	    })
+	    if(locationVal.length)
+	    	locationVal = locationVal.substr(0,locationVal.length-1);
+	    bestwindVal = "";
+	    jQ("[name='bestwind']:checked").each(function(){
+	    	bestwindVal += jQ(this).val() +"," ;
+	    })
+	    if(bestwindVal.length)
+	    	bestwindVal = bestwindVal.substr(0,bestwindVal.length-1);
+	
+	    winddirVal = "";
+	    jQ("[name='winddir']:checked").each(function(){
+	    	winddirVal += jQ(this).val() +"," ;
+	    })
+	    if(winddirVal.length)
+	    	winddirVal = winddirVal.substr(0,winddirVal.length-1);
+	    }
+		
+    	function ajaxSearchResult(pageno, center, zoomLevel){ 
+        	getCheckboxVal(); 
+	        if(typeof pageno =="undefined"){
+	            var pageno = 1;
+	        }else if(pageno==''){
+	        	  var pageno = 1;
+	        }
+	        if((searchAddress != '') && (center == '')) {	      	
+	      	var addressSearch='yes';	        	 
+	        }else{
+	        	var addressSearch='no';
+	        }
+	        var xhr;
+	        jQ("#searchinnerpage").html('<div class="loadingWrapper"><div class="content three-bounce"><div class="one"></div><div class="two"></div><div class="three"></div></div></div>');
+	        var searchAddress = jQ("#searchTextField").val(); 
+	        var searchAddressFrom = jQ("#searchAddress").val(); 
+	        var checkin = jQ("#fromcheckin").val();
+	        var checkout = jQ("#tocheckin").val();
+	        var searchguest = jQ("#number_of_guests").val();
+	        var amount = jQ("#pricepernightval").val();
+	        var upperLimitPrice = jQ("#upperLimitPrice").val();
+	        var propertyServiceFrom = jQ("#property_service_from").val();
+	        var propertyServiceTo = jQ("#property_service_to").val();
+	        var propertyServiceFromPeriod = jQ("#property_service_from_period").val();
+	        var propertyServiceToPeriod = jQ("#property_service_to_period").val();
+        	if(center == "" || center=="undefined") {
+           		center = '';
+    		} else {			
+    			var searchAddress = '';
+    		}    
+		    if(xhr && xhr.readystate != 4) {
+		        xhr.abort();
+		    }		
+        	xhr = jQ.ajax({    
+            async:true,
+            type: "GET",
+            data: {searchAddress :searchAddress,searchAddressFrom: searchAddressFrom,checkin:checkin,checkout:checkout,searchguest:searchguest,amount:amount,proptypeVal:proptypeVal,roomtypeval:roomtypeVal,amenityval:amenityVal,spotval:spotVal,locationval:locationVal,waterval:waterVal,bestwindval:bestwindVal,winddirval:winddirVal,pageno:pageno,upperLimitPrice:upperLimitPrice,propertyServiceFrom:propertyServiceFrom,propertyServiceTo:propertyServiceTo,propertyServiceFromPeriod:propertyServiceFromPeriod,propertyServiceToPeriod:propertyServiceToPeriod,latituteZoom:center,zoomLevel:zoomLevel},
+            url: "<?php echo Mage::getBaseUrl() . 'airhotels/calendar/searchresult' ?>",
+            success: function(data){
+                jQ("#searchinnerpage").html(data);
+                var prevCount 	= jQ('#prerescount').val();
+				var rescount 	= jQ('#rescount').val();
+				if(prevCount != rescount) {
+					jQ('#prerescount').val(rescount);            	
+                var alldata = '';
+                var liwrapper = jQ("#results").find('li');
+                if(liwrapper.length > 0) {
+                   	var propertyprice = [];
+                       
+                   for(l=0; l<liwrapper.length; l++) {
+                     property_name = jQ(liwrapper[l]).attr("data-name");
+                 	 property_location = jQ(liwrapper[l]).attr("data-location");
+                     property_location = property_location.replace(",", "#@@A");
+                     property_price = jQ(liwrapper[l]).attr("currency-data");
+                     propertyprice.push(property_price);
+                     property_url = jQ(liwrapper[l]).attr("data-url");
+                     property_src = jQ(liwrapper[l]).attr("data-src");
+                     property_state = jQ(liwrapper[l]).attr("data-state");
+                     product_id = jQ(liwrapper[l]).attr("product_id");
+                     if((property_name != '') && (property_location != '') && (property_url != '') && (property_src != '')) {
+                     alldata += property_url+'#@@A'+property_src+'#@@A'+property_state+'#@@A'+property_name+'#@@A'+property_location+'#@@A'+property_price+'#@@A'+product_id+'@|@';
+                     }
+                   }
+                   }else {
+                       alldata = jQ('#searchTextField').val();
+                   }
+                    jQ("#latlong_cordinates").val(alldata);
+                 	var cordinate_value = jQ('#latlong_cordinates').val();      
+                 	var northeastlat = '<?php echo $geoCode['northeastlat']; ?>';
+                 	var northeastlng = '<?php echo $geoCode['northeastlng']; ?>';
+                 	var southwestlat = '<?php echo $geoCode['southwestlat']; ?>';
+                 	var southwestlng = '<?php echo $geoCode['southwestlng']; ?>';                   	        
+					loadmarkers(cordinate_value,zoomLevel,addressSearch,propertyprice,northeastlat,northeastlng,southwestlat,southwestlng);                                    
+    			}       
+               }
+           });
+    }
+    	
+</script>
+<?php
+$accDefault = 16;
+$select = "";
+$privacySelect = '';
+$propertytypeId = Mage::helper('airhotels/product')->getpropertytype();
+$propertytypeAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $propertytypeId);
+$amenityId = Mage::helper('airhotels/product')->getamenity();
+$amenityAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $amenityId);
+$privacyId= Mage::helper('airhotels/product')->getprivacy();
+$privacyAttribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $privacyId);
+foreach ($privacyAttribute->getSource()->getAllOptions() as $privacyOption) {  
+	$privacyValue = $privacyOption['value'];
+	
+	if($privacyValue != '') {		
+		$privacySelect .= "<span><em class='airhotel-sprite'></em><input type='checkbox' name='room_type' id='room_type' value='" . $privacyOption['value'] . "'><label class='check-box'>". $privacyOption['label']."</label></span>" ;
+	}
+}
+?>
+<input type="hidden" id="upperLimitPrice" value="<?php echo round(Mage::helper('directory')->currencyConvert($maxValue, Mage::app()->getStore()->getBaseCurrencyCode(), Mage::app()->getStore()->getCurrentCurrencyCode()), 0); ?>" />
+	<div class="map-container <?php if (Mage::getSingleton('customer/session')->isLoggedIn()) {  ?>user<?php } ?>">
+		 <div class="mapsearchCtrl"><input type="checkbox" name="searchmap" id="searchmap" checked value="1" /> <label for="searchmap">Search when I move the map</label></div>
+			<div id="mapview"> 
+   		<div id="map" style="width:45%;height:100%;"></div>
+	</div>	
+	<input type="hidden" id="latlong_cordinates" value="">
+</div>
+<div class="searchform-container <?php if (Mage::getSingleton('customer/session')->isLoggedIn()) { ?>user<?php } ?>">
+<div class="searchmainpage_1">
+    <div class="gradient-grey left">
+    	<div class="search-location-search">
+     		<div class="locationbar-name">     
+     			<div class="advance_date<?php if($hourlyEnabledOrNot == 0){echo ' hourly_element';} ?>">
+	     			<span class="span_head"> <?php echo $this->__('Date'); ?> </span>
+	     			<div class="in_out_date">
+			     		<input type="text" readonly="readonly" placeholder="<?php echo $this->__('Check In');?>" autocomplete="off" value="<?php echo $this->getRequest()->getParam('from'); ?>"  id="fromcheckin" name="fromcheckin"  />
+			     		<select id="property_service_from" onchange="ajaxSearchResult('','','');" name="property_service_from" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>
+                        <option value="hh"><?php echo $this->__('Time') ?></option> 
+                        <?php for ($inc = 1; $inc <= 12; $inc++) { ?>  
+                        <option value="<?php echo $inc; ?>" <?php if($propertyServiceFromData == $inc){ echo 'selected="selected"';} ?>><?php echo $inc; ?></option>
+                        <?php } ?>
+                        </select>
+                        <select id="property_service_from_period" onchange="ajaxSearchResult('','','');" name="property_service_from_period" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>                         
+                            <option value="AM" <?php if($propertyServiceFromPeriodData == 'AM'){ echo 'selected="selected"';} ?>><?php echo $this->__('AM'); ?></option>
+                            <option value="PM" <?php if($propertyServiceFromPeriodData == 'PM'){ echo 'selected="selected"';} ?>><?php echo $this->__('PM'); ?></option>
+                        </select>
+			     		
+			     		<input type="text" readonly="readonly" placeholder="<?php echo $this->__('Check Out');?>" autocomplete="off" value="<?php echo $this->getRequest()->getParam('to'); ?>" id="tocheckin" name="to" />
+			     		<select id="property_service_to" onchange="ajaxSearchResult('','','');" name="property_service_to" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>
+                       <option value="hh"><?php echo $this->__('Time') ?></option> 
+                            <?php for ($inc = 1; $inc <= 12; $inc++) { ?>  
+                                <option value="<?php echo $inc; ?>" <?php if($propertyServiceToData == $inc){ echo 'selected="selected"';} ?>><?php echo $inc; ?></option>
+                            <?php } ?>
+                        </select>
+                        <select id="property_service_to_period" onchange="ajaxSearchResult('','','');" name="property_service_to_period" <?php if($hourlyEnabledOrNot == 1){echo 'style="display:none;"';} ?>>                         
+                            <option value="AM" <?php if($propertyServiceToPeriodData == 'AM'){ echo 'selected="selected"';} ?>><?php echo $this->__('AM'); ?></option>
+                            <option value="PM" <?php if($propertyServiceToPeriodData == 'PM'){ echo 'selected="selected"';} ?>><?php echo $this->__('PM'); ?></option>
+                        </select>
+			     		<select id="number_of_guests" name="number_of_guests" onchange="ajaxSearchResult('','','');">
+		                    <option value="" selected="selected"><?php echo $this->__('Guests') ?></option>
+		                    <?php for ($i = 1; $i <= $accDefault; $i++) { ?>
+		                    <option value="<?php echo $i; ?>"><?php if($i==1){echo $i ." Guest ";}else{ if($i == 16){echo $i.'+'." Guests ";}else{echo $i." Guests ";}} ?></option>
+		                    <?php } ?>
+						</select>
+			     	</div>
+	     		</div>
+			    <div class="advance_date">
+			    	<span class="span_head"> <?php echo $this->__('Room Type'); ?> </span>
+			     	<div class="in_out_date">
+			     		<?php echo $privacySelect;?>
+			     	</div>
+			    </div>     
+		        <div class="left" id="pricerange">
+		            <span class="span_head"> <?php echo $this->__('Price'); ?> </span>		          
+		            <div class="advance_price_slider">		               
+		                <span class="price-slider-left">
+		            		<input type="text" id="amountMin" readonly  />
+		                </span>
+		                <div id="pricePernight"  ></div>
+		                <span class="price-slider-right">
+		                    <input type="hidden" value="" id="pricepernightval" />	                    
+		                    <input type="text" id="amountMax" readonly  />
+		                </span>		           
+		        	</div>
+        		</div>
+        	</div>      
+        </div> 		
+		<input type="hidden" class="left searchmainpage"  value="<?php $placeholder = $this->__('Where do you want to eat ?'); 
+          if($placeholder != $this->getRequest()->getParam('searchTextField')){
+			 echo $this->getRequest()->getParam('searchTextField'); } ?>"   
+			 id="searchTextField" name="searchTextField" type="text" class="searchmainpage"  
+			 placeholder="<?php echo $this->__('e.g. Berlin, Los Angeles'); ?>"   
+			 id="searchTextField" name="searchTextField" type="text" class="searchmainpage"  
+			 placeholder="<?php echo $this->__('e.g. Berlin, Los Angeles'); ?>" onfocus="if (this.placeholder == '<?php echo $this->__('e.g. Berlin, Los Angeles'); ?>') {this.placeholder = '';this.style.color ='#8AA443';}" onblur="if (this.placeholder == '') {this.style.color ='#8AA443';this.placeholder = '<?php echo $this->__('e.g. Berlin, Los Angeles'); ?>';}">
+    </div>	
+    <div class="advance_srch" style="display:none">    
+    	<div  class="advance_date" id="property_type">
+	        <span class="span_head"><?php echo $this->__('Property type'); ?></span>
+			<div class="in_out_date">
+				<?php $totalPropertytype = count($propertytypeAttribute->getSource()->getAllOptions()); 
+				if ($totalPropertytype > 4){ ?>
+			    	<div id="expandProprType"  style="cursor: pointer" ><?php echo $this->__('More') . ".." ?></div>
+			    <?php } ?>			
+			    <ul id="searchPropertytype" >
+	                <?php              
+	                foreach ($propertytypeAttribute->getSource()->getAllOptions() as $propertytype) {
+	                    $propertyname = explode('@/@', $propertytype['label']);
+						$propertytype['label'] = $propertyname[0];
+						$value = $propertytype['value'];	                    
+	                    if ($value != '') {
+	                        $PropertyType[$value] = $propertytype['label'];
+	                        ?>
+	                        <li><input  type="checkbox" name="pro_type"  value="<?php echo $propertytype['value']; ?>" /><label class="checkboxspan check-box"> <?php echo ucfirst($propertytype['label']); ?></label></li>
+	                        <?php
+	                    }
+	                }
+	                ?>
+	            </ul>
+	            <input type="hidden" value="<?php echo $this->__('Hide'); ?>.." id="propertytypeHide" />
+	   			<input type="hidden" value="<?php echo $this->__('More'); ?>.." id="expandProprType1" />
+   				</div>
+        </div>       
+        <div  class="advance_date" id="amenities">
+           <span class="span_head"><?php echo $this->__('Amenities'); ?></span>
+				<div class="in_out_date">
+					<?php $totalAmenity = count($amenityAttribute->getSource()->getAllOptions());
+					if ($totalAmenity > 4){ ?>
+			                <div id="expandAmenity"  style="cursor: pointer" ><?php echo $this->__('More') . ".." ?></div>
+			        <?php } ?>			
+		             <ul id="searchAmenity" overflow: hidden" >
+		                <?php              
+		                foreach ($amenityAttribute->getSource()->getAllOptions() as $amenity) {
+		                    $amenityname = explode('@/@', $amenity['label']);
+							$amenity['label'] = $amenityname[0];
+							$value = $amenity['value'];		                    
+		                    if ($value != '') {
+		                        $PropertyType[$value] = $amenity['label'];
+		                        ?>
+		                        <li><input  type="checkbox" name="amenity"  value="<?php echo $amenity['value']; ?>" /><label class="checkboxspan check-box"> <?php echo ucfirst($amenity['label']); ?></label></li>
+		                        <?php
+		                    }
+		                }
+		                ?>
+		            </ul>
+		            <input type="hidden" value="<?php echo $this->__('Hide'); ?>.." id="amenityHide" />
+		   			<input type="hidden" value="<?php echo $this->__('More'); ?>.." id="expandAmenity1" />
+   				</div>
+        	</div>      
+    	</div>
+     <div class="show_filter"><?php echo $this->__('Show Filters') ?></div>
+</div>
+<div class="clear"></div>
+<div id="searchinnerpage" style="min-height:210px;">
+<input type="hidden" id="active_view" value="searchinnerpage">
+<input type="hidden" name="latlong_cordinates" id="latlong_cordinates" />
+<input type="hidden" name="prerescount" id="prerescount" value="" />
+</div>
+<script type="text/javascript">
+jQ(document).ready(function(){	    
+    initialLoad();
+    ajaxSearchResult('','','');
+    function initialLoad(){        
+	 	jQ('.header-container').addClass('top-fix');
+        jQ('.map-container').addClass('fixed-position');
+        var center;
+	    var zoomvalue;
+        var mapOptions = {zoom: 3,center: new google.maps.LatLng(46.613071, 1.543322),mapTypeId: google.maps.MapTypeId.ROADMAP};
+        var map = new google.maps.Map(document.getElementById('map'),
+        mapOptions);
+        var input = document.getElementById('searchTextField');
+        var autocomplete = new google.maps.places.SearchBox(input);
+        autocomplete.bindTo('bounds', map);
+        function setupClickListener(id, types) { var radioButton = document.getElementById(id); google.maps.event.addDomListener(radioButton, 'click', function() { autocomplete.setTypes(types); });}
+    }    
+	if(jQ(window).width() < 1024){
+		jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+	}else{
+		jQ(window).scroll(function() {
+			if(jQ(window).width() < 1024){
+				 jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+			}else{
+		       var scrollVal = jQ(this).scrollTop();
+		        if ( scrollVal > 50) {
+		        	jQ(".hideelements").hide();
+		            jQ("#expandFilter").html("Show filters")
+		            jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+		        } else {
+		        	 jQ(".hideelements").show();
+		              jQ("#expandFilter").html("Hide filters")
+		              jQ('.searchform-container #searchinnerpage').css({'margin-top':'0em'});
+		        }
+			}
+		});
+	}	
+jQ(".show_filter").click(function() {	
+if(jQ(".show_filter").html()=="Show Filters"){
+	jQ(".advance_srch").show();
+	jQ(".show_filter").html("Hide Filters");
+	}else{
+		jQ(".advance_srch").hide();
+		jQ(".show_filter").html("Show Filters");
+		}
+	});
+});
+</script>
+ <style type="text/css">
+   .labels {
+     color: red;
+     background-color: white;
+     font-family: "Lucida Grande", "Arial", sans-serif;
+     font-size: 10px;
+     font-weight: bold;
+     text-align: center;
+     width: 40px;     
+     border: 2px solid black;    
+     white-space: nowrap;
+   }
+ </style>
