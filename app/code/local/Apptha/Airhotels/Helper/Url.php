@@ -348,16 +348,18 @@ class Apptha_Airhotels_Helper_Url extends Mage_Core_Helper_Abstract {
   * @param unknown $propertyAddress         
   * @return multitype:NULL unknown
   */
- public function getGeocodeDatas($propertyAddress) {
-  $arrayAddress = array ();
-  $addrsRemoveSpace = str_replace ( ' ', ',', $propertyAddress );
-  $addressAddPlus = str_replace ( ',', '+', $addrsRemoveSpace );  
-  $encodeAddress = urlencode($addressAddPlus);  
-  /**
-   * Google map API cal.
-   */  
-  $geocode = file_get_contents ( 'https://maps.googleapis.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress, '+' ) );
-  $jsondata = json_decode ( $geocode, true );
+  public function getGeocodeDatas($propertyAddress) {
+    $arrayAddress = array ();
+    $addrsRemoveSpace = str_replace ( ' ', ',', $propertyAddress );
+    $addressAddPlus = str_replace ( ',', '+', $addrsRemoveSpace );  
+    $encodeAddress = urlencode($addressAddPlus);  
+   $config = Mage::getStoreConfig ( 'airhotels/custom_group' );
+              $googleApiKey = $config['airhotels_googlemapapi'];
+    /**
+     * Google map API cal.*/
+  
+                  $geocode = file_get_contents ( 'https://maps.google.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress ) . '&sensor=false&key='.$googleApiKey);
+   $jsondata = json_decode ( $geocode, true );
   
   /**
    * street

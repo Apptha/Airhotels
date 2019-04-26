@@ -146,7 +146,7 @@ class Apptha_Airhotels_Model_Status extends Varien_Object {
      */
     public function searchResult($data, $copycollection) {
         /**
-         * Check weather the latitude zoom and address are set.
+         * Check whether the latitude zoom and address are set.
          */
         $zoomLevel = $data ['zoomLevel'];
         if (! empty ( $data ["latituteZoom"] ) && $data ["address"] == '') {
@@ -227,14 +227,17 @@ class Apptha_Airhotels_Model_Status extends Varien_Object {
             $addrsRemoveSpace = str_replace ( ' ', '+', $country );
             $addressAddPlus = str_replace ( ',', '+', $addrsRemoveSpace );
             /**
-             * Check weahter 'allow_url_fopen' is enabled
+             * Check whether 'allow_url_fopen' is enabled
              */
+            $config = Mage::getStoreConfig ( 'airhotels/custom_group' );
+            $googleApiKey = $config['airhotels_googlemapapi'];
             $encodeAddress = urlencode ( $addressAddPlus );
             if (ini_get ( 'allow_url_fopen' )) {
-                $geocode = file_get_contents ( 'http://maps.google.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress ) . '&sensor=false' );
+                $geocode = file_get_contents ( 'https://maps.google.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress ) . '&sensor=false&key='.$googleApiKey);
+
             } else {
                 $ch = curl_init ();
-                curl_setopt ( $ch, CURLOPT_URL, 'http://maps.google.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress ) . '&sensor=false' );
+                curl_setopt ( $ch, CURLOPT_URL, 'https://maps.google.com/maps/api/geocode/json?address=' . rtrim ( $encodeAddress ) . '&sensor=false&key='.$googleApiKey);
                 curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
                 $geocode = curl_exec ( $ch );
             }
@@ -546,7 +549,7 @@ class Apptha_Airhotels_Model_Status extends Varien_Object {
                 $propertyServiceFromTime = $post ['property_service_from'] . ':' . $post ['property_service_from_period'];
                 $propertyServiceToTime = $post ['property_service_to'] . ':' . $post ['property_service_to_period'];
                 /**
-                 * Check weather the Property Service From time, PropetyService To Time are set
+                 * Check whether the Property Service From time, PropetyService To Time are set
                  */
                 if (! empty ( $post ['property_service_from'] ) && ! empty ( $post ['property_service_to'] )) {
                     /**
